@@ -44,4 +44,9 @@ export const sidebarItems = [
     link: "/nodes",
     icon: "pi pi-circle",
   },
+  {
+    title: "Users (RBAC)",
+    link: "/users",
+    icon: "pi pi-users",
+  },
 ];

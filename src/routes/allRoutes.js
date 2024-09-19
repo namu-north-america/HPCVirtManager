@@ -1,5 +1,6 @@
 import Dashboard from "../views/Dashboard";
 import Clusters from "../views/Clusters";
+import Users from "../views/Users";
 import AllNodes from "../views/AllNodes";
 import VMList from "../views/VirtualMachines/VMList";
 import LiveMigrations from "../views/VirtualMachines/LiveMigrations";
@@ -49,5 +50,10 @@ export const PrivateRoutes = [
     path: "/nodes",
     name: "Nodes",
     element: <AllNodes />,
+  },
+  {
+    path: "/users",
+    name: "Users Management",
+    element: <Users />,
   },
 ];
