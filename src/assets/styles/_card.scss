@@ -1,0 +1,69 @@
+.card {
+  background-color: $white-color;
+  color: $text-color-secondary;
+  border-radius: $border-radius;
+  padding: 14px 16px;
+  // box-shadow: 0px 3.75px 27.17px 0px #e7e7e740;
+  box-shadow: 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid $border-color;
+
+  overflow-x: auto;
+
+  .title {
+    font-size: 18px;
+    font-weight: 500;
+    color: $primary-color;
+  }
+}
+
+.scrollable-card {
+  height: 220px;
+  overflow-y: auto;
+}
+
+.image-container img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.greenValue {
+  font-family: "DM Sans", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0cb954;
+}
+.yellowUnit {
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #de9d1e;
+}
+.value-card {
+  .title {
+    color: #828282;
+  }
+  .value {
+    font-size: 38px;
+    font-weight: 600;
+  }
+}
+.value-field {
+  display: flex;
+  justify-content: space-between;
+
+  .title {
+    color: #828282;
+    font-size: 15px;
+  }
+  .value {
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
+.custom-chip {
+  .value {
+    background-color: $bg-color-secondary;
+  }
+}

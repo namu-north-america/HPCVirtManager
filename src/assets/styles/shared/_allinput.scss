@@ -1,0 +1,33 @@
+.input-layout {
+  label div {
+    font-family: "DM Sans", sans-serif;
+    color: $text-label-color !important;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .custom-dropdown,
+  input {
+    border-color: #ecedef !important;
+  }
+  .custom-dropdown,
+  input:focus {
+    box-shadow: none;
+    border-color: #c8c9ca;
+  }
+  .custom-dropdown,
+  input::placeholder {
+    color: #cbcbcb;
+    opacity: 1;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .custom-dropdown,
+  input::-ms-input-placeholder {
+    color: #cbcbcb;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}

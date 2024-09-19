@@ -1,0 +1,29 @@
+/////////////////////////////////////////////////////////////////
+///////////// Follow the same color name below//////////////////
+///////////////////////////////////////////////////////////////
+
+// These variables with $ sign will be used in all other style file
+// No color code will be write in any style file directly
+
+//Primary Background and text colors
+
+:root {
+  --font-family: "DM Sans", sans-serif;
+}
+
+$primary-color: #020817;
+$white-color: #ffffff;
+
+$border-color: #e5e7eb;
+$bg-color-primary: #ffffff;
+$bg-color-secondary: #f1f5f966;
+
+$text-color-primary: #020817;
+$text-label-color: #4e5b76;
+$text-color-secondary: #22242b;
+
+$border-radius: 6px;
+$transitionDuration: 0.5s;
+$gutter: 5px;
+$sidebar-width: 250px;
+$topbar-height: 4rem;

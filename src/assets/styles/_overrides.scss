@@ -1,0 +1,92 @@
+.p-dialog-footer {
+  background: none;
+}
+.search-box {
+  position: relative;
+  margin-left: 8px;
+  input {
+    border: none;
+    border-bottom: 1.5px solid $primary-color;
+    background-color: transparent;
+    padding-left: 30px;
+    border-radius: 0;
+    height: 38px;
+  }
+  input:focus {
+    box-shadow: none !important;
+  }
+  i {
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    cursor: pointer;
+  }
+}
+.calendar-box {
+  position: relative;
+  i {
+    position: absolute;
+    right: 13px;
+    top: 13px;
+    cursor: pointer;
+  }
+}
+.primary-button {
+  background-color: $primary-color;
+  border-color: $primary-color;
+}
+.primary-button-outlined {
+  color: $primary-color;
+  border-color: $primary-color;
+}
+
+.p-password {
+  width: 100%;
+  div {
+    width: 100%;
+  }
+  input {
+    width: 100%;
+  }
+}
+
+.p-inputswitch.p-highlight .p-inputswitch-slider {
+  background-color: $primary-color;
+}
+.link {
+  color: $primary-color;
+  text-decoration: none;
+}
+.p-checkbox.p-highlight .p-checkbox-box {
+  border-color: $primary-color;
+  background-color: $primary-color;
+}
+
+.p-breadcrumb {
+  .p-menuitem {
+    font-size: 13px;
+  }
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  color: $text-label-color !important;
+  font-weight: 500;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  color: $text-label-color !important;
+  border-color: $text-label-color !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  color: #4e5b7696 !important;
+}
+.p-button.p-button-sm {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.8rem;
+}
+
+.p-button.p-button-icon-only {
+  width: 30px;
+  padding: 0;
+}

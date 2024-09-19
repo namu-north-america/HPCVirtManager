@@ -1,0 +1,88 @@
+.layout-topbar {
+  position: fixed;
+  height: $topbar-height;
+  z-index: 9;
+  left: 0;
+  top: 0;
+  width: 100%;
+  padding: 10px;
+  // background-color: $sidebar-color;
+  color: $text-color-primary;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: $transitionDuration;
+
+  .logo {
+    height: calc($topbar-height - 30px);
+    width: 100%;
+    svg {
+      height: 100%;
+      margin-left: 1px;
+    }
+  }
+
+  .toggle-container {
+    width: 150px;
+    display: flex;
+    justify-content: center;
+    border-right: 1px solid #344967;
+    transition: 0.2s;
+    margin-right: 40px;
+
+    .toggle-button2 {
+      position: relative;
+      z-index: 2;
+      right: -55px;
+      background-color: #c5c4c4;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+      margin: auto 0;
+    }
+    .small-logo {
+      width: 45px;
+      img {
+        width: 90%;
+      }
+    }
+  }
+
+  .toggle-button {
+    position: relative;
+    z-index: 2;
+    left: -25px;
+    background-color: #c5c4c4;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .page-title {
+    font-family: "DM Sans", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .username {
+    font-family: "DM Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .top-menu {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

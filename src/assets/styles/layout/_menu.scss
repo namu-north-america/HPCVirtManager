@@ -1,0 +1,120 @@
+.layout-sidebar {
+  position: fixed;
+  width: $sidebar-width;
+  height: 100vh;
+  z-index: 9;
+  overflow-y: auto;
+  user-select: none;
+  top: 0;
+  left: 0;
+  transition: transform $transitionDuration, left $transitionDuration;
+  background-color: #f9fbfc;
+  border-right: 1px solid $border-color;
+
+  color: $text-color-primary;
+
+  .logo {
+    height: $topbar-height;
+    border-bottom: 1px solid $border-color;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    cursor: pointer;
+    padding: 0 35px;
+    div {
+      color: #ffffff;
+      margin: auto 0;
+      font-size: 26px;
+      font-weight: 600;
+    }
+    svg {
+      margin: auto 0;
+      height: 100%;
+    }
+  }
+
+  .menu-bar {
+    height: calc(100% - $topbar-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+
+  .sidebar-header {
+    overflow-y: auto;
+  }
+  .open-icon {
+    transition: $transitionDuration;
+  }
+  .open {
+    transform: rotate(90deg);
+  }
+
+  // .......
+  .sidebar-item {
+    margin: 1px 0;
+    width: 100%;
+    border-radius: $border-radius;
+    padding: 8px;
+    transition: $transitionDuration;
+    color: $text-color-secondary;
+    div {
+      color: $text-color-secondary;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+    }
+    svg {
+      height: 25px;
+      width: 25px;
+    }
+    &.active {
+      background-color: $bg-color-secondary;
+    }
+  }
+
+  .sidebar-item:hover {
+    background-color: $bg-color-secondary;
+  }
+  .sidebar-item:first-child {
+    margin: 0 0;
+  }
+  .menu-items {
+    padding-left: 38px;
+    padding-right: 10px;
+    transition: $transitionDuration;
+
+    cursor: pointer;
+    margin: 5px 0;
+    div {
+      color: $text-color-secondary;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 15px 0;
+      &.active {
+        color: $text-color-primary;
+        font-weight: 800;
+      }
+    }
+  }
+  .menu-items div:first-child {
+    margin: 0;
+  }
+  .menu-links {
+    padding-left: 10px;
+    padding-right: 10px;
+    transition: $transitionDuration;
+    cursor: pointer;
+    div {
+      font-size: 14px;
+      font-weight: 400;
+      color: #909090;
+      margin: 15px 0;
+    }
+    & .active {
+      color: $text-color-primary;
+      font-weight: 800;
+    }
+  }
+}

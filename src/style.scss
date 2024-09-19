@@ -1,0 +1,63 @@
+@import url("https://unpkg.com/primeflex@latest/primeflex.css");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+@import "./assets/styles/all.scss";
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "DM Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: $bg-color-secondary;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid $bg-color-secondary;
+}
+.border-bottom {
+  border-bottom: 1px solid $bg-color-secondary;
+}
+
+.p-dialog {
+  background-color: $bg-color-primary;
+}
+.p-dialog-header,
+.p-dialog-content {
+  background: none;
+}
+
+.p-breadcrumb {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.p-menuitem-link {
+  background-color: transparent;
+}
+.p-tabview .p-tabview-nav,
+.p-tabview-panels,
+.p-tabview-nav-link {
+  background-color: transparent !important;
+}
+
+.custom-overlay {
+  .p-overlaypanel-content {
+    background-color: $white-color;
+  }
+}
+.p-tabview-panels {
+  padding: 10px 0;
+}
+.p-tabview-nav-link {
+  padding-bottom: 8px;
+}
+
+.p-stepper .p-stepper-header .p-stepper-action {
+  background-color: transparent;
+}
+
+.p-stepper.p-stepper-vertical .p-stepper-toggleable-content {
+  background-color: transparent;
+}
