@@ -1,4 +1,3 @@
-// const baseUrl = "http://localhost:8000/server";
 const baseUrl = "http://15.157.153.228:32023";
 const endPointUrl = baseUrl;
 
