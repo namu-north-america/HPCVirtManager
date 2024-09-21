@@ -19,6 +19,9 @@ const formValidation = (name, value, state, ignore = []) => {
     return formErrors;
   }
   switch (name) {
+    case "clusterPermission":
+    case "namespacePermission":
+    case "permissionGranted":
     case "email":
     case "businessEmail":
       if (equal(length(value))) {
@@ -92,8 +95,8 @@ const formValidation = (name, value, state, ignore = []) => {
         formErrors[name] = "";
       }
       break;
-    
-    case "clusterPermission": 
+
+    case "clusterPermission":
     default:
       break;
   }

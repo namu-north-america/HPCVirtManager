@@ -11,9 +11,7 @@ import { confirmPopup } from "primereact/confirmpopup";
 
 export default function Namespace({ disk, setDisk, index, onRemoveDisk }) {
   const {
-    storageClassesDropdown,
-    accessModeDropdown,
-    disksDropdown,
+    namespacesDropdown
   } = useSelector((state) => state.project);
 
   const handleChangeDisk = ({ name, value }) => {
@@ -65,10 +63,7 @@ export default function Namespace({ disk, setDisk, index, onRemoveDisk }) {
           onChange={handleChangeDisk}
           data={disk}
           name="namespace"
-          options={[
-            { name: "Disk", value: "disk" },
-            { name: "CDROM", value: "cdrom" },
-          ]}
+          options={namespacesDropdown}
           required
           col={12}
         />

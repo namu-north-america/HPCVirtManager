@@ -33,11 +33,12 @@ import {
   CustomPasswordInput,
   CustomMemoryInput,
 } from "../../../shared/AllInputs";
+import { setNamespaces } from "../../../store/slices/projectSlice";
 
 export default function AddUserModal({ visible, setVisible }) {
   const stepperRef = useRef(null);
   const dispatch = useDispatch();
- 
+
   useEffect(() => {
     dispatch(getNamespacesAction());
     dispatch(getNodesAction());
@@ -50,22 +51,42 @@ export default function AddUserModal({ visible, setVisible }) {
     email: "",
     userName: "",
     password: "",
-  });
 
-  const [role, setRole] = useState({
-    role: "Admin",
+    role: "",
     clusterPermission: "",
     namespacePermission: "",
     permissionGranted: "",
   });
 
- 
+  // const [role, setRole] = useState({
+  //   role: "Admin",
+  //   clusterPermission: "",
+  //   namespacePermission: "",
+  //   permissionGranted: "",
+  // });
+  const onBasicDetailsNext = () => {
+    if (
+      showFormErrors(data, setData, [
+        "role",
+        "clusterPermission",
+        "namespacePermission",
+        "permissionGranted",
+      ])
+    ) {
+      stepperRef.current.nextCallback();
+    }
+  };
+
+  const onRolePermissionNext = () => {
+    if (showFormErrors(data, setData, ["userName", "email", "password"])) {
+      stepperRef.current.nextCallback();
+    }
+  };
 
   const handleChange = ({ name, value }) => {
-    console.log(name,value);
-    
     const formErrors = formValidation(name, value, data);
     setData((prev) => ({ ...prev, [name]: value, formErrors }));
+    console.log(data);
   };
 
   const [loading, setLoading] = useState(false);
@@ -73,41 +94,8 @@ export default function AddUserModal({ visible, setVisible }) {
   const onAddVM = () => {
     if (showFormErrors(data, setData)) {
       if (validateDisk()) {
-        dispatch(
-          onAddVMAction2(data, disks, setLoading, () => {
-            setVisible(false);
-            setData({
-              node: "",
-              name: "",
-              namespace: "",
-              sockets: "",
-              cores: "",
-              threads: "",
-              memory: "",
-              priorityClass: "",
-              storage1: "",
-              networkType: "podNetwork",
-              bindingMode: "bridge",
-              advanced: "",
-              userName: "",
-              password: "",
-            });
-            setDiskes([
-              {
-                createType: "new",
-                diskType: "disk",
-                busType: "",
-                size: "",
-                storageClass: "",
-                accessMode: "",
-
-                disk: "",
-                type: "blank",
-                url: "",
-              },
-            ]);
-          })
-        );
+        
+      
       } else {
         stepperRef.current.setActiveStep(1);
       }
@@ -120,17 +108,8 @@ export default function AddUserModal({ visible, setVisible }) {
     setVisible(false);
   };
 
-  const onBasicDetailsNext = () => {
-    if (showFormErrors(data, setData, [])) {
-      stepperRef.current.nextCallback();
-    }
-    
-  };
-
- 
-
   const validateDisk = () => {
-    return disks.every((disk, i) => {
+    return nameSpace.every((disk, i) => {
       let ignore = ["disk"];
       if (disk?.createType === "existing") {
         ignore = ["name", "size", "storageClass", "accessMode", "osImageUrl"];
@@ -139,7 +118,7 @@ export default function AddUserModal({ visible, setVisible }) {
         ignore.push("url");
       }
       const setError = ({ formErrors }) => {
-        setDiskes((prev) => {
+        setNameSpace((prev) => {
           let arr = [...prev];
           arr[i]["formErrors"] = formErrors;
           return arr;
@@ -149,45 +128,31 @@ export default function AddUserModal({ visible, setVisible }) {
     });
   };
 
-  const [disks, setDiskes] = useState([
+  const [nameSpace, setNameSpace] = useState([
     {
-      createType: "new",
-      diskType: "disk",
-      busType: "",
-      memoryType: "Gi",
-      size: "",
-      storageClass: "",
-      accessMode: "",
-
-      disk: "",
-      type: "blank",
-      url: "",
-      cache: "",
+      nameSpace: "",
+      viewVMs: "",
+      crudVMS: "",
+      viewDataVolume: "",
+      crudDataVolume: "",
     },
   ]);
 
-  const onAddMoreDisk = () => {
-    setDiskes((prev) => [
+  const onAddMoreNameSpace = () => {
+    setNameSpace((prev) => [
       ...prev,
       {
-        createType: "new",
-        diskType: "disk",
-        busType: "",
-        memoryType: "Gi",
-        size: "",
-        storageClass: "",
-        accessMode: "",
-
-        disk: "",
-        type: "blank",
-        url: "",
-        cache: "",
+        nameSpace: "",
+        viewVMs: "",
+        crudVMS: "",
+        viewDataVolume: "",
+        crudDataVolume: "",
       },
     ]);
   };
 
-  const onRemoveDisk = (index) => {
-    setDiskes((prev) => {
+  const onRemoveNameSpace = (index) => {
+    setNameSpace((prev) => {
       let _arr = [...prev];
       _arr.splice(index, 1);
       return _arr;
@@ -206,12 +171,6 @@ export default function AddUserModal({ visible, setVisible }) {
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
     setPermissions({ ...permissions, [name]: checked });
-  };
-
-  const onRolePermissionNext = () => {
-    if (showFormErrors(role, setRole, ["userName", "password"])) {
-      stepperRef.current.nextCallback();
-    }
   };
 
   return (
@@ -261,199 +220,208 @@ export default function AddUserModal({ visible, setVisible }) {
             <Col>
               <CustomCard>
                 <CustomForm>
-                <CustomDropDown
-                  data={data}
-                  onChange={handleChange}
-                  name="Role"
-                  options={["Admin", "User"]}
-                  required
-                  col={12}
-                />
-                <CustomInput
-                  data={data}
-                  onChange={handleChange}
-                  name="clusterPermission"
-                  required
-                  col={12}
-                />
-                {/* admin role and permission */}
-                {role.role === "Admin" && (
-                  <>
-                    <CustomInput
-                      data={data}
-                      onChange={handleChange}
-                      name="namespacePermission"
-                      required
-                      col={12}
-                    />
-                    <div>
-                      <label>
-                        Permissions Granted{" "}
-                        <span style={{ color: "red" }}>*</span>
-                      </label>
-                      <ul style={{ listStyle: "none", padding: 0 }}>
-                        <li>
-                          <label
-                            style={{
-                              color: permissions.userManagement
-                                ? "black"
-                                : "#999",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              name="userManagement"
-                              disabled
-                              checked={permissions.userManagement}
-                              onChange={handleCheckboxChange}
-                            />
-                            Access to the <strong>User Management</strong> page
-                            to manage users.
-                          </label>
-                        </li>
-                        <li>
-                          <label
-                            style={{
-                              color: permissions.userManagement
-                                ? "black"
-                                : "#999",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              disabled
-                              name="manageCluster"
-                              checked={permissions.manageCluster}
-                              onChange={handleCheckboxChange}
-                            />
-                            Manage cluster resources (e.g., adding/removing
-                            nodes).
-                          </label>
-                        </li>
-                        <li>
-                          <label
-                            style={{
-                              color: permissions.userManagement
-                                ? "black"
-                                : "#999",
-                            }}
-                          >
-                            <input
-                              disabled
-                              type="checkbox"
-                              name="systemConfig"
-                              checked={permissions.systemConfig}
-                              onChange={handleCheckboxChange}
-                            />
-                            System configuration settings.
-                          </label>
-                        </li>
-                        <li>
-                          <label
-                            style={{
-                              color: permissions.userManagement
-                                ? "black"
-                                : "#999",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              name="vmOperations"
-                              disabled
-                              checked={permissions.vmOperations}
-                              onChange={handleCheckboxChange}
-                            />
-                            Create/Edit/Migrate/Delete VMs.
-                          </label>
-                        </li>
-                        <li>
-                          <label
-                            style={{
-                              color: permissions.userManagement
-                                ? "black"
-                                : "#999",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              name="dataVolumes"
-                              disabled
-                              checked={permissions.dataVolumes}
-                              onChange={handleCheckboxChange}
-                            />
-                            Create/Resize/Delete Data Volumes.
-                          </label>
-                        </li>
-                        <li>
-                          <label
-                            style={{
-                              color: permissions.userManagement
-                                ? "black"
-                                : "#999",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              name="assignRoles"
-                              disabled
-                              checked={permissions.assignRoles}
-                              onChange={handleCheckboxChange}
-                            />
-                            Assign roles and permissions to other users.
-                          </label>
-                        </li>
-                      </ul>
-                    </div>
-                  </>
-                )}
+                  <CustomDropDown
+                    data={data}
+                    onChange={handleChange}
+                    name="role"
+                    options={[
+                      {
+                        name: "Admin",
+                        value: "admin",
+                      },
+                      {
+                        name: "User",
+                        value: "user",
+                      },
+                    ]}
+                    required
+                    col={12}
+                  />
+                  <CustomInput
+                    data={data}
+                    onChange={handleChange}
+                    name="clusterPermission"
+                    required
+                    col={12}
+                  />
+                  {/* admin role and permission */}
+                  {data.role === "admin" && (
+                    <>
+                      <CustomInput
+                        data={data}
+                        onChange={handleChange}
+                        name="namespacePermission"
+                        required
+                        col={12}
+                      />
+                      <div>
+                        <label>
+                          Permissions Granted{" "}
+                          <span style={{ color: "red" }}>*</span>
+                        </label>
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                          <li>
+                            <label
+                              style={{
+                                color: permissions.userManagement
+                                  ? "black"
+                                  : "#999",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                name="userManagement"
+                                disabled
+                                checked={permissions.userManagement}
+                                onChange={handleCheckboxChange}
+                              />
+                              Access to the <strong>User Management</strong>{" "}
+                              page to manage users.
+                            </label>
+                          </li>
+                          <li>
+                            <label
+                              style={{
+                                color: permissions.userManagement
+                                  ? "black"
+                                  : "#999",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                disabled
+                                name="manageCluster"
+                                checked={permissions.manageCluster}
+                                onChange={handleCheckboxChange}
+                              />
+                              Manage cluster resources (e.g., adding/removing
+                              nodes).
+                            </label>
+                          </li>
+                          <li>
+                            <label
+                              style={{
+                                color: permissions.userManagement
+                                  ? "black"
+                                  : "#999",
+                              }}
+                            >
+                              <input
+                                disabled
+                                type="checkbox"
+                                name="systemConfig"
+                                checked={permissions.systemConfig}
+                                onChange={handleCheckboxChange}
+                              />
+                              System configuration settings.
+                            </label>
+                          </li>
+                          <li>
+                            <label
+                              style={{
+                                color: permissions.userManagement
+                                  ? "black"
+                                  : "#999",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                name="vmOperations"
+                                disabled
+                                checked={permissions.vmOperations}
+                                onChange={handleCheckboxChange}
+                              />
+                              Create/Edit/Migrate/Delete VMs.
+                            </label>
+                          </li>
+                          <li>
+                            <label
+                              style={{
+                                color: permissions.userManagement
+                                  ? "black"
+                                  : "#999",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                name="dataVolumes"
+                                disabled
+                                checked={permissions.dataVolumes}
+                                onChange={handleCheckboxChange}
+                              />
+                              Create/Resize/Delete Data Volumes.
+                            </label>
+                          </li>
+                          <li>
+                            <label
+                              style={{
+                                color: permissions.userManagement
+                                  ? "black"
+                                  : "#999",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                name="assignRoles"
+                                disabled
+                                checked={permissions.assignRoles}
+                                onChange={handleCheckboxChange}
+                              />
+                              Assign roles and permissions to other users.
+                            </label>
+                          </li>
+                        </ul>
+                      </div>
+                    </>
+                  )}
 
-                {/* user role and permissions */}
-                {role.role === "User" && (
-                  <Grid>
-                    <Col>
-                      {disks.map((item, i) => (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "start",
-                            marginBottom: "16px",
-                          }}
+                  {/* user role and permissions */}
+                  {data.role === "user" && (
+                    <Grid>
+                      <Col>
+                        {nameSpace.map((item, i) => (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "start",
+                              marginBottom: "16px",
+                            }}
+                          >
+                            <button
+                              style={{
+                                background: "rgba(255, 0, 0, 0.1)",
+                                border: "none",
+                                borderRadius: "50%",
+                                color: "red",
+                                fontSize: "24px",
+                                padding: "4px 8px",
+                                marginRight: "16px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              -
+                            </button>
+                            <CustomCard col={10} key={i}>
+                              <Namespace
+                                disk={item}
+                                setDisk={setNameSpace}
+                                index={i}
+                                onRemoveDisk={onRemoveNameSpace}
+                              />
+                            </CustomCard>
+                          </div>
+                        ))}
+
+                        <span
+                          onClick={onAddMoreNameSpace}
+                          className="ml-2 cursor-pointer"
                         >
-                          <button
-                            style={{
-                              background: "rgba(255, 0, 0, 0.1)",
-                              border: "none",
-                              borderRadius: "50%",
-                              color: "red",
-                              fontSize: "24px",
-                              padding: "4px 8px",
-                              marginRight: "16px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            -
-                          </button>
-                          <CustomCard col={10} key={i}>
-                            <Namespace
-                              disk={item}
-                              setDisk={setDiskes}
-                              index={i}
-                              onRemoveDisk={onRemoveDisk}
-                            />
-                          </CustomCard>
-                        </div>
-                      ))}
-
-                      <span
-                        onClick={onAddMoreDisk}
-                        className="ml-2 cursor-pointer"
-                      >
-                        <i className="pi pi-plus-circle"></i> Add another
-                        Namespace
-                      </span>
-                    </Col>
-                  </Grid>
-                )}
+                          <i className="pi pi-plus-circle"></i> Add another
+                          Namespace
+                        </span>
+                      </Col>
+                    </Grid>
+                  )}
                 </CustomForm>
               </CustomCard>
             </Col>
@@ -472,12 +440,12 @@ export default function AddUserModal({ visible, setVisible }) {
             />
           </Buttonlayout>
         </StepperPanel>
-    
+
         <StepperPanel header="Review">
           <Grid>
             <Col>
               <CustomCard>
-                <Review data={data} disks={disks} />
+                <Review data={data} disks={nameSpace} />
               </CustomCard>
             </Col>
           </Grid>
