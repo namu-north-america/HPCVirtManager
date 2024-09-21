@@ -37,7 +37,7 @@ import {
 export default function AddUserModal({ visible, setVisible }) {
   const stepperRef = useRef(null);
   const dispatch = useDispatch();
-  const { priorityClassesDropdown } = useSelector((state) => state.project);
+ 
   useEffect(() => {
     dispatch(getNamespacesAction());
     dispatch(getNodesAction());
@@ -47,38 +47,19 @@ export default function AddUserModal({ visible, setVisible }) {
   }, [dispatch]);
 
   const [data, setData] = useState({
-    node: "",
-    name: "",
-    namespace: "",
-    sockets: "",
-    cores: "",
-    threads: "",
-    memory: "",
-    memoryType: "Gi",
-    priorityClass: "",
-    storage1: "",
-    networkType: "podNetwork",
-    bindingMode: "bridge",
-    advanced: "",
+    email: "",
     userName: "",
     password: "",
   });
 
   const [role, setRole] = useState({
     role: "Admin",
-    clusterPermission: true,
-    namespacePermission: true,
-    permissionGranted: true,
+    clusterPermission: "",
+    namespacePermission: "",
+    permissionGranted: "",
   });
 
-  useEffect(() => {
-    if (priorityClassesDropdown.length) {
-      setData((prev) => ({
-        ...prev,
-        priorityClass: priorityClassesDropdown[0],
-      }));
-    }
-  }, [priorityClassesDropdown]);
+ 
 
   const handleChange = ({ name, value }) => {
     console.log(name,value);
@@ -140,22 +121,14 @@ export default function AddUserModal({ visible, setVisible }) {
   };
 
   const onBasicDetailsNext = () => {
-    if (showFormErrors(data, setData, ["userName", "password"])) {
-    }
-    stepperRef.current.nextCallback();
-  };
-
-  const onStorageNext = () => {
-    if (validateDisk()) {
+    if (showFormErrors(data, setData, [])) {
       stepperRef.current.nextCallback();
     }
+    
   };
 
-  const onUserDetailsNext = () => {
-    if (showFormErrors(data, setData)) {
-      stepperRef.current.nextCallback();
-    }
-  };
+ 
+
   const validateDisk = () => {
     return disks.every((disk, i) => {
       let ignore = ["disk"];
@@ -235,6 +208,12 @@ export default function AddUserModal({ visible, setVisible }) {
     setPermissions({ ...permissions, [name]: checked });
   };
 
+  const onRolePermissionNext = () => {
+    if (showFormErrors(role, setRole, ["userName", "password"])) {
+      stepperRef.current.nextCallback();
+    }
+  };
+
   return (
     <CustomModal title="Adding a New User" visible={visible} onHide={onHide}>
       <ConfirmPopup />
@@ -247,7 +226,7 @@ export default function AddUserModal({ visible, setVisible }) {
                 <CustomInput
                   data={data}
                   onChange={handleChange}
-                  name="name"
+                  name="userName"
                   required
                   col={12}
                 />
@@ -262,7 +241,7 @@ export default function AddUserModal({ visible, setVisible }) {
                 <CustomPasswordInput
                   data={data}
                   onChange={handleChange}
-                  name="Password"
+                  name="password"
                   required
                   col={12}
                 />
@@ -281,6 +260,7 @@ export default function AddUserModal({ visible, setVisible }) {
           <Grid>
             <Col>
               <CustomCard>
+                <CustomForm>
                 <CustomDropDown
                   data={data}
                   onChange={handleChange}
@@ -292,7 +272,7 @@ export default function AddUserModal({ visible, setVisible }) {
                 <CustomInput
                   data={data}
                   onChange={handleChange}
-                  name="cluster permission"
+                  name="clusterPermission"
                   required
                   col={12}
                 />
@@ -302,7 +282,7 @@ export default function AddUserModal({ visible, setVisible }) {
                     <CustomInput
                       data={data}
                       onChange={handleChange}
-                      name="namespace permission"
+                      name="namespacePermission"
                       required
                       col={12}
                     />
@@ -474,6 +454,7 @@ export default function AddUserModal({ visible, setVisible }) {
                     </Col>
                   </Grid>
                 )}
+                </CustomForm>
               </CustomCard>
             </Col>
           </Grid>
@@ -487,76 +468,11 @@ export default function AddUserModal({ visible, setVisible }) {
             <CustomButton
               label="Next"
               icon="pi pi-arrow-right"
-              onClick={onStorageNext}
+              onClick={onRolePermissionNext}
             />
           </Buttonlayout>
         </StepperPanel>
-        <StepperPanel header="Network">
-          <Grid>
-            <Col>
-              <CustomCard>
-                <Network data={data} handleChange={handleChange} />
-              </CustomCard>
-            </Col>
-          </Grid>
-          <Buttonlayout>
-            <CustomButtonOutlined
-              label="Go Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              onClick={() => stepperRef.current.prevCallback()}
-            />
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={() => stepperRef.current.nextCallback()}
-            />
-          </Buttonlayout>
-        </StepperPanel>
-        {/* <StepperPanel header="Advanced">
-          <Grid>
-            <Col>
-              <CustomCard>
-                <Advanced data={data} handleChange={handleChange} />
-              </CustomCard>
-            </Col>
-          </Grid>
-          <Buttonlayout>
-            <CustomButtonOutlined
-              label="Go Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              onClick={() => stepperRef.current.prevCallback()}
-            />
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={() => stepperRef.current.nextCallback()}
-            />
-          </Buttonlayout>
-        </StepperPanel> */}
-        <StepperPanel header="User Data">
-          <Grid>
-            <Col>
-              <CustomCard>
-                <UserData data={data} handleChange={handleChange} />
-              </CustomCard>
-            </Col>
-          </Grid>
-          <Buttonlayout>
-            <CustomButtonOutlined
-              label="Go Back"
-              severity="secondary"
-              icon="pi pi-arrow-left"
-              onClick={() => stepperRef.current.prevCallback()}
-            />
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={onUserDetailsNext}
-            />
-          </Buttonlayout>
-        </StepperPanel>
+    
         <StepperPanel header="Review">
           <Grid>
             <Col>

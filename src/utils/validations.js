@@ -92,6 +92,8 @@ const formValidation = (name, value, state, ignore = []) => {
         formErrors[name] = "";
       }
       break;
+    
+    case "clusterPermission": 
     default:
       break;
   }
