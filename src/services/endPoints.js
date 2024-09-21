@@ -5,6 +5,8 @@ const endPoints = {
   VERIFY_OTP: "/auth/verify-otp/",
   CHANGE_FORGOT_PASSWORD: "/auth/forgot-password/",
 
+  ADD_USER: "/api/v1/namespaces/default/secrets",
+
   PROFILE: "/profile",
   VMS: "/apis/kubevirt.io/v1alpha3/virtualmachines",
   GET_VM_INSTANCE: ({ namespace, name }) =>

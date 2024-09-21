@@ -5,7 +5,11 @@ import { Column } from "primereact/column";
 import CustomBreadcrum from "../shared/CustomBreadcrum";
 import CustomOverlay from "../shared/CustomOverlay";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
-import AddVirtualMachineModal from "./VirtualMachines/Form/AddVirtualMachineModal";
+import AddUserModal from "./VirtualMachines/Form/AddUserModal";
+import { useDispatch } from "react-redux";
+import {
+  onAddUserAction
+} from "../store/actions/projectActions";
 
 const allNodes = [
   {
@@ -55,6 +59,7 @@ const statusTemplate = (item) => {
 const breadcrumItems = [{ label: "Users (RBAC)", url: "/#/users" }];
 export default function Users() {
       const [visible, setVisible] = useState(false);
+      const dispatch = useDispatch();
   const actionTemplate = (item) => {
     return (
       <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
@@ -81,6 +86,10 @@ export default function Users() {
   const onDelete = (item) => {
     console.log("delete", item);
   };
+  const onAddUser = () => {
+  
+    dispatch(onAddUserAction());
+  };
   return (
     <>
       <CustomBreadcrum items={breadcrumItems} />
@@ -88,7 +97,7 @@ export default function Users() {
         title="User Management (RBAC)"
         onSearch={(e) => console.log(e)}
         onRefresh={(e) => console.log(e)}
-        onAdd={(e) => console.log(e)}
+        onAdd={(e) =>setVisible(true)}
         addText="Register New User"
       >
         <DataTable value={allNodes} tableStyle={{ minWidth: "50rem" }}>
@@ -101,7 +110,7 @@ export default function Users() {
           <Column field="time" header="Last Login" body={timeTemplate}></Column>
           <Column body={actionTemplate}></Column>
         </DataTable>
-        <AddVirtualMachineModal visible={visible} setVisible={setVisible} />
+        <AddUserModal visible={visible} setVisible={setVisible} />
       </Page>
     </>
   );

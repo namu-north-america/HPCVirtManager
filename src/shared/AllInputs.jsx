@@ -7,6 +7,7 @@ import { Password } from "primereact/password";
 import { Calendar } from "primereact/calendar";
 import { InputSwitch } from "primereact/inputswitch";
 import { capitalizeCamelCase } from "../utils/commonFunctions";
+import { Button } from "primereact/button";
 
 export const CustomInput = ({
   label,
@@ -309,6 +310,63 @@ export const CustomMemoryInput = ({
           className="custom-dropdown w-3"
           options={["Pi", "Ti", "Gi", "Mi"]}
         />
+      </div>
+    </InputLayout>
+  );
+};
+
+export const CustomPasswordInput = ({
+  label,
+  name,
+  data,
+  value,
+  onChange,
+
+  typeValue,
+  typeName,
+  onTypeChange,
+
+  errorMessage,
+  extraClassName,
+  required,
+  col = 6,
+  inputClass,
+  disabled = false,
+  type = "text",
+  placeholder = "",
+  ...props
+}) => {
+  return (
+    <InputLayout
+      col={col}
+      label={label}
+      name={name}
+      required={required}
+      extraClassName={extraClassName}
+      data={data}
+      errorMessage={errorMessage}
+    >
+      <div className="p-inputgroup flex-1">
+        <InputText
+          id={name}
+          name={name}
+          value={value || data?.[name] || ""}
+          type={type}
+          onChange={(e) =>
+            onChange &&
+            onChange({ ...e, name: e.target.name, value: e.target.value })
+          }
+          className={`input w-full ${inputClass ? inputClass : ""} ${
+            errorMessage ? "p-invalid" : ""
+          }`}
+          placeholder={placeholder || `Enter ${capitalizeCamelCase(name)}`}
+          disabled={disabled}
+          {...props}
+        />
+        <Button
+         
+        
+        >Generate</Button>
       </div>
     </InputLayout>
   );

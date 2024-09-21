@@ -8,7 +8,7 @@ export default function CustomCard({
   col = 12,
 }) {
   return (
-    <div className={`col-12 md:col-${col} p-2`}>
+    <div className={`col-12 md:col-${col} p-2` }>
       <div className={`card ${className}`}>
         <div className="flex justify-content-between flex-wrap">
           {title ? <div className="title  mb-2">{title}</div> : null}
