@@ -12,6 +12,7 @@ const showFormErrors = (data, setData, ignore) => {
   });
 
   console.log(formErrors);
+  
   setData({ ...data, formErrors });
   return !values(formErrors).some((v) => notEqual(v, ""));
 };

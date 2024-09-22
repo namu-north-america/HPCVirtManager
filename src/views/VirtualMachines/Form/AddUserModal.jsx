@@ -14,26 +14,23 @@ import CustomButton, {
   CustomButtonOutlined,
 } from "../../../shared/CustomButton";
 import Grid, { Col } from "../../../shared/Grid";
-import BasicDetails from "./BasicDetails";
-import Network from "./Network";
+
 // import Advanced from "./Advanced";
 import formValidation from "../../../utils/validations";
 import Namespace from "./Namespace";
-import Review from "./Review";
-import { onAddVMAction2 } from "../../../store/actions/vmActions";
+import UserReview from "./UserReview";
 import CustomCard from "../../../shared/CustomCard";
 import CustomModal from "../../../shared/CustomModal";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import { ConfirmPopup } from "primereact/confirmpopup";
-import UserData from "./UserData";
+
 import {
   CustomDropDown,
   CustomForm,
   CustomInput,
   CustomPasswordInput,
-  CustomMemoryInput,
+
 } from "../../../shared/AllInputs";
-import { setNamespaces } from "../../../store/slices/projectSlice";
 
 export default function AddUserModal({ visible, setVisible }) {
   const stepperRef = useRef(null);
@@ -51,35 +48,35 @@ export default function AddUserModal({ visible, setVisible }) {
     email: "",
     userName: "",
     password: "",
-
-    role: "",
-    clusterPermission: "",
-    namespacePermission: "",
-    permissionGranted: "",
   });
 
-  // const [role, setRole] = useState({
-  //   role: "Admin",
-  //   clusterPermission: "",
-  //   namespacePermission: "",
-  //   permissionGranted: "",
-  // });
+  const [role, setRole] = useState({
+    role: "",
+    clusterPermission: "cluster-01",
+    namespacePermission: "All Namespaces",
+  });
   const onBasicDetailsNext = () => {
-    if (
-      showFormErrors(data, setData, [
-        "role",
-        "clusterPermission",
-        "namespacePermission",
-        "permissionGranted",
-      ])
-    ) {
+    if (showFormErrors(data, setData, [])) {
       stepperRef.current.nextCallback();
     }
   };
 
   const onRolePermissionNext = () => {
-    if (showFormErrors(data, setData, ["userName", "email", "password"])) {
-      stepperRef.current.nextCallback();
+    let ignore = [];
+   
+
+    if (role.role === "admin") {
+      ignore.push("permissionGranted");
+    }
+    console.log(nameSpace);
+    if (showFormErrors(role, setRole, ignore)) {
+      if (role.role === "user") {
+        if (validateDisk()) {
+          stepperRef.current.nextCallback();
+        }
+      } else {
+        stepperRef.current.nextCallback();
+      }
     }
   };
 
@@ -88,14 +85,23 @@ export default function AddUserModal({ visible, setVisible }) {
     setData((prev) => ({ ...prev, [name]: value, formErrors }));
     console.log(data);
   };
+  const handleRoleChange = ({ name, value }) => {
+    const formErrors = formValidation(name, value, role);
+    setRole((prev) => ({ ...prev, [name]: value, formErrors }));
+    console.log(role);
+  };
 
   const [loading, setLoading] = useState(false);
 
-  const onAddVM = () => {
+  const onAddUser = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onHide();
+    }, 2000);
+
     if (showFormErrors(data, setData)) {
       if (validateDisk()) {
-        
-      
       } else {
         stepperRef.current.setActiveStep(1);
       }
@@ -130,7 +136,10 @@ export default function AddUserModal({ visible, setVisible }) {
 
   const [nameSpace, setNameSpace] = useState([
     {
-      nameSpace: "",
+      userManagement: true,
+      userCustom: false,
+      namespace: "",
+      manageCluster: "",
       viewVMs: "",
       crudVMS: "",
       viewDataVolume: "",
@@ -142,7 +151,9 @@ export default function AddUserModal({ visible, setVisible }) {
     setNameSpace((prev) => [
       ...prev,
       {
-        nameSpace: "",
+        userManagement: true,
+        userCustom: false,
+        namespace: "",
         viewVMs: "",
         crudVMS: "",
         viewDataVolume: "",
@@ -151,10 +162,11 @@ export default function AddUserModal({ visible, setVisible }) {
     ]);
   };
 
-  const onRemoveNameSpace = (index) => {
+  const onRemoveNameSpace = (index, event) => {
     setNameSpace((prev) => {
+      event.preventDefault();
       let _arr = [...prev];
-      _arr.splice(index, 1);
+      if (index > 0) _arr.splice(index, 1);
       return _arr;
     });
   };
@@ -221,8 +233,8 @@ export default function AddUserModal({ visible, setVisible }) {
               <CustomCard>
                 <CustomForm>
                   <CustomDropDown
-                    data={data}
-                    onChange={handleChange}
+                    data={role}
+                    onChange={handleRoleChange}
                     name="role"
                     options={[
                       {
@@ -238,20 +250,21 @@ export default function AddUserModal({ visible, setVisible }) {
                     col={12}
                   />
                   <CustomInput
-                    data={data}
+                    data={role}
                     onChange={handleChange}
                     name="clusterPermission"
-                    required
+                    disabled
                     col={12}
                   />
                   {/* admin role and permission */}
-                  {data.role === "admin" && (
+                  {role.role === "admin" && (
                     <>
                       <CustomInput
-                        data={data}
+                        data={role}
                         onChange={handleChange}
                         name="namespacePermission"
                         required
+                        disabled
                         col={12}
                       />
                       <div>
@@ -376,7 +389,7 @@ export default function AddUserModal({ visible, setVisible }) {
                   )}
 
                   {/* user role and permissions */}
-                  {data.role === "user" && (
+                  {role.role === "user" && (
                     <Grid>
                       <Col>
                         {nameSpace.map((item, i) => (
@@ -386,6 +399,7 @@ export default function AddUserModal({ visible, setVisible }) {
                               alignItems: "start",
                               marginBottom: "16px",
                             }}
+                            key={i}
                           >
                             <button
                               style={{
@@ -398,15 +412,15 @@ export default function AddUserModal({ visible, setVisible }) {
                                 marginRight: "16px",
                                 cursor: "pointer",
                               }}
+                              onClick={(event) => onRemoveNameSpace(i, event)}
                             >
                               -
                             </button>
-                            <CustomCard col={10} key={i}>
+                            <CustomCard col={11}>
                               <Namespace
-                                disk={item}
-                                setDisk={setNameSpace}
+                                nameSpace={item}
+                                setNameSpace={setNameSpace}
                                 index={i}
-                                onRemoveDisk={onRemoveNameSpace}
                               />
                             </CustomCard>
                           </div>
@@ -445,7 +459,7 @@ export default function AddUserModal({ visible, setVisible }) {
           <Grid>
             <Col>
               <CustomCard>
-                <Review data={data} disks={nameSpace} />
+                <UserReview data={data} role={role} namespace={nameSpace} />
               </CustomCard>
             </Col>
           </Grid>
@@ -456,7 +470,7 @@ export default function AddUserModal({ visible, setVisible }) {
               icon="pi pi-arrow-left"
               onClick={() => stepperRef.current.prevCallback()}
             />
-            <CustomButton loading={loading} label="Create" onClick={onAddVM} />
+            <CustomButton loading={loading} label="Create" onClick={onAddUser} />
           </Buttonlayout>
         </StepperPanel>
       </Stepper>

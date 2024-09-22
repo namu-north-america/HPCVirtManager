@@ -19,9 +19,19 @@ const formValidation = (name, value, state, ignore = []) => {
     return formErrors;
   }
   switch (name) {
+    case "role":
     case "clusterPermission":
     case "namespacePermission":
     case "permissionGranted":
+    case "userManagement":
+    case "userCustom":
+    if (equal(length(value))) {
+      formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
+    }  
+    else {
+        formErrors[name] = "";
+      }
+    break 
     case "email":
     case "businessEmail":
       if (equal(length(value))) {
@@ -96,7 +106,7 @@ const formValidation = (name, value, state, ignore = []) => {
       }
       break;
 
-    case "clusterPermission":
+   
     default:
       break;
   }
