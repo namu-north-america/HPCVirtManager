@@ -38,7 +38,7 @@ export default function UserReview({ data, role, namespace }) {
         />
         <CustomField name="Email (Id)" data={data} value={data.email} />
         <CustomField name="Password" data={data} value={data.password} />
-        <CustomField name="Department" data={data} />
+        <CustomField name="Department" data={data} value={data.department} />
       </CustomForm>
       <br />
       <CustomForm>
@@ -51,10 +51,10 @@ export default function UserReview({ data, role, namespace }) {
         <CustomField
           name="Namespace"
           data={data}
-          value={"Permission"}
+          value={role.role==='user'?"Permission":"All Permission"}
         />
-        {namespace?.map((item, i) => (
-          <>
+        {role.role==='user'&& (namespace?.map((item, i) => (
+          <  >
             {i ? <div className=" col-6 border-200 border-top-1"></div> : null}
             {item?.userManagement ? (
               <>
@@ -65,7 +65,8 @@ export default function UserReview({ data, role, namespace }) {
                   value={`All Permissions`}
                 />
               </>
-            ) : (
+            ) :
+             (
               <>
                 <CustomField
                   name={item.namespace}
@@ -75,7 +76,8 @@ export default function UserReview({ data, role, namespace }) {
               </>
             )}
           </>
-        ))}
+        ))) }
+      
       </CustomForm>
     </>
   );

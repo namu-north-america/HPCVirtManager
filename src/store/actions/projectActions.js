@@ -237,26 +237,9 @@ const onDeleteDiskAction = (data) => async (dispatch) => {
   }
 };
 
-const onAddUserAction = (data) => async (dispatch) => {
-  let url = endPoints.ADD_USER;
-  let payload = {
-    "apiVersion": "v1",
-    "kind": "Secret",
-    "metadata": {
-      "name": "ma60813",
-      "namespace": "default"
-    },
-    "data": {
-      "username": "YWRtaW4=",   // Base64-encoded "admin"
-      "password": "UGE1NXcwcmQ=" // Base64-encoded "Pa55w0rd"
-    }
-  };
-  const res = await api("post", url, payload);
-  if (res?.kind) {
-    console.log("add user response",res);
-    
-  }
-};
+
+
+
 export {
   getVMsAction,
   getNodesAction,
@@ -267,5 +250,4 @@ export {
   onAddDiskAction,
   onDeleteDiskAction,
   getPriorityClassAction,
-  onAddUserAction,
 };

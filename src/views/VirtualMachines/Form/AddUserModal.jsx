@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getDisksAction,
-  getNamespacesAction,
-  getNodesAction,
-  getPriorityClassAction,
-  getStorageClassesAction,
-} from "../../../store/actions/projectActions";
+import { getNamespacesAction } from "../../../store/actions/projectActions";
+import { onAddUserAction } from "../../../store/actions/userActions";
 import { Stepper } from "primereact/stepper";
 import { StepperPanel } from "primereact/stepperpanel";
 import CustomButton, {
@@ -29,7 +24,6 @@ import {
   CustomForm,
   CustomInput,
   CustomPasswordInput,
-
 } from "../../../shared/AllInputs";
 
 export default function AddUserModal({ visible, setVisible }) {
@@ -38,16 +32,13 @@ export default function AddUserModal({ visible, setVisible }) {
 
   useEffect(() => {
     dispatch(getNamespacesAction());
-    dispatch(getNodesAction());
-    dispatch(getStorageClassesAction());
-    dispatch(getPriorityClassAction());
-    dispatch(getDisksAction());
   }, [dispatch]);
 
   const [data, setData] = useState({
     email: "",
     userName: "",
     password: "",
+    department: "",
   });
 
   const [role, setRole] = useState({
@@ -63,7 +54,6 @@ export default function AddUserModal({ visible, setVisible }) {
 
   const onRolePermissionNext = () => {
     let ignore = [];
-   
 
     if (role.role === "admin") {
       ignore.push("permissionGranted");
@@ -92,13 +82,63 @@ export default function AddUserModal({ visible, setVisible }) {
   };
 
   const [loading, setLoading] = useState(false);
+  const transformData = (dataArray) => {
+    const result = {};
+
+    dataArray.forEach((item) => {
+      const namespace = item.namespace;
+
+      // Create the namespace key
+      result[`namespace-${namespace}`] = namespace;
+
+      // Iterate over the keys of the item
+      for (const key in item) {
+        if (key !== "userManagement" && key !== "namespace") {
+          // Store 'yes' or 'no' based on the value
+          result[`${namespace}-${key}`] = item[key] === true ? "yes" : "no";
+        }
+      }
+    });
+
+    return result;
+  };
 
   const onAddUser = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onHide();
-    }, 2000);
+    let parsed = {};
+    if (role.role === "user") {
+      const newDataArray = nameSpace.map((item) => {
+        // Create a new object based on the original item
+        const { userCustom, manageCluster, formErrors, ...newItem } = item;
+
+        if (item.userManagement) {
+          // Set the specified properties to true if userManagement is true
+          newItem.viewVMs = true;
+          newItem.crudVMS = true;
+          newItem.viewDataVolume = true;
+          newItem.crudDataVolume = true;
+        }
+
+        return newItem; // Return the modified item
+      });
+
+      let parsed = transformData(newDataArray);
+      parsed.username = data.userName;
+      parsed.email = data.email;
+      parsed.department = data.department;
+      parsed.password = data.password;
+      parsed.role = role.role;
+    } else {
+      parsed = {
+        username: data.userName,
+        email: data.email,
+        department: data.department,
+        password: data.password,
+        role: "admin",
+      };
+    }
+
+    console.log(parsed);
+    dispatch(onAddUserAction(parsed));
 
     if (showFormErrors(data, setData)) {
       if (validateDisk()) {
@@ -193,7 +233,6 @@ export default function AddUserModal({ visible, setVisible }) {
           <Grid>
             <Col>
               <CustomCard>
-                {/* <BasicDetails data={data} handleChange={handleChange} /> */}
                 <CustomInput
                   data={data}
                   onChange={handleChange}
@@ -214,6 +253,12 @@ export default function AddUserModal({ visible, setVisible }) {
                   onChange={handleChange}
                   name="password"
                   required
+                  col={12}
+                />
+                <CustomInput
+                  data={data}
+                  onChange={handleChange}
+                  name="department"
                   col={12}
                 />
               </CustomCard>
@@ -470,7 +515,11 @@ export default function AddUserModal({ visible, setVisible }) {
               icon="pi pi-arrow-left"
               onClick={() => stepperRef.current.prevCallback()}
             />
-            <CustomButton loading={loading} label="Create" onClick={onAddUser} />
+            <CustomButton
+              loading={loading}
+              label="Create"
+              onClick={onAddUser}
+            />
           </Buttonlayout>
         </StepperPanel>
       </Stepper>
