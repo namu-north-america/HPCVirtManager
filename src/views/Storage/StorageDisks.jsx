@@ -103,7 +103,7 @@ export default function StorageDisks() {
     visible: false,
   });
 
-  console.log("data==>", data);
+  
   const handleUpdateChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, disk);
     setData((prev) => ({ ...prev, [name]: value, formErrors }));

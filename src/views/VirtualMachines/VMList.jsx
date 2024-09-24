@@ -19,7 +19,8 @@ import { confirmDialog } from "primereact/confirmdialog";
 import constants from "../../constants";
 import MigrateModal from "./Form/MigrateModal";
 import EditVmModal from "./Form/EditVmModal";
-
+import { showToastAction } from "../../store/slices/commonSlice";
+import { hasPermission } from "../../utils/commonFunctions";
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
 };
@@ -49,8 +50,12 @@ const breadcrumItems = [
 ];
 export default function VMList() {
   const dispatch = useDispatch();
+  const { profile } = useSelector((state) => state.user);
+  console.log("profile", profile);
 
   let { vms } = useSelector((state) => state.project);
+  console.log("vms",vms);
+  
 
   const actionTemplate = (item) => {
     return (
@@ -223,6 +228,23 @@ export default function VMList() {
     [search, vms]
   );
 
+  const addVm = () => {
+    if (profile.role === "admin") {
+      setVisible(true);
+    } else {
+      if (hasPermission(profile, "vm-create")) {
+
+      } else {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: "Sorry You have no permission!",
+          })
+        );
+      }
+    }
+  };
+
   return (
     <>
       <CustomBreadcrum items={breadcrumItems} />
@@ -232,7 +254,7 @@ export default function VMList() {
         onRefresh={() => {
           dispatch(getVMsAction());
         }}
-        onAdd={() => setVisible(true)}
+        onAdd={addVm}
         addText="Add Virtual Machine"
       >
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>

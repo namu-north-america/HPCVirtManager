@@ -57,7 +57,19 @@ function splitMemoryString(string = "") {
   return { size, memoryType };
 }
 
+// permissions.js
+ const hasPermission = (permissions, requiredPermission) => {
+  if (permissions.hasOwnProperty(requiredPermission) && permissions.requiredPermission === true) {
+    return true
+  } else {
+    return false;
+  }
+  
+};
+
+
 export {
+  hasPermission,
   capitalizeCamelCase,
   showFormErrors,
   getImageUrl,

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getNamespacesAction } from "../../../store/actions/projectActions";
 import { onAddUserAction } from "../../../store/actions/userActions";
 import { Stepper } from "primereact/stepper";
@@ -73,7 +73,8 @@ export default function AddUserModal({ visible, setVisible }) {
   const handleChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, data);
     setData((prev) => ({ ...prev, [name]: value, formErrors }));
-    console.log(data);
+    
+    
   };
   const handleRoleChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, role);
@@ -104,6 +105,7 @@ export default function AddUserModal({ visible, setVisible }) {
   };
 
   const onAddUser = () => {
+    setLoading(true);
     let parsed = {};
     if (role.role === "user") {
       const newDataArray = nameSpace.map((item) => {
@@ -121,7 +123,7 @@ export default function AddUserModal({ visible, setVisible }) {
         return newItem; // Return the modified item
       });
 
-      let parsed = transformData(newDataArray);
+       parsed = transformData(newDataArray);
       parsed.username = data.userName;
       parsed.email = data.email;
       parsed.department = data.department;
@@ -137,17 +139,14 @@ export default function AddUserModal({ visible, setVisible }) {
       };
     }
 
-    console.log(parsed);
+    console.log('parsed data',parsed);
+    
     dispatch(onAddUserAction(parsed));
+    setLoading(false);
+    //close modal
+    onHide();
 
-    if (showFormErrors(data, setData)) {
-      if (validateDisk()) {
-      } else {
-        stepperRef.current.setActiveStep(1);
-      }
-    } else {
-      stepperRef.current.setActiveStep(0);
-    }
+
   };
 
   const onHide = () => {

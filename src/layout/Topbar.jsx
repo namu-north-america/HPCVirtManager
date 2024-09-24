@@ -13,7 +13,8 @@ export default function Topbar({ toggleSidebar }) {
   }, [dispatch]);
 
   const { profile } = useSelector((state) => state.user);
-  
+   
+   
   
   let username = profile?.firstName || "Loading...";
   let userimage = profile?.image;

@@ -21,6 +21,7 @@ export const userSlice = createSlice({
     setUserList: (state, action) => {
       state.userList = action.payload; 
     },
+    
 
   },
   

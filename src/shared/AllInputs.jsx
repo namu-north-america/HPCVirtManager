@@ -336,6 +336,22 @@ export const CustomPasswordInput = ({
   placeholder = "",
   ...props
 }) => {
+ 
+  const generatePassword = (length) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      password += characters[randomIndex];
+    }
+    
+    return password;
+  };
+  const handleGeneratePassword = () => {
+    const newPassword = generatePassword(10); // Generates a password of 10 characters
+    onChange({ ...data, name: "password", value: newPassword })
+  };
   return (
     <InputLayout
       col={col}
@@ -350,7 +366,7 @@ export const CustomPasswordInput = ({
         <InputText
           id={name}
           name={name}
-          value={value || data?.[name] || ""}
+          value={value || data?.[name] || "" }
           type={type}
           onChange={(e) =>
             onChange &&
@@ -364,8 +380,8 @@ export const CustomPasswordInput = ({
           {...props}
         />
         <Button
-         
-        
+         className="primary-button"
+         onClick={handleGeneratePassword}
         >Generate</Button>
       </div>
     </InputLayout>
