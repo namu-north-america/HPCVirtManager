@@ -8,6 +8,7 @@ import {
   setUserList,
 } from "../slices/userSlice";
 import api from "../../services/api";
+import apiEmail from "../../services/apiEmail"
 import endPoints from "../../services/endPoints";
 
 const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
@@ -121,6 +122,8 @@ const onAddUserAction = (data) => async (dispatch) => {
   let url = endPoints.ADD_USER;
   let secretName = data.email.replace(/[@.]/g, "-");
   // Convert each value to Base64
+  
+  
   const base64Data = Object.fromEntries(
     Object.entries(data).map(([key, value]) => [
       key,
@@ -138,6 +141,16 @@ const onAddUserAction = (data) => async (dispatch) => {
   };
   const res = await api("post", url, payload);
   if (res?.kind === "Secret") {
+
+    let ePayload = {
+      to: data.email,
+      subject: "Your Account Information",
+      username: data.email,
+      password: data.password
+    }
+     await apiEmail("post", 'http://localhost:3001/send-email',ePayload);
+   
+
     console.log("add user response", res);
     dispatch(
       showToastAction({
@@ -146,7 +159,8 @@ const onAddUserAction = (data) => async (dispatch) => {
       })
     );
     dispatch(onGetUserALLAction());
-  } else {
+  } 
+  else {
     console.log("add user error", res.message);
     dispatch(
       showToastAction({
