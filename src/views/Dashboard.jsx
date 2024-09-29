@@ -25,7 +25,7 @@ export default function Dashboard() {
     dispatch(getVMsAction());
     dispatch(getDisksAction());
     dispatch(getStorageClassesAction());
-    dispatch(onGetStorageAction());
+   // dispatch(onGetStorageAction());
   };
 
   let { nodes, vms, storageClasses, disks } = useSelector(
