@@ -2,7 +2,8 @@ import React from "react";
 import Page from "../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-
+import CapacityCard from "../shared/CapacityCard";
+import Grid, { Col } from "../shared/Grid";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
 
 const allNodes = [
@@ -60,6 +61,27 @@ export default function Clusters() {
       onAdd={(e) => console.log(e)}
       addText="Register New Cluster"
     >
+      <Grid className="mb-2">
+        <Col size={12}>
+          <div className="flex space-x-4 gap-3 justify-center p-2">
+            <CapacityCard
+              title="CPU"
+              description="Total CPU Capacity"
+              usage={1.9}
+            />
+            <CapacityCard
+              title="Memory"
+              description="Total Memory Capacity"
+              usage={20.9}
+            />
+            <CapacityCard
+              title="Storage"
+              description="Total Storage Capacity"
+              usage={30.9}
+            />
+          </div>
+        </Col>
+      </Grid>
       <DataTable value={allNodes} tableStyle={{ minWidth: "50rem" }}>
         <Column field="name" header="Name" body={nameTemplate}></Column>
         <Column field="status" header="Status" body={statusTemplate}></Column>

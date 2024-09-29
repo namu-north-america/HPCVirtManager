@@ -8,7 +8,7 @@ import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
 import AddUserModal from "./VirtualMachines/Form/AddUserModal";
 import { useDispatch, useSelector } from "react-redux";
 import { onGetUserALLAction ,onDeleteUserAction} from "../store/actions/userActions";
-import { showToastAction } from "../store/slices/commonSlice";
+// import { showToastAction } from "../store/slices/commonSlice";
 
 import { confirmDialog } from "primereact/confirmdialog";
 
@@ -75,12 +75,14 @@ export default function Users() {
   };
 
   useEffect(() => {
+    const onInitialLoad = () => {
+      dispatch(onGetUserALLAction());
+    };
+  
     onInitialLoad();
   }, [dispatch]);
 
-  const onInitialLoad = () => {
-    dispatch(onGetUserALLAction());
-  };
+ 
 
   const { userList } = useSelector((state) => state.user);
   useEffect(() => {

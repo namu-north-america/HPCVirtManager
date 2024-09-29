@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const apiEmail = async (
+const prometheusApi = async (
   method,
   urlEndPoint,
   data = {},
@@ -14,7 +14,7 @@ const apiEmail = async (
 
     let response = await axios({
       method,
-      url:  'http://localhost:3001'+urlEndPoint,
+      url:  '/server1'+urlEndPoint,
       data,
       headers,
     });
@@ -29,4 +29,4 @@ const apiEmail = async (
 
 
 
-export default apiEmail;
+export default prometheusApi;

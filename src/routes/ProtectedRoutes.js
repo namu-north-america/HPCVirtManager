@@ -8,7 +8,7 @@ import { isAuthenticated, getUserRole } from "../services/auth";
 const Auth = ({ allowedRoles }) => {
   const isLoggedIn = isAuthenticated(); // Check if the user is authenticated
   const userRole = getUserRole().role; // Get the current user's role
-  console.log(userRole);
+ 
 
   if (!isLoggedIn) {
     return <Navigate to="/403" />; // Redirect if not logged in

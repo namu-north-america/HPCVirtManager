@@ -4,14 +4,12 @@ import formValidation from "../utils/validations";
 import { useDispatch } from "react-redux";
 import { showFormErrors } from "../utils/commonFunctions";
 import { isAuthenticated } from "../services/auth";
-import { onUserLoginAction } from "../store/actions/userActions";
+import { onForgetPasswordAction } from "../store/actions/userActions";
 import Layout from "./Layout";
 import { Link } from "react-router-dom";
 import {
   CustomForm,
   CustomInput,
-  CustomPassword,
-  CustomSwitch,
 } from "../shared/AllInputs";
 import CustomButton from "../shared/CustomButton";
 
@@ -27,9 +25,7 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
-    email: "user@yopmail.com",
-    password: "User@1234",
-    rememberMe: true,
+    email: "",
   });
 
   const handleChange = ({ name, value }) => {
@@ -40,12 +36,12 @@ export default function Login() {
   const onSubmit = (e) => {
     e.preventDefault();
     if (showFormErrors(data, setData)) {
-      dispatch(onUserLoginAction(data, setLoading, navigate));
+      dispatch(onForgetPasswordAction(data, setLoading, navigate));
     }
   };
 
   return (
-    <Layout title="Login Here ">
+    <Layout title="Forget Password ">
       <CustomForm onSubmit={onSubmit} className="form">
         <CustomInput
           data={data}
@@ -54,36 +50,20 @@ export default function Login() {
           required
           col="12"
         />
-        <CustomPassword
-          data={data}
-          onChange={handleChange}
-          name="password"
-          required
-          col="12"
-        />
-        <CustomSwitch
-          data={data}
-          onChange={handleChange}
-          name="rememberMe"
-          label="Remember Me"
-        />
-        <div className="col-6 flex justify-content-end my-auto">
-          <Link className="link" to="/forget-password">
-            Forgot password?
-          </Link>
-        </div>
+       
+       
         <CustomButton
           onClick={onSubmit}
           loading={loading}
           extraClassNames="w-full my-4"
-          label="Sign in"
+          label="Reset"
         />
 
         <div className="w-full text-center">
-          Don’t have an account?{" "}
-          <span className="link" to="/register">
-            Sign up now
-          </span>
+        Remember password?{" "}
+          <Link className="link" to="/">
+          Login here
+          </Link>
         </div>
       </CustomForm>
     </Layout>

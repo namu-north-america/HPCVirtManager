@@ -118,6 +118,64 @@ const onGetUserSecretsAction =
     loading(false);
   };
 
+// on forget password 
+const onForgetPasswordAction =
+  (data, loading, navigate) => async (dispatch) => {
+    loading(true);
+    let secretName = data.email.replace(/[@.]/g, "-");
+    let url = endPoints.GET_USER_SECRET({
+      namespace: "default",
+      name: 'cocktail-'+secretName,
+    });
+
+    const res = await api("get", url);
+    if (res?.status!=='Failure') {
+      const decodeFromBase64 = Object.fromEntries(
+        Object.entries(res.data).map(([key, value]) => [
+          key,
+          decodeURIComponent(atob(value)),
+        ])
+      );
+      if (
+        decodeFromBase64?.email === data.email
+      ) {
+         
+        let ePayload = {
+          to: data.email,
+          subject: "Forget Password - Your Account  Credentials",
+          username: decodeFromBase64?.username,
+    
+          password: decodeFromBase64?.password
+        }
+        let eData = await apiEmail("post", '/forget-password-email',ePayload);
+        if (eData && eData.status && eData.status === 200) {
+          dispatch(
+            showToastAction({
+              type: "success",
+              title: "Email  is sent. Please your Email Address!",
+            })
+          );
+        } else {
+          dispatch(
+            showToastAction({
+              type: "error",
+              title: "Email  is invalid!",
+            })
+          );
+        }
+       
+      }
+    } else {
+      dispatch(
+        showToastAction({
+          type: "error",
+          title: "Email  is invalid!",
+        })
+      );
+    }
+    loading(false);
+  };  
+
 const onAddUserAction = (data) => async (dispatch) => {
   let url = endPoints.ADD_USER;
   let secretName = data.email.replace(/[@.]/g, "-");
@@ -145,10 +203,10 @@ const onAddUserAction = (data) => async (dispatch) => {
     let ePayload = {
       to: data.email,
       subject: "Your Account Information",
-      username: data.email,
+      username: data.username,
       password: data.password
     }
-     await apiEmail("post", 'http://localhost:3001/send-email',ePayload);
+     await apiEmail("post", '/send-email',ePayload);
    
 
     console.log("add user response", res);
@@ -219,4 +277,5 @@ export {
   onAddUserAction,
   onGetUserALLAction,
   onDeleteUserAction,
+  onForgetPasswordAction
 };
