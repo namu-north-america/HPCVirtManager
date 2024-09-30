@@ -401,7 +401,9 @@ const onPauseVMAction = (data, next) => async () => {
     type: data.type,
   });
   await api("put", url);
-  next();
+  if (next) {
+    next();
+  }
 };
 
 const onDeleteVMAction = (data) => async (dispatch) => {
