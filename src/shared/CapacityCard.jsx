@@ -8,7 +8,7 @@ const CapacityCard = ({ title, description, usage }) => {
       <p className="text-sm text-gray-500">{description}</p>
       <div className="flex justify-content-between mt-5">
         <span className="text-sm title">Used</span>
-        <span className="text-sm title">{usage.toFixed(2)}%</span>
+        <span className="text-sm title">{usage}%</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-1 overflow-hidden">
         <div

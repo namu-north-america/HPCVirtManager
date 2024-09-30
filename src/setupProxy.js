@@ -11,7 +11,7 @@ module.exports = function (app) {
         "^/server": "", // remove /server prefix
       },
     })
-  ),
+  );
   app.use(
     "/server1",
     createProxyMiddleware({
@@ -22,5 +22,5 @@ module.exports = function (app) {
         "^/server1": "", // remove /server prefix
       },
     })
-  )
-};
+  );
+}

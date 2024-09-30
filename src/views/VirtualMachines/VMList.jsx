@@ -24,8 +24,7 @@ import {
   filterNamespacesByCrudVMS,
   checkNamespaceValue,
 } from "../../utils/commonFunctions";
-import CapacityCard  from "../../shared/CapacityCard";
-import Grid, { Col } from "../../shared/Grid";
+
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
 };
@@ -316,27 +315,7 @@ export default function VMList() {
         onAdd={addVm}
         addText="Add Virtual Machine"
       >
-        <Grid className="mb-2">
-        <Col size={12}>
-          <div className="flex space-x-4 gap-3 justify-center p-2">
-            <CapacityCard
-              title="CPU"
-              description="Total CPU Capacity"
-              usage={0}
-            />
-            <CapacityCard
-              title="Memory"
-              description="Total Memory Capacity"
-              usage={0}
-            />
-            <CapacityCard
-              title="Storage"
-              description="Total Storage Capacity"
-              usage={0}
-            />
-          </div>
-        </Col>
-      </Grid>
+       
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
           <Column field="name" header="Name" body={vmname}></Column>
           <Column field="status" header="Status" body={statusTemplate}></Column>

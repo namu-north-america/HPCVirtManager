@@ -1,10 +1,12 @@
-import React from "react";
+import React ,{useEffect} from "react";
 import Page from "../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CapacityCard from "../shared/CapacityCard";
 import Grid, { Col } from "../shared/Grid";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
+import { onGetStorageAction,getCPUTotalCores ,getMemoryUsage} from "../store/actions/reportingActions";
+import { useDispatch,useSelector } from "react-redux";
 
 const allNodes = [
   {
@@ -53,6 +55,34 @@ const statusTemplate = (item) => {
 };
 
 export default function Clusters() {
+  const dispatch = useDispatch();
+  const [cpuUsage, setCpuUsage] = React.useState(0);
+  const [memory, setMemory] = React.useState(0);
+  const [storage, setStorage] = React.useState(0);
+  useEffect(() => {
+    onInitialLoad();
+  }, [dispatch]);
+
+  const onInitialLoad = () => {
+    dispatch(onGetStorageAction());
+    dispatch(getCPUTotalCores());
+    dispatch(getMemoryUsage());
+  };
+  let { clusterCpuInfo,memoryInfo,storageInfo } = useSelector(
+    (state) => state.reporting
+  );
+
+  useEffect(() => {
+    
+    const usage = clusterCpuInfo.cpuUsage ? parseFloat(clusterCpuInfo.cpuUsage) : null;
+    setCpuUsage(usage);
+  }, [clusterCpuInfo]);
+  useEffect(() => {
+    setMemory(memoryInfo);
+  }, [memoryInfo]);
+  useEffect(() => {
+    setStorage(storageInfo);
+  }, [storageInfo]);
   return (
     <Page
       title="Clusters"
@@ -67,17 +97,17 @@ export default function Clusters() {
             <CapacityCard
               title="CPU"
               description="Total CPU Capacity"
-              usage={1.9}
+              usage={cpuUsage}
             />
             <CapacityCard
               title="Memory"
               description="Total Memory Capacity"
-              usage={20.9}
+              usage={memory}
             />
             <CapacityCard
               title="Storage"
               description="Total Storage Capacity"
-              usage={30.9}
+              usage={storage}
             />
           </div>
         </Col>

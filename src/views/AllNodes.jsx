@@ -6,8 +6,13 @@ import { timeAgo } from "../utils/date";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getNodesAction } from "../store/actions/projectActions";
-import CapacityCard  from "../shared/CapacityCard";
+import CapacityCard from "../shared/CapacityCard";
 import Grid, { Col } from "../shared/Grid";
+import {
+  onGetStorageAction,
+  getCPUTotalCores,
+  getMemoryUsage,
+} from "../store/actions/reportingActions";
 
 const nameTemplate = (item) => {
   return <Link className="link">{item.name}</Link>;
@@ -31,13 +36,34 @@ const timeTemplate = (item) => {
 
 export default function AllNodes() {
   const dispatch = useDispatch();
+  const [cpuUsage, setCpuUsage] = React.useState(0);
+  const [memory, setMemory] = React.useState(0);
+  const [storage, setStorage] = React.useState(0);
   useEffect(() => {
     dispatch(getNodesAction());
+    dispatch(getCPUTotalCores());
+    dispatch(getMemoryUsage());
+    dispatch(onGetStorageAction());
   }, [dispatch]);
+
 
   let { nodes } = useSelector((state) => state.project);
 
   const [search, setSearch] = useState("");
+  let { clusterCpuInfo, memoryInfo ,storageInfo} = useSelector((state) => state.reporting);
+
+  useEffect(() => {
+    const usage = clusterCpuInfo.cpuUsage
+      ? parseFloat(clusterCpuInfo.cpuUsage)
+      : null;
+    setCpuUsage(usage);
+  }, [clusterCpuInfo]);
+  useEffect(() => {
+    setMemory(memoryInfo);
+  }, [memoryInfo]);
+  useEffect(() => {
+    setStorage(storageInfo);
+  }, [storageInfo]);
 
   nodes = useMemo(
     () =>
@@ -58,17 +84,17 @@ export default function AllNodes() {
             <CapacityCard
               title="CPU"
               description="Total CPU Capacity"
-              usage={0}
+              usage={cpuUsage}
             />
             <CapacityCard
               title="Memory"
               description="Total Memory Capacity"
-              usage={2.9}
+              usage={memory}
             />
             <CapacityCard
               title="Storage"
               description="Total Storage Capacity"
-              usage={0.9}
+              usage={storage}
             />
           </div>
         </Col>

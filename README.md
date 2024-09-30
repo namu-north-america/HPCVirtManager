@@ -23,3 +23,9 @@ You may also see any lint errors in the console.
 You need to change the server url in setupProxy.js file.
 
 You need to add the kubevirt-manager url in constants.js file to run the console.
+
+## Cluster Node VM metrices
+
+You need to install Prometheus and Metrics Server
+If you want to access Prometheus from your local machine while it's running in a Kubernetes cluster, you might also use kubectl port-forward
+# kubectl port-forward svc/prometheus 9090:9090 -n monitoring
