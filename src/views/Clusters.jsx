@@ -1,9 +1,12 @@
-import React from "react";
+import React ,{useEffect} from "react";
 import Page from "../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-
+import CapacityCard from "../shared/CapacityCard";
+import Grid, { Col } from "../shared/Grid";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
+import { onGetStorageAction,getCPUTotalCores ,getMemoryUsage} from "../store/actions/reportingActions";
+import { useDispatch,useSelector } from "react-redux";
 
 const allNodes = [
   {
@@ -52,6 +55,34 @@ const statusTemplate = (item) => {
 };
 
 export default function Clusters() {
+  const dispatch = useDispatch();
+  const [cpuUsage, setCpuUsage] = React.useState(0);
+  const [memory, setMemory] = React.useState(0);
+  const [storage, setStorage] = React.useState(0);
+  useEffect(() => {
+    onInitialLoad();
+  }, [dispatch]);
+
+  const onInitialLoad = () => {
+    dispatch(onGetStorageAction());
+    dispatch(getCPUTotalCores());
+    dispatch(getMemoryUsage());
+  };
+  let { clusterCpuInfo,memoryInfo,storageInfo } = useSelector(
+    (state) => state.reporting
+  );
+
+  useEffect(() => {
+    
+    const usage = clusterCpuInfo.cpuUsage ? parseFloat(clusterCpuInfo.cpuUsage) : null;
+    setCpuUsage(usage);
+  }, [clusterCpuInfo]);
+  useEffect(() => {
+    setMemory(memoryInfo);
+  }, [memoryInfo]);
+  useEffect(() => {
+    setStorage(storageInfo);
+  }, [storageInfo]);
   return (
     <Page
       title="Clusters"
@@ -60,6 +91,27 @@ export default function Clusters() {
       onAdd={(e) => console.log(e)}
       addText="Register New Cluster"
     >
+      <Grid className="mb-2">
+        <Col size={12}>
+          <div className="flex space-x-4 gap-3 justify-center p-2">
+            <CapacityCard
+              title="CPU"
+              description="Total CPU Capacity"
+              usage={cpuUsage}
+            />
+            <CapacityCard
+              title="Memory"
+              description="Total Memory Capacity"
+              usage={memory}
+            />
+            <CapacityCard
+              title="Storage"
+              description="Total Storage Capacity"
+              usage={storage}
+            />
+          </div>
+        </Col>
+      </Grid>
       <DataTable value={allNodes} tableStyle={{ minWidth: "50rem" }}>
         <Column field="name" header="Name" body={nameTemplate}></Column>
         <Column field="status" header="Status" body={statusTemplate}></Column>

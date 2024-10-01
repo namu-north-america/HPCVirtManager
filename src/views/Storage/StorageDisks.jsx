@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import Page from "../../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -7,7 +13,6 @@ import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getDisksAction,
-  getNamespacesAction,
   getStorageClassesAction,
   onAddDiskAction,
   onDeleteDiskAction,
@@ -25,7 +30,12 @@ import CustomButton, {
   CustomButtonOutlined,
 } from "../../shared/CustomButton";
 import formValidation from "../../utils/validations";
-import { showFormErrors } from "../../utils/commonFunctions";
+import { showToastAction } from "../../store/slices/commonSlice";
+import {
+  showFormErrors,
+  filterNamespacesBycrudDataVolume,
+  checkNamespaceValue
+} from "../../utils/commonFunctions";
 import {
   longOverlayText,
   nameTemplate,
@@ -39,6 +49,8 @@ const breadcrumItems = [
 ];
 export default function StorageDisks() {
   const dispatch = useDispatch();
+  const [namespace, setNamespace] = useState([]);
+  const { profile, userNamespace } = useSelector((state) => state.user);
   let {
     disks,
     namespacesDropdown,
@@ -47,9 +59,35 @@ export default function StorageDisks() {
   } = useSelector((state) => state.project);
   useEffect(() => {
     dispatch(getDisksAction());
-    dispatch(getNamespacesAction());
     dispatch(getStorageClassesAction());
   }, [dispatch]);
+
+  const hasAccess = useCallback(() => {
+    if (profile?.role === "admin") {
+      setNamespace(namespacesDropdown);
+    } else {
+      const filteredNamespaces = filterNamespacesBycrudDataVolume(
+        namespacesDropdown,
+        userNamespace
+      );
+      const namespaceArray = filteredNamespaces.map((item) => item.namespace);
+      setNamespace(namespaceArray);
+    }
+  }, [profile, namespacesDropdown, userNamespace]);
+  // create hasAccess dispatch
+  useEffect(() => {
+    hasAccess();
+  }, [hasAccess]);
+
+  
+  const showError = () => {
+    dispatch(
+      showToastAction({
+        type: "error",
+        title: "Sorry You have no permission!",
+      })
+    );
+  };
 
   const [loading, setLoading] = useState(false);
 
@@ -103,7 +141,6 @@ export default function StorageDisks() {
     visible: false,
   });
 
-  console.log("data==>", data);
   const handleUpdateChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, disk);
     setData((prev) => ({ ...prev, [name]: value, formErrors }));
@@ -137,14 +174,21 @@ export default function StorageDisks() {
     });
   };
   const onOpenUpdateDialog = (item) => {
-    setData({
-      name: item.name,
-      namespace: item.namespace,
-      currentSize: item.size,
-      size: "",
-      memoryType: "Gi",
-      visible: true,
-    });
+    
+
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudDataVolume") ||profile?.role === "admin") {
+      setData({
+        name: item.name,
+        namespace: item.namespace,
+        currentSize: item.size,
+        size: "",
+        memoryType: "Gi",
+        visible: true,
+      });
+    } else {
+      showError();
+    }
+
   };
 
   const actionTemplate = (item) => {
@@ -173,17 +217,25 @@ export default function StorageDisks() {
   const ref = useRef();
 
   const onDelete = (item) => {
-    confirmDialog({
-      target: ref.currentTarget,
-      header: "Delete Confirmation",
-      message: `Do you want to delete ${item.namespace} - ${item.name} ?`,
-      icon: "pi pi-info-circle",
-      rejectClassName: "p-button-outlined p-button-secondary",
-      acceptClassName: " primary-button",
-      accept: () => {
-        dispatch(onDeleteDiskAction(item));
-      },
-    });
+    
+
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudDataVolume") ||profile?.role === "admin") {
+      confirmDialog({
+        target: ref.currentTarget,
+        header: "Delete Confirmation",
+        message: `Do you want to delete ${item.namespace} - ${item.name} ?`,
+        icon: "pi pi-info-circle",
+        rejectClassName: "p-button-outlined p-button-secondary",
+        acceptClassName: " primary-button",
+        accept: () => {
+          dispatch(onDeleteDiskAction(item));
+        },
+      });
+    } else {
+      showError();
+    }
+
+
   };
 
   const [search, setSearch] = useState("");
@@ -319,7 +371,7 @@ export default function StorageDisks() {
             data={disk}
             onChange={handleChange}
             name="namespace"
-            options={namespacesDropdown}
+            options={namespace}
             required
             col={12}
           />

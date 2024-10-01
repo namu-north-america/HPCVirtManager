@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import Page from "../shared/Page";
 import Grid, { Col } from "../shared/Grid";
 import CustomCard, { CustomCardValue } from "../shared/CustomCard";
+import CapacityCard from "../shared/CapacityCard";
 import { Link } from "react-router-dom";
 import PieChart from "../shared/PieChart";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,9 +12,14 @@ import {
   getDisksAction,
   getStorageClassesAction,
 } from "../store/actions/projectActions";
+import { onGetStorageAction,getCPUTotalCores ,getMemoryUsage} from "../store/actions/reportingActions";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
+  const [cpuUsage, setCpuUsage] = React.useState(0);
+  const [memory, setMemory] = React.useState(0);
+  const [storage, setStorage] = React.useState(0);
+
   useEffect(() => {
     onInitialLoad();
   }, [dispatch]);
@@ -23,11 +29,29 @@ export default function Dashboard() {
     dispatch(getVMsAction());
     dispatch(getDisksAction());
     dispatch(getStorageClassesAction());
+    dispatch(onGetStorageAction());
+    dispatch(getCPUTotalCores());
+    dispatch(getMemoryUsage());
   };
 
   let { nodes, vms, storageClasses, disks } = useSelector(
     (state) => state.project
   );
+  let { clusterCpuInfo,memoryInfo,storageInfo } = useSelector(
+    (state) => state.reporting
+  );
+
+  useEffect(() => {
+    
+    const usage = clusterCpuInfo.cpuUsage ? parseFloat(clusterCpuInfo.cpuUsage) : null;
+    setCpuUsage(usage);
+  }, [clusterCpuInfo]);
+  useEffect(() => {
+    setMemory(memoryInfo);
+  }, [memoryInfo]);
+  useEffect(() => {
+    setStorage(storageInfo);
+  }, [storageInfo]);
 
   const getVMsByStatus = (status) => {
     if (status) {
@@ -48,6 +72,17 @@ export default function Dashboard() {
   return (
     <Page onRefresh={onInitialLoad}>
       <Grid>
+      <Col size={12}>
+      <div className="flex space-x-4 gap-3 justify-center p-2">
+      <CapacityCard title="CPU" description="Total CPU Capacity" usage={cpuUsage} />
+      <CapacityCard title="Memory" description="Total Memory Capacity" usage={memory} />
+      <CapacityCard title="Storage" description="Total Storage Capacity" usage={storage} />
+      
+    </div>
+        </Col>
+      </Grid>
+      <Grid>
+     
         <Col>
           <CustomCard
             title="Clusters"

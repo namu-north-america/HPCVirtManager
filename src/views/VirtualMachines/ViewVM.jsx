@@ -26,6 +26,7 @@ import constants from "../../constants";
 import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
 
+
 export default function ViewVM() {
   const dispatch = useDispatch();
   let { name, namespace } = useParams();

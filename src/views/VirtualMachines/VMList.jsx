@@ -19,6 +19,11 @@ import { confirmDialog } from "primereact/confirmdialog";
 import constants from "../../constants";
 import MigrateModal from "./Form/MigrateModal";
 import EditVmModal from "./Form/EditVmModal";
+import { showToastAction } from "../../store/slices/commonSlice";
+import {
+  filterNamespacesByCrudVMS,
+  checkNamespaceValue,
+} from "../../utils/commonFunctions";
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
@@ -49,8 +54,21 @@ const breadcrumItems = [
 ];
 export default function VMList() {
   const dispatch = useDispatch();
+  const { profile, userNamespace } = useSelector((state) => state.user);
+  let { vms, namespacesDropdown } = useSelector((state) => state.project);
 
-  let { vms } = useSelector((state) => state.project);
+ 
+
+  const hasAccess = () => {
+    if (profile?.role === "admin") return true;
+    else {
+      const filteredNamespaces = filterNamespacesByCrudVMS(
+        namespacesDropdown,
+        userNamespace
+      );
+      return filteredNamespaces.length > 0;
+    }
+  };
 
   const actionTemplate = (item) => {
     return (
@@ -150,11 +168,17 @@ export default function VMList() {
   }, [dispatch]);
 
   const vmname = (item) => {
-    return (
-      <Link to={`/virtual-machines/details/${item.namespace}/${item.name}`}>
-        {item.name}
-      </Link>
-    );
+
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
+      return (
+        <Link to={`/virtual-machines/details/${item.namespace}/${item.name}`}>
+          {item.name}
+        </Link>
+      );
+    } else {
+      return <>{item.name}</>;
+    }
+    
   };
   const [visible, setVisible] = useState(false);
   const [editInfo, setEditInfo] = useState(null);
@@ -162,32 +186,63 @@ export default function VMList() {
 
   const ref = useRef();
 
-  const onStart = (item) => {
+  const showError = () => {
     dispatch(
-      onChangeVmStatusAction(item, {
-        running: true,
+      showToastAction({
+        type: "error",
+        title: "Sorry You have no permission!",
       })
     );
+  };
+
+  const onStart = (item) => {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+      dispatch(
+        onChangeVmStatusAction(item, {
+          running: true,
+        })
+      );
+    } else {
+      showError();
+    }
   };
   const onRestart = (item) => {
-    dispatch(onRestartVMAction(item));
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+      dispatch(onRestartVMAction(item));
+    } else {
+      showError();
+    }
   };
   const onStop = (item) => {
-    dispatch(
-      onChangeVmStatusAction(item, {
-        running: false,
-      })
-    );
+   
+
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+      dispatch(
+        onChangeVmStatusAction(item, {
+          running: false,
+        })
+      );
+    } else {
+      showError();
+    }
   };
   const onPauseUnpause = (item, type) => {
-    dispatch(
-      onPauseVMAction({ ...item, type }, () => {
-        dispatch(getVMsAction());
-      })
-    );
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS")) {
+      dispatch(
+        onPauseVMAction({ ...item, type }, () => {
+          dispatch(getVMsAction());
+        })
+      );
+    } else {
+      showError();
+    }
   };
   const onMigrate = (item) => {
-    setOpenMigrate(item);
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+      setOpenMigrate(item);
+    } else {
+      showError();
+    }
   };
   const onOpenConsole = ({ name, namespace }) => {
     window.open(
@@ -197,20 +252,28 @@ export default function VMList() {
     );
   };
   const onEdit = (item) => {
-    setEditInfo(item);
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+      setEditInfo(item);
+    } else {
+      showError();
+    }
   };
   const onDelete = (item) => {
-    confirmDialog({
-      target: ref.currentTarget,
-      header: "Delete Confirmation",
-      message: `Do you want to delete ${item.namespace} - ${item.name} ?`,
-      icon: "pi pi-info-circle",
-      rejectClassName: "p-button-outlined p-button-secondary",
-      acceptClassName: " primary-button",
-      accept: () => {
-        dispatch(onDeleteVMAction(item));
-      },
-    });
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+      confirmDialog({
+        target: ref.currentTarget,
+        header: "Delete Confirmation",
+        message: `Do you want to delete ${item.namespace} - ${item.name} ?`,
+        icon: "pi pi-info-circle",
+        rejectClassName: "p-button-outlined p-button-secondary",
+        acceptClassName: " primary-button",
+        accept: () => {
+          dispatch(onDeleteVMAction(item));
+        },
+      });
+    } else {
+      showError();
+    }
   };
 
   const [search, setSearch] = useState("");
@@ -223,6 +286,23 @@ export default function VMList() {
     [search, vms]
   );
 
+  const addVm = () => {
+    if (profile.role === "admin") {
+      setVisible(true);
+    } else {
+      if (hasAccess) {
+        setVisible(true);
+      } else {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: "Sorry You have no permission!",
+          })
+        );
+      }
+    }
+  };
+
   return (
     <>
       <CustomBreadcrum items={breadcrumItems} />
@@ -232,9 +312,10 @@ export default function VMList() {
         onRefresh={() => {
           dispatch(getVMsAction());
         }}
-        onAdd={() => setVisible(true)}
+        onAdd={addVm}
         addText="Add Virtual Machine"
       >
+       
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
           <Column field="name" header="Name" body={vmname}></Column>
           <Column field="status" header="Status" body={statusTemplate}></Column>

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Avatar } from "primereact/avatar";
 import { useSelector, useDispatch } from "react-redux";
 import { getProfileAction } from "../store/actions/userActions";
+import { getNamespacesAction } from "../store/actions/projectActions";
 import { getImageUrl } from "../utils/commonFunctions";
 import { ReactComponent as Logo } from "../assets/images/svg/Logo.svg";
 
@@ -10,9 +11,16 @@ export default function Topbar({ toggleSidebar }) {
 
   useEffect(() => {
     dispatch(getProfileAction());
+    dispatch(getNamespacesAction());
   }, [dispatch]);
 
   const { profile } = useSelector((state) => state.user);
+  
+
+  
+   
+   
+  
   let username = profile?.firstName || "Loading...";
   let userimage = profile?.image;
 

@@ -1,15 +1,34 @@
-import React from "react";
+import React,{useState,useEffect,useCallback} from "react";
 import {
   CustomDropDown,
   CustomForm,
   CustomInput,
   CustomMemoryInput,
 } from "../../../shared/AllInputs";
-import { useSelector } from "react-redux";
 
+import { filterNamespacesByCrudVMS } from "../../../utils/commonFunctions";
+import {  useSelector } from "react-redux";
 export default function BasicDetails({ data, handleChange }) {
+
+  const [namespace,setNamespace]= useState([])
   const { namespacesDropdown, priorityClassesDropdown, nodesDropdown } =
     useSelector((state) => state.project);
+    const { profile,userNamespace } = useSelector((state) => state.user);
+
+    const hasAccess = useCallback(() => {
+      if (profile?.role === "admin") {
+        setNamespace(namespacesDropdown);
+      } else {
+        const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
+        const namespaceArray = filteredNamespaces.map(item => item.namespace);
+        setNamespace(namespaceArray);
+      }
+    }, [profile, namespacesDropdown, userNamespace]);
+    // create hasAccess dispatch
+    useEffect(() => {
+      hasAccess()
+    }, [hasAccess]);
+    
   return (
     <CustomForm>
       <CustomDropDown
@@ -31,7 +50,7 @@ export default function BasicDetails({ data, handleChange }) {
         data={data}
         onChange={handleChange}
         name="namespace"
-        options={namespacesDropdown}
+        options={namespace}
         required
       />
       <CustomInput
