@@ -15,6 +15,8 @@ const endPoints = {
   GET_VM_INSTANCE: ({ namespace, name }) =>
     `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}`,
   NODES: "/api/v1/nodes",
+  GET_NODE_INSTANCE: ({  name }) =>
+    `/api/v1/nodes/${name}`,
   NAMESPACE: "/api/v1/namespaces",
   PRIORITY_CLASSES:
     "/apis/scheduling.k8s.io/v1/priorityclasses?labelSelector=kubevirt-manager.io/managed%3Dtrue",

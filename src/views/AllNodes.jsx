@@ -15,7 +15,7 @@ import {
 } from "../store/actions/reportingActions";
 
 const nameTemplate = (item) => {
-  return <Link className="link">{item.name}</Link>;
+  return <Link className="link"  to={`/nodes/${item.name}`}>{item.name}</Link>;
 };
 const statusTemplate = (item) => {
   switch (item.status) {

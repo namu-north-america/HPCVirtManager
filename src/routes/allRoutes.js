@@ -2,6 +2,7 @@ import Dashboard from "../views/Dashboard";
 import Clusters from "../views/Clusters";
 import Users from "../views/Users";
 import AllNodes from "../views/AllNodes";
+import NodeDetail from "../views/NodeDetail/NodeDetail";
 import VMList from "../views/VirtualMachines/VMList";
 import LiveMigrations from "../views/VirtualMachines/LiveMigrations";
 import StorageDisks from "../views/Storage/StorageDisks";
@@ -57,6 +58,12 @@ export const PrivateRoutes = [
     path: "/nodes",
     name: "Nodes",
     element: <AllNodes />,
+    role: "shared",
+  },
+  {
+    path: "/nodes/:name",
+    name: "Nodes Details",
+    element: <NodeDetail />,
     role: "shared",
   },
   {
