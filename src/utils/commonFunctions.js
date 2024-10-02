@@ -49,6 +49,10 @@ function convertKiToMBorGB(input) {
     return `${mebibytes.toFixed(2)} MiB`;
   }
 }
+function bytesToGB(bytes) {
+  const gb = bytes / (1024 ** 3); // 1 GB = 1024^3 bytes
+  return gb.toFixed(2); // Rounds to 2 decimal places
+}
 
 function splitMemoryString(string = "") {
   const result = string.match(/(\d+)([A-Za-z]+)/);
@@ -121,5 +125,6 @@ export {
   showFormErrors,
   getImageUrl,
   convertKiToMBorGB,
+  bytesToGB,
   splitMemoryString,
 };

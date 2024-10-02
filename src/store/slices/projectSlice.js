@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   vms: [],
   nodes: [],
+  nodeDetail:{},
   nodesDropdown: [],
   namespaces: [],
   namespacesDropdown: [],
@@ -24,6 +25,9 @@ export const projectSlice = createSlice({
     setNodes: (state, action) => {
       state.nodes = action.payload;
       state.nodesDropdown = action.payload.map((item) => item?.name);
+    },
+    setNodeDetail: (state, action) => {
+      state.nodeDetail = action.payload;
     },
     setNamespaces: (state, action) => {
       state.namespaces = action.payload;
@@ -49,6 +53,7 @@ export const projectSlice = createSlice({
 export const {
   setVMs,
   setNodes,
+  setNodeDetail,
   setNamespaces,
   setStorageClasses,
   setDisks,
