@@ -5,9 +5,11 @@ import CustomButton, {
   Buttonlayout,
   CustomButtonOutlined,
 } from "../../../shared/CustomButton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { onMigrateVMAction } from "../../../store/actions/vmActions";
 
 export default function MigrateModal({ visible, setVisible }) {
+  const dispatch = useDispatch();
   let { nodes } = useSelector((state) => state.project);
   nodes = nodes.map((item) => ({ name: item.name, value: item.name }));
   let unSelected = nodes.filter((item) => item?.name !== visible?.node);
@@ -23,6 +25,14 @@ export default function MigrateModal({ visible, setVisible }) {
   const handleChange = ({ name, value }) => {
     setData((prev) => ({ ...prev, [name]: value }));
   };
+
+  console.log("visible==>", visible);
+
+  const onSubmit = () => {
+    console.log(data);
+    dispatch(onMigrateVMAction(visible));
+  };
+
   return (
     <CustomModal
       title="Migrating Virtual Machine From Node to Node"
@@ -60,7 +70,7 @@ export default function MigrateModal({ visible, setVisible }) {
           severity="secondary"
           onClick={() => setVisible(false)}
         />
-        <CustomButton label="Migrate" />
+        <CustomButton label="Migrate" onClick={onSubmit} />
       </Buttonlayout>
     </CustomModal>
   );

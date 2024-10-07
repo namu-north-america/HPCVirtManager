@@ -33,7 +33,7 @@ export default function ViewVM() {
 
   const onOpenConsole = () => {
     window.open(
-      `${constants.baseUrl}/assets/noVNC/vnc.html?resize=scale&autoconnect=1&path=k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`,
+      `${constants.baseUrl}/assets/noVNC/vnc.html?resize=scale&autoconnect=1&path=/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`,
       "mywindow",
       "menubar=1,resizable=1,width=500,height=350"
     );
@@ -233,7 +233,7 @@ export default function ViewVM() {
     {
       label: "Pause",
       command: () => {
-        dispatch(onPauseVMAction({ name, namespace }));
+        dispatch(onPauseVMAction({ name, namespace, type: "pause" }));
       },
       disabled: data.status !== "Running",
     },

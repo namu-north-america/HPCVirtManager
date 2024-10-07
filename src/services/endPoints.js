@@ -43,6 +43,8 @@ const endPoints = {
     `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachines/${name}`,
   DELETE_VM: ({ namespace, name }) =>
     `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachines/${name}`,
+  MIGRATE_VM: ({ namespace }) =>
+    `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachineinstancemigrations`,
   RESTART_VM: ({ namespace, name }) =>
     `/apis/subresources.kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}/restart`,
   PAUSE_VM: ({ namespace, name, type }) =>

@@ -461,6 +461,33 @@ const adddisk = async (data) => {
   return res.metadata;
 };
 
+const onMigrateVMAction = (data) => async (dispatch) => {
+  let url = endPoints.MIGRATE_VM({
+    namespace: data.namespace,
+  });
+
+  const vmiName = data.name;
+  const migrationName = `migrate-vm-${vmiName}`;
+
+  const payload = {
+    apiVersion: "kubevirt.io/v1",
+    kind: "VirtualMachineInstanceMigration",
+    metadata: {
+      name: migrationName,
+    },
+    spec: {
+      vmiName: vmiName,
+    },
+  };
+
+  console.log(url);
+  console.log(payload);
+  const res = await api("post", url, payload);
+  if (res?.kind) {
+    dispatch(getVMsAction());
+  }
+};
+
 export {
   onAddVMAction,
   onAddVMAction2,
@@ -471,4 +498,5 @@ export {
   onDeleteVMAction,
   onRestartVMAction,
   onPauseVMAction,
+  onMigrateVMAction,
 };
