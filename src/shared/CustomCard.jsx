@@ -54,3 +54,4 @@ export function CustomChip({ extraClassNames, value }) {
     </div>
   );
 }
+
