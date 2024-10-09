@@ -9,7 +9,7 @@ import AddUserModal from "./VirtualMachines/Form/AddUserModal";
 import { useDispatch, useSelector } from "react-redux";
 import { onGetUserALLAction ,onDeleteUserAction} from "../store/actions/userActions";
  import { showToastAction } from "../store/slices/commonSlice";
-import { Link } from "react-router-dom";
+
 
 import { confirmDialog } from "primereact/confirmdialog";
 
@@ -89,12 +89,13 @@ export default function Users() {
   useEffect(() => {
     let allUser = [];
     userList.forEach((user) => {
-      console.log("user",user);
+      console.log("user list",user);
       
       if (user.metadata.name.includes("cocktail") && !user.metadata.name.includes("cocktail-super-admin-token")) {
         let item = {
           name: decoder(user.data.username),
-          status: decoder(user.data.status),
+          status: (user.data.hasOwnProperty('status')
+        )?decoder(user.data.status):'',
           role: decoder(user.data.role),
           email: decoder(user.data.email),
           department:
