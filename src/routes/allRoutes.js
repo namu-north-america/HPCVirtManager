@@ -1,6 +1,8 @@
 import Dashboard from "../views/Dashboard";
 import Clusters from "../views/Clusters";
 import Users from "../views/Users";
+import EditUser from "../views/User/EditUser";
+import UpdateUser from "../views/User/UpdateUser";
 import AllNodes from "../views/AllNodes";
 import NodeDetail from "../views/NodeDetail/NodeDetail";
 import VMList from "../views/VirtualMachines/VMList";
@@ -58,7 +60,7 @@ export const PrivateRoutes = [
     path: "/clusters",
     name: "Clusters",
     element: <Clusters />,
-    role: "admin",
+    role: "shared",
   },
   {
     path: "/nodes",
@@ -76,6 +78,19 @@ export const PrivateRoutes = [
     path: "/users",
     name: "Users Management",
     element: <Users />,
-    role: "admin",
+    role: "shared",
   },
+  {
+    path: "/users/:name",
+    name: "User Details",
+    element: <EditUser />,
+    role: "shared",
+  },
+  {
+    path: "/users/profile",
+    name: "User Profile",
+    element: <UpdateUser />,
+    role: "shared",
+  },
+  
 ];

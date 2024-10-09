@@ -8,18 +8,19 @@ import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
 import AddUserModal from "./VirtualMachines/Form/AddUserModal";
 import { useDispatch, useSelector } from "react-redux";
 import { onGetUserALLAction ,onDeleteUserAction} from "../store/actions/userActions";
-// import { showToastAction } from "../store/slices/commonSlice";
+ import { showToastAction } from "../store/slices/commonSlice";
+import { Link } from "react-router-dom";
 
 import { confirmDialog } from "primereact/confirmdialog";
 
 const statusTemplate = (item) => {
   switch (item.status) {
-    case "Active":
+    case "active":
       return <span className="text-green-500">Active</span>;
     case "RUNNING":
       return <span className="text-cyan-500">Running</span>;
-    case "STOPPED":
-      return <span className="text-red-500">Stopped</span>;
+    case "in-active":
+      return <span className="text-red-500">In-active</span>;
     default:
       return <span className="text-red-500">Stopped</span>;
   }
@@ -28,6 +29,7 @@ const breadcrumItems = [{ label: "Users (RBAC)", url: "/#/users" }];
 export default function Users() {
   const ref = useRef();
   const [visible, setVisible] = useState(false);
+  const { profile } = useSelector((state) => state.user);
   const [user, setUser] = useState([]);
   const dispatch = useDispatch();
   const actionTemplate = (item) => {
@@ -38,8 +40,11 @@ export default function Users() {
 
           {
             <>
-              <div className="cursor-pointer mb-2" onClick={() => onEdit(item)}>
-                Edit
+              <div className=" mb-2" onClick={() => onEdit(item)} >
+              
+          Edit
+       
+                
               </div>
               <div className="cursor-pointer" onClick={() => onDelete(item)}>
                 Delete
@@ -50,17 +55,9 @@ export default function Users() {
       </CustomOverlay>
     );
   };
-  const onEdit = (item) => {
-    console.log("edit", item);
-    // dispatch(
-    //   showToastAction({
-    //     type: "success",
-    //     title: "Email or password is invalid!",
-    //   })
-    // )
-  };
+ 
   const onDelete = (item) => {
-    console.log("delete", item);
+    if(profile.role !== "admin")return showError()
     confirmDialog({
       target: ref.currentTarget,
       header: "Delete Confirmation",
@@ -72,6 +69,10 @@ export default function Users() {
         dispatch(onDeleteUserAction(item));
       },
     });
+  };
+  const onEdit = (item) => {
+    if(profile.role !== "admin")return showError()
+    window.location.href = `/#/users/${item.email}`;
   };
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function Users() {
       if (user.metadata.name.includes("cocktail") && !user.metadata.name.includes("cocktail-super-admin-token")) {
         let item = {
           name: decoder(user.data.username),
-          status: "Active",
+          status: decoder(user.data.status),
           role: decoder(user.data.role),
           email: decoder(user.data.email),
           department:
@@ -112,6 +113,19 @@ export default function Users() {
     return decodeURIComponent(atob(value));
   };
 
+  const addNewUser = () => {
+    if(profile.role !== "admin")return showError()
+    setVisible(true);
+  };
+  const showError = () => {
+    dispatch(
+      showToastAction({
+        type: "error",
+        title: "Sorry You have no permission!",
+      })
+    );
+  };
+
   return (
     <>
       <CustomBreadcrum items={breadcrumItems} />
@@ -119,7 +133,7 @@ export default function Users() {
         title="User Management (RBAC)"
         onSearch={(e) => console.log(e)}
         onRefresh={(e) => dispatch(onGetUserALLAction())}
-        onAdd={(e) => setVisible(true)}
+        onAdd={addNewUser}
         addText="Register New User"
       >
         <DataTable value={user} tableStyle={{ minWidth: "50rem" }}>

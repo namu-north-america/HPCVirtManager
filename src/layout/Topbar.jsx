@@ -17,7 +17,9 @@ export default function Topbar({ toggleSidebar }) {
   const { profile } = useSelector((state) => state.user);
   
 
-  
+  const editPage = () => {
+    window.location.href = "/#/users/profile";
+  };
    
    
   
@@ -43,7 +45,7 @@ export default function Topbar({ toggleSidebar }) {
           <Logo style={{ width: "180px" }} />
         </div>
       </div>
-      <div className="top-menu w-6">
+      <div className="top-menu w-6" onClick={editPage}>
         <div className="flex">
           {userimage ? (
             <Avatar

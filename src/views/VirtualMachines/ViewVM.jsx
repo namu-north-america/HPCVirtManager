@@ -8,6 +8,7 @@ import {
   CustomSplitButton,
 } from "../../shared/CustomButton";
 import CustomCard, { CustomCardField } from "../../shared/CustomCard";
+import InfoCircle from "./Form/InfoCircle";
 import Grid, { Col } from "../../shared/Grid";
 import { useDispatch } from "react-redux";
 import {
@@ -25,6 +26,7 @@ import moment from "moment";
 import constants from "../../constants";
 import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
+import { findByLabelText } from "@testing-library/react";
 
 
 export default function ViewVM() {
@@ -369,7 +371,16 @@ export default function ViewVM() {
                       <CustomCardField title="Sockets" value={data?.sockets} />
                       <CustomCardField title="Threads" value={data?.threads} />
                       <CustomCardField title="Memory" value={data?.memory} />
+                      <Grid extraClassNames={'flex justify-content-center'}>
+                   <InfoCircle percentage="7.9%" label="Used from total CPU" color="bg-green-500" />
+                  
+                   </Grid>
+                   <Grid extraClassNames={'flex justify-content-center'}>
+                   <InfoCircle percentage="7.9%" label="Used from total CPU" color="bg-green-500" />
+                  
+                   </Grid>
                     </CustomCard>
+                   
                   </Col>
                 </Grid>
               </Col>

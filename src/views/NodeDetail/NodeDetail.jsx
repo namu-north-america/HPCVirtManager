@@ -3,7 +3,7 @@ import Page from "../../shared/Page";
 import Grid, { Col } from "../../shared/Grid";
 import CustomCard from "../../shared/CustomCard";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
-
+import NodeVMList from "./NodeVMList";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getNodeInstanceAction,
@@ -95,7 +95,7 @@ export default function NodeDetail() {
   return (
     <>
       <CustomBreadcrum items={breadcrumItems} />
-      <Page title={name} onRefresh={onInitialLoad}>
+      <Page  title={name} onRefresh={onInitialLoad}>
         <Grid>
           <Col>
             <CustomCard title="Overview">
@@ -113,6 +113,9 @@ export default function NodeDetail() {
           </Col>
         </Grid>
       </Page>
+    
+      <NodeVMList/>
+     
     </>
   );
 }

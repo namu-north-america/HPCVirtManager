@@ -71,7 +71,7 @@ export default function NodeOverView() {
 
   
   return (
-    <div className=" bg-white p-4 rounded-lg shadow-md max-w-xs">
+    <div className=" bg-white p-3 rounded-lg shadow-md max-w-xs">
       <div className="space-y-2">
         {node.map((item, index) => (
           <div
