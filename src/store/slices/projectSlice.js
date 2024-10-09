@@ -11,6 +11,7 @@ const initialState = {
   storageClassesDropdown: [],
   disks: [],
   disksDropdown: [],
+  images: [],
   accessModeDropdown: ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"],
   bindingModeDropdown: ["bridge", "masquerade"],
   priorityClassesDropdown: [],
@@ -47,6 +48,10 @@ export const projectSlice = createSlice({
       state.disks = action.payload;
       state.disksDropdown = action.payload.map((item) => item?.name);
     },
+
+    setImages: (state, action) => {
+      state.images = action.payload;
+    },
     setPriorityClasses: (state, action) => {
       state.priorityClassesDropdown = action.payload
         .map((item) => item?.metadata?.name)
@@ -63,5 +68,6 @@ export const {
   setStorageClasses,
   setDisks,
   setPriorityClasses,
+  setImages,
 } = projectSlice.actions;
 export default projectSlice.reducer;

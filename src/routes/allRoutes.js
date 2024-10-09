@@ -8,6 +8,7 @@ import LiveMigrations from "../views/VirtualMachines/LiveMigrations";
 import StorageDisks from "../views/Storage/StorageDisks";
 import StorageClasses from "../views/Storage/StorageClasses";
 import ViewVM from "../views/VirtualMachines/ViewVM";
+import Images from "../views/Images";
 
 export const PrivateRoutes = [
   {
@@ -47,7 +48,12 @@ export const PrivateRoutes = [
     element: <StorageClasses />,
     role: "shared",
   },
-
+  {
+    path: "/images",
+    name: "Images",
+    element: <Images />,
+    role: "admin",
+  },
   {
     path: "/clusters",
     name: "Clusters",

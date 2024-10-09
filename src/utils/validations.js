@@ -25,13 +25,12 @@ const formValidation = (name, value, state, ignore = []) => {
     case "permissionGranted":
     case "userManagement":
     case "userCustom":
-    if (equal(length(value))) {
-      formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
-    }  
-    else {
+      if (equal(length(value))) {
+        formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
+      } else {
         formErrors[name] = "";
       }
-    break 
+      break;
     case "email":
     case "businessEmail":
       if (equal(length(value))) {
@@ -73,7 +72,7 @@ const formValidation = (name, value, state, ignore = []) => {
       break;
 
     case "firstName":
-    case "lastName":
+    case "readableName":
     case "name":
     case "sockets":
     case "cores":
@@ -106,7 +105,6 @@ const formValidation = (name, value, state, ignore = []) => {
       }
       break;
 
-   
     default:
       break;
   }
