@@ -1,5 +1,6 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
+import { setLiveMigrations } from "../slices/projectSlice";
 
 import { getVMsAction } from "./projectActions";
 
@@ -461,13 +462,13 @@ const adddisk = async (data) => {
   return res.metadata;
 };
 
-const onMigrateVMAction = (data) => async (dispatch) => {
+const onMigrateVMAction = (data, next) => async (dispatch) => {
   let url = endPoints.MIGRATE_VM({
     namespace: data.namespace,
   });
 
   const vmiName = data.name;
-  const migrationName = `migrate-vm-${vmiName}`;
+  const migrationName = `${vmiName}-migration-${new Date().getTime()}`;
 
   const payload = {
     apiVersion: "kubevirt.io/v1",
@@ -479,13 +480,45 @@ const onMigrateVMAction = (data) => async (dispatch) => {
       vmiName: vmiName,
     },
   };
-
-  console.log(url);
-  console.log(payload);
   const res = await api("post", url, payload);
   if (res?.kind) {
     dispatch(getVMsAction());
   }
+  if (next) {
+    next();
+  }
+};
+
+const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
+  let items = await Promise.all(
+    namespaces.map(async (namespace, i) => {
+      let data = await api(
+        "get",
+        endPoints.MIGRATE_VM({
+          namespace,
+        })
+      );
+      if (data?.items) {
+        return data?.items;
+      }
+      return [];
+    })
+  );
+  items = items.flatMap((item) => item);
+  items = items.map((item) => ({
+    name: item?.metadata?.name,
+    namespace: item?.metadata?.namespace,
+    time: item?.metadata?.creationTimestamp,
+    status: item?.status?.phase,
+    vmName: item?.spec?.vmiName,
+    completed: item?.status?.migrationState?.completed,
+    sourceNode: item?.status?.migrationState?.sourceNode,
+    targetNode: item?.status?.migrationState?.targetNode,
+    targetNodeAddress: item?.status?.migrationState?.targetNodeAddress,
+    startTimestamp: item?.status?.migrationState?.startTimestamp,
+    endTimestamp: item?.status?.migrationState?.endTimestamp,
+  }));
+  dispatch(setLiveMigrations(items));
 };
 
 export {
@@ -499,4 +532,5 @@ export {
   onRestartVMAction,
   onPauseVMAction,
   onMigrateVMAction,
+  getLiveMigrationsAction,
 };

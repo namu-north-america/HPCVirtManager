@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   vms: [],
+  migrations: [],
   nodes: [],
-  nodeDetail:{},
+  nodeDetail: {},
   nodesDropdown: [],
   namespaces: [],
   namespacesDropdown: [],
@@ -21,6 +22,9 @@ export const projectSlice = createSlice({
   reducers: {
     setVMs: (state, action) => {
       state.vms = action.payload;
+    },
+    setLiveMigrations: (state, action) => {
+      state.migrations = action.payload;
     },
     setNodes: (state, action) => {
       state.nodes = action.payload;
@@ -52,6 +56,7 @@ export const projectSlice = createSlice({
 });
 export const {
   setVMs,
+  setLiveMigrations,
   setNodes,
   setNodeDetail,
   setNamespaces,

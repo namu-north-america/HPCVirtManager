@@ -1,7 +1,7 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
 import prometheusApi from "../../services/prometheusApi";
-import { convertKiToMBorGB ,bytesToGB} from "../../utils/commonFunctions";
+import { convertKiToMBorGB, bytesToGB } from "../../utils/commonFunctions";
 import {
   setNamespaces,
   setNodes,
@@ -11,7 +11,11 @@ import {
   setDisks,
   setPriorityClasses,
 } from "../slices/projectSlice";
-import {setNodeMemory,setNodeStorage,setNodeCpu} from "../slices/reportingSlice"
+import {
+  setNodeMemory,
+  setNodeStorage,
+  setNodeCpu,
+} from "../slices/reportingSlice";
 
 const getVMsAction = () => async (dispatch) => {
   const res = await api("get", endPoints.VMS);
@@ -56,6 +60,7 @@ const getVMsAction = () => async (dispatch) => {
   );
   dispatch(setVMs(items));
 };
+
 // <----------------- Nodes Action-------------->>
 const getNodesAction = () => async (dispatch) => {
   const res = await api("get", endPoints.NODES);
@@ -133,8 +138,8 @@ const getNodeTotalMemoryAction = (name) => async (dispatch) => {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
     let data = !isNaN(numericValue) ? bytesToGB(numericValue.toFixed(2)) : 0;
-    
-    dispatch(setNodeMemory({type:"total",size:data}));
+
+    dispatch(setNodeMemory({ type: "total", size: data }));
     dispatch(getNodeUsedMemoryAction(name));
   } else {
     console.log("onGetStorageAction error", res);
@@ -150,8 +155,8 @@ const getNodeUsedMemoryAction = (name) => async (dispatch) => {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
     let data = !isNaN(numericValue) ? bytesToGB(numericValue.toFixed(2)) : 0;
-   
-    dispatch(setNodeMemory({type:"used",size:data}));
+
+    dispatch(setNodeMemory({ type: "used", size: data }));
   } else {
     console.log("onGetStorageAction error", res);
   }
@@ -167,8 +172,8 @@ const getNodeTotalStorageAction = (name) => async (dispatch) => {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
     let data = !isNaN(numericValue) ? bytesToGB(numericValue.toFixed(2)) : 0;
-   
-    dispatch(setNodeStorage({type:"total",size:data}));
+
+    dispatch(setNodeStorage({ type: "total", size: data }));
     dispatch(getNodeUsedStorageAction(name));
   } else {
     console.log("getNodeTotalStorageAction error", res);
@@ -184,14 +189,13 @@ const getNodeUsedStorageAction = (name) => async (dispatch) => {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
     let data = !isNaN(numericValue) ? bytesToGB(numericValue.toFixed(2)) : 0;
-    
-   
-    dispatch(setNodeStorage({type:"used",size:data}));
+
+    dispatch(setNodeStorage({ type: "used", size: data }));
   } else {
     console.log("getNodeUsedStorageAction error", res);
   }
 };
-//          cpu 
+//          cpu
 const getNodeTotalCPUCoresAction = (name) => async (dispatch) => {
   const Query = `machine_cpu_cores{kubernetes_io_hostname='${name}'}`;
   const res = await prometheusApi(
@@ -200,8 +204,8 @@ const getNodeTotalCPUCoresAction = (name) => async (dispatch) => {
   );
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
-    
-    dispatch(setNodeCpu({type:"total",size:value}));
+
+    dispatch(setNodeCpu({ type: "total", size: value }));
     dispatch(getNodeUsedCPUCoresAction(name));
   } else {
     console.log("getNodeTotalCPUCoresAction error", res);
@@ -218,8 +222,8 @@ const getNodeUsedCPUCoresAction = (name) => async (dispatch) => {
   );
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
-    
-    dispatch(setNodeCpu({type:"used",size:value}));
+
+    dispatch(setNodeCpu({ type: "used", size: value }));
   } else {
     console.log("getNodeUsedCPUCoresAction error", res);
   }
@@ -255,8 +259,8 @@ const getPriorityClassAction = () => async (dispatch) => {
   if (res?.items) {
     items = res.items;
   }
-  console.log("getPriorityClassAction",res);
-  
+  console.log("getPriorityClassAction", res);
+
   dispatch(setPriorityClasses(items));
 };
 const getDisksAction = () => async (dispatch) => {
@@ -391,7 +395,6 @@ const onDeleteDiskAction = (data) => async (dispatch) => {
 
 export {
   getVMsAction,
-
   getNodesAction,
   getNodeInstanceAction,
   getNodeTotalMemoryAction,
@@ -400,7 +403,6 @@ export {
   getNodeUsedStorageAction,
   getNodeTotalCPUCoresAction,
   getNodeUsedCPUCoresAction,
-
   getNamespacesAction,
   getStorageClassesAction,
   getDisksAction,

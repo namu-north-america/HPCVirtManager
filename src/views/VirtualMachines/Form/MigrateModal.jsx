@@ -26,11 +26,8 @@ export default function MigrateModal({ visible, setVisible }) {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  console.log("visible==>", visible);
-
   const onSubmit = () => {
-    console.log(data);
-    dispatch(onMigrateVMAction(visible));
+    dispatch(onMigrateVMAction(visible, () => setVisible(false)));
   };
 
   return (
