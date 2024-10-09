@@ -117,6 +117,34 @@ const onGetUserSecretsAction =
     }
     loading(false);
   };
+// get user by   
+const onGetUserDetailAction =
+  (data) => async (dispatch) => {
+   
+    let secretName = data.email.replace(/[@.]/g, "-");
+    let url = endPoints.GET_USER_SECRET({
+      namespace: "default",
+      name: 'cocktail-'+secretName,
+    });
+
+    const res = await api("get", url);
+    console.log('res',res);
+    
+    if (res?.status!=='Failure') {
+      const decodeFromBase64 = Object.fromEntries(
+        Object.entries(res.data).map(([key, value]) => [
+          key,
+          (value!=='')?decodeURIComponent(atob(value)):value,
+        ])
+      );
+      return decodeFromBase64 
+    }else{
+      return {
+        status:'Failure'}
+    } 
+    
+  };
+
 
 // on forget password 
 const onForgetPasswordAction =
@@ -229,6 +257,54 @@ const onAddUserAction = (data) => async (dispatch) => {
   }
 };
 
+const onUpdateUserAction = (data) => async (dispatch) => {
+
+  let secretName = data.email.replace(/[@.]/g, "-");
+  // Convert each value to Base64
+  let url = endPoints.GET_USER_SECRET({
+    namespace: "default",
+    name: 'cocktail-'+secretName,
+  });
+
+  
+  const base64Data = Object.fromEntries(
+    Object.entries(data).map(([key, value]) => [
+      key,
+      btoa(encodeURIComponent(value)),
+    ])
+  );
+  let payload = {
+    apiVersion: "v1",
+    kind: "Secret",
+    metadata: {
+      name: "cocktail-"+secretName, // set on the base of last user
+      namespace: "default", // always default namespace don`t change
+    },
+    data: base64Data,
+  };
+  const res = await api("put", url, payload);
+  if (res?.kind === "Secret") {
+
+   
+    dispatch(
+      showToastAction({
+        type: "success",
+        title: "User updated Successfully",
+      })
+    );
+  
+  } 
+  else {
+    console.log("add user error", res.message);
+    dispatch(
+      showToastAction({
+        type: "error",
+        title: "User Not Created! " + res.message,
+      })
+    );
+  }
+};
+
 const onGetUserALLAction = () => async (dispatch) => {
   let url = endPoints.GET_USER_ALL;
 
@@ -271,10 +347,12 @@ const onDeleteUserAction = (data) => async (dispatch) => {
 };
 
 export {
+  onGetUserDetailAction,
   onUserLoginAction,
   getProfileAction,
   onGetUserSecretsAction,
   onAddUserAction,
+  onUpdateUserAction,
   onGetUserALLAction,
   onDeleteUserAction,
   onForgetPasswordAction

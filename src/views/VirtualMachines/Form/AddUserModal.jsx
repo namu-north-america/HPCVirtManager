@@ -129,6 +129,7 @@ export default function AddUserModal({ visible, setVisible }) {
       parsed.department = data.department;
       parsed.password = data.password;
       parsed.role = role.role;
+      parsed.status = 'in-active'
     } else {
       parsed = {
         username: data.userName,
@@ -136,6 +137,7 @@ export default function AddUserModal({ visible, setVisible }) {
         department: data.department,
         password: data.password,
         role: "admin",
+        status : 'in-active'
       };
     }
 
