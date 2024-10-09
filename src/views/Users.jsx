@@ -22,7 +22,7 @@ const statusTemplate = (item) => {
     case "in-active":
       return <span className="text-red-500">In-active</span>;
     default:
-      return <span className="text-red-500">Stopped</span>;
+      return <span className="text-red-500">In-active</span>;
   }
 };
 const breadcrumItems = [{ label: "Users (RBAC)", url: "/#/users" }];
@@ -95,7 +95,7 @@ export default function Users() {
         let item = {
           name: decoder(user.data.username),
           status: (user.data.hasOwnProperty('status')
-        )?decoder(user.data.status):'',
+        )?decoder(user.data.status):'in-active',
           role: decoder(user.data.role),
           email: decoder(user.data.email),
           department:
