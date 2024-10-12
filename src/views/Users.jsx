@@ -58,6 +58,7 @@ export default function Users() {
  
   const onDelete = (item) => {
     if(profile.role !== "admin")return showError()
+      if(profile.email === item.email)return showError()
     confirmDialog({
       target: ref.currentTarget,
       header: "Delete Confirmation",
@@ -71,8 +72,12 @@ export default function Users() {
     });
   };
   const onEdit = (item) => {
+    
+    
     if(profile.role !== "admin")return showError()
-    window.location.href = `/#/users/${item.email}`;
+      if(profile.email === item.email)return showError()
+   window.location.href = `/#/users/${item.email}`;
+    
   };
 
   useEffect(() => {

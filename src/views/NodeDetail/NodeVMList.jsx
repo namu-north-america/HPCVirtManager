@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo,  useState } from "react";
 import Page from "../../shared/Page";
 import { timeAgo } from "../../utils/date";
 
@@ -8,7 +8,7 @@ import { Column } from "primereact/column";
 import { useDispatch, useSelector } from "react-redux";
 import { getVMsAction } from "../../store/actions/projectActions";
 import { Link } from "react-router-dom";
-
+import { useParams } from "react-router-dom";
 import {
   
   checkNamespaceValue,
@@ -42,10 +42,12 @@ export default function NodeVMList() {
   const dispatch = useDispatch();
   const { profile, userNamespace } = useSelector((state) => state.user);
   let { vms } = useSelector((state) => state.project);
+  
+  
 
+  const { name } = useParams();
  
-
- 
+  
 
 
 
@@ -68,13 +70,18 @@ export default function NodeVMList() {
   };
 
 
-  const ref = useRef();
+ 
 
-  
+  const filterByNode = (data, nodeName) => {
+    return data.filter(item => item.node === nodeName);
+  };
 
 
 
   const [search, setSearch] = useState("");
+  
+
+  
 
   vms = useMemo(
     () =>
@@ -83,8 +90,6 @@ export default function NodeVMList() {
       ),
     [search, vms]
   );
-
- 
 
   return (
     < >
@@ -98,7 +103,7 @@ export default function NodeVMList() {
       
       >
        
-        <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
+        <DataTable value={filterByNode(vms,name)} tableStyle={{ minWidth: "50rem" }}>
           <Column field="name" header="Name" body={vmname}></Column>
           <Column field="status" header="Status" body={statusTemplate}></Column>
           <Column field="conditions" header="Conditions"></Column>

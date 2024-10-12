@@ -56,6 +56,8 @@ export default function VMList() {
   const dispatch = useDispatch();
   const { profile, userNamespace } = useSelector((state) => state.user);
   let { vms, namespacesDropdown } = useSelector((state) => state.project);
+  console.log("profile",profile);
+  
 
  
 
@@ -227,7 +229,7 @@ export default function VMList() {
     }
   };
   const onPauseUnpause = (item, type) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS")) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
       dispatch(
         onPauseVMAction({ ...item, type }, () => {
           dispatch(getVMsAction());
