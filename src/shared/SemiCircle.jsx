@@ -18,8 +18,12 @@ export default function SemiCircleGauge({
         endAngle: 90,
         track: {
           background: "#e7e7e7",
-          strokeWidth: "97%",
+          strokeWidth: "80%",
           margin: 5, // margin is in pixels
+        },
+        hollow: {
+          margin: 5,
+          size: "65%", // Increase size for a thicker look
         },
        
         dataLabels: {
@@ -28,11 +32,11 @@ export default function SemiCircleGauge({
           },
           value: {
             offsetY: -10,
-            fontSize: "22px",
+            fontSize: "16px",
             fontWeight: 600,
             color: "#000",
             formatter: function (val) {
-              return `${percentage}%`;
+              return `${val}%`;
             },
           },
         },

@@ -130,11 +130,15 @@ export default function Dashboard() {
               <CustomCardValue title="Others" value={others} />
             </Grid>
             <Grid extraClassNames="justify-content-center">
+            
               <PieChart
                 labels={["Total", "Running", "Paused", "Stopped", "Others"]}
                 series={[total, running, paused, stopped, others]}
               />
+            
+              
             </Grid>
+            
           </CustomCard>
         </Col>
         <Col>

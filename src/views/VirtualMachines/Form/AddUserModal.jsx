@@ -24,6 +24,7 @@ import {
   CustomForm,
   CustomInput,
   CustomPasswordInput,
+  CustomPassword
 } from "../../../shared/AllInputs";
 
 export default function AddUserModal({ visible, setVisible }) {
@@ -129,6 +130,7 @@ export default function AddUserModal({ visible, setVisible }) {
       parsed.department = data.department;
       parsed.password = data.password;
       parsed.role = role.role;
+      parsed.status = 'in-active'
     } else {
       parsed = {
         username: data.userName,
@@ -136,6 +138,7 @@ export default function AddUserModal({ visible, setVisible }) {
         department: data.department,
         password: data.password,
         role: "admin",
+        status : 'in-active'
       };
     }
 
@@ -247,13 +250,13 @@ export default function AddUserModal({ visible, setVisible }) {
                   col={12}
                 />
 
-                <CustomPasswordInput
-                  data={data}
-                  onChange={handleChange}
-                  name="password"
-                  required
-                  col={12}
-                />
+       <CustomPassword
+          data={data}
+          onChange={handleChange}
+          name="password"
+          required
+          col="12"
+        />
                 <CustomInput
                   data={data}
                   onChange={handleChange}
