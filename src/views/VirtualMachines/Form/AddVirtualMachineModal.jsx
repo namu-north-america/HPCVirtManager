@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getDisksAction,
   getNamespacesAction,
   getNodesAction,
   getPriorityClassAction,
-  getStorageClassesAction,
 } from "../../../store/actions/projectActions";
 import { Stepper } from "primereact/stepper";
 import { StepperPanel } from "primereact/stepperpanel";
@@ -20,12 +18,16 @@ import Network from "./Network";
 import formValidation from "../../../utils/validations";
 import Storage from "./Storage";
 import Review from "./Review";
-import { onAddVMAction2 } from "../../../store/actions/vmActions";
+import { onAddVMAction } from "../../../store/actions/vmActions";
 import CustomCard from "../../../shared/CustomCard";
 import CustomModal from "../../../shared/CustomModal";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import UserData from "./UserData";
+import {
+  getDisksAction,
+  getStorageClassesAction,
+} from "../../../store/actions/storageActions";
 
 export default function AddVirtualMachineModal({ visible, setVisible }) {
   const stepperRef = useRef(null);
@@ -77,7 +79,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
     if (showFormErrors(data, setData)) {
       if (validateDisk()) {
         dispatch(
-          onAddVMAction2(data, disks, setLoading, () => {
+          onAddVMAction(data, disks, setLoading, () => {
             setVisible(false);
             setData({
               node: "",

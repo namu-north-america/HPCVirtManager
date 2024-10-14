@@ -1,5 +1,6 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
+import { showToastAction } from "../slices/commonSlice";
 import { setImages } from "../slices/projectSlice";
 
 const getImagesAction = () => async (dispatch) => {
@@ -44,7 +45,19 @@ const onAddImageAction = (data, setLoading, next) => async (dispatch) => {
   };
 
   const res = await api("post", url, payload);
-  if (res?.kind) {
+
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  } else if (res?.kind) {
     dispatch(getImagesAction());
     next();
   }
@@ -71,8 +84,18 @@ const onEditImageAction = (data, setLoading, next) => async (dispatch) => {
       "Content-Type": "application/merge-patch+json",
     }
   );
-
-  if (res?.kind) {
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  } else if (res?.kind) {
     dispatch(getImagesAction());
     next(res?.metadata);
   }

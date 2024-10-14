@@ -37,11 +37,12 @@ const api = async (
     if (error?.response?.status === 401) {
       logout();
     }
+
+    console.log("qwertyuio==>", error);
+    
     let res = error?.response ? error.response.data : error.toString();
     return res;
   }
 };
-
-
 
 export default api;

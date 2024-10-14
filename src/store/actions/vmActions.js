@@ -1,112 +1,23 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
+import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations } from "../slices/projectSlice";
 
 import { getVMsAction } from "./projectActions";
 
-const onAddVMAction = (data, setLoading, next) => async (dispatch) => {
-  setLoading(true);
-  let url = endPoints.ADD_VM({
-    namespace: data.namespace,
-    name: data.name,
-  });
-  let payload = {
-    apiVersion: "kubevirt.io/v1alpha3",
-    kind: "VirtualMachine",
-    metadata: {
-      name: data.name,
-      namespace: data.namespace,
-      labels: {
-        "kubevirt.io/domain": data.name,
-        "kubevirt-manager.io/managed": "true",
-        "cloud-init.kubevirt-manager.io/username": "admin",
-      },
-    },
-    spec: {
-      running: false,
-      template: {
-        metadata: {},
-        spec: {
-          domain: {
-            devices: {
-              disks: [
-                {
-                  name: "disk1",
-                  disk: {},
-                },
-                {
-                  name: "disk3",
-                  disk: {
-                    bus: "virtio",
-                  },
-                },
-              ],
-              interfaces: [
-                {
-                  name: "net1",
-                  [data.bindingMode]: {},
-                },
-              ],
-              networkInterfaceMultiqueue: true,
-            },
-            cpu: {
-              cores: parseInt(data.cores),
-              threads: parseInt(data.threads),
-              sockets: parseInt(data.sockets),
-            },
-            resources: {
-              requests: {
-                memory: `${data.memory}Gi`,
-              },
-            },
-          },
-          networks: [
-            {
-              name: "net1",
-              pod: {},
-            },
-          ],
-          volumes: [
-            {
-              name: "disk1",
-              dataVolume: {
-                name: data.storage,
-              },
-            },
-            {
-              name: "disk3",
-              cloudInitNoCloud: {
-                userData: `#cloud-config\nmanage_etc_hosts: true\nhostname: ${data.name}\nuser: admin\npassword: Admin@123\n`,
-                networkData:
-                  "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
-              },
-            },
-          ],
-          nodeSelector: {
-            "kubernetes.io/hostname": data.node,
-          },
-        },
-      },
-    },
-  };
-  const res = await api("post", url, payload);
-  if (res?.kind) {
-    dispatch(getVMsAction());
-    next();
-  }
-  setLoading(false);
-};
-
-const onAddVMAction2 = (data, disks, setLoading, next) => async (dispatch) => {
+const onAddVMAction = (data, disks, setLoading, next) => async (dispatch) => {
   setLoading(true);
   let _disks = await Promise.all(
     disks.map(async (disk, i) => {
       if (disk?.createType === "new") {
-        let diskData = await adddisk({
-          ...disk,
-          namespace: data?.namespace,
-          name: `${data?.name}-disk${i + 1}`,
-        });
+        let diskData = await adddisk(
+          {
+            ...disk,
+            namespace: data?.namespace,
+            name: `${data?.name}-disk${i + 1}`,
+          },
+          dispatch
+        );
 
         let _obj = {
           cache: disk?.cache,
@@ -204,20 +115,7 @@ const onAddVMAction2 = (data, disks, setLoading, next) => async (dispatch) => {
         spec: {
           domain: {
             devices: {
-              // disks: [
-              //   {
-              //     name: "disk1",
-              //     disk: {},
-              //   },
-              //   {
-              //     name: "disk3",
-              //     disk: {
-              //       bus: "virtio",
-              //     },
-              //   },
-              // ],
               disks: _deviceDisk,
-
               interfaces: [
                 {
                   name: "net1",
@@ -243,22 +141,6 @@ const onAddVMAction2 = (data, disks, setLoading, next) => async (dispatch) => {
               pod: {},
             },
           ],
-          // volumes: [
-          //   {
-          //     name: "disk1",
-          //     dataVolume: {
-          //       name: data.storage,
-          //     },
-          //   },
-          //   {
-          //     name: "disk3",
-          //     cloudInitNoCloud: {
-          //       userData: `#cloud-config\nmanage_etc_hosts: true\nhostname: ${data.name}\nuser: ${data.userName}\npassword: ${data.password}\n`,
-          //       networkData:
-          //         "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
-          //     },
-          //   },
-          // ],
           volumes: _volumes,
           nodeSelector: {
             "kubernetes.io/hostname": data.node,
@@ -268,7 +150,19 @@ const onAddVMAction2 = (data, disks, setLoading, next) => async (dispatch) => {
     },
   };
   const res = await api("post", url, payload);
-  if (res?.kind) {
+
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  } else if (res?.kind) {
     dispatch(getVMsAction());
     next();
   }
@@ -310,7 +204,18 @@ const onEditVMAction = (data, setLoading, next) => async (dispatch) => {
       "Content-Type": "application/merge-patch+json",
     }
   );
-  if (res?.kind) {
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  } else if (res?.kind) {
     dispatch(getVMsAction());
     next();
   }
@@ -419,7 +324,7 @@ const onDeleteVMAction = (data) => async (dispatch) => {
   }
 };
 
-const adddisk = async (data) => {
+const adddisk = async (data, dispatch) => {
   let url = endPoints.ADD_STORAGE_DISK({
     namespace: data.namespace,
     name: data.name,
@@ -459,6 +364,18 @@ const adddisk = async (data) => {
   };
 
   const res = await api("post", url, payload);
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  }
   return res.metadata;
 };
 
@@ -481,7 +398,18 @@ const onMigrateVMAction = (data, next) => async (dispatch) => {
     },
   };
   const res = await api("post", url, payload);
-  if (res?.kind) {
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  } else if (res?.kind) {
     dispatch(getVMsAction());
   }
   if (next) {
@@ -523,7 +451,6 @@ const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
 
 export {
   onAddVMAction,
-  onAddVMAction2,
   onEditVMAction,
   onGetVMAction,
   getVolumesAction,

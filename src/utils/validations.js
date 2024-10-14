@@ -10,6 +10,7 @@ import {
   stringValidation,
   emailValidation,
   regularString,
+  urlValidation,
 } from "./regex";
 
 const formValidation = (name, value, state, ignore = []) => {
@@ -64,8 +65,8 @@ const formValidation = (name, value, state, ignore = []) => {
     case "url":
       if (equal(length(value))) {
         formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
-      } else if (!regularString(value)) {
-        formErrors[name] = `Unnecessary space in url!`;
+      } else if (!urlValidation(value)) {
+        formErrors[name] = `Please enter a valid URL!`;
       } else {
         formErrors[name] = "";
       }

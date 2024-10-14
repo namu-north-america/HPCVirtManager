@@ -35,6 +35,11 @@ export const passwordValidation = (password) => {
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
   return regex.test(password);
 };
+export const urlValidation = (url) => {
+  const regex =
+    /^([a-zA-Z][a-zA-Z\d+\-.]*):\/\/([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+(:[0-9]{1,5})?(\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$/;
+  return regex.test(url);
+};
 
 export const spaceBetweenWords = (word) =>
   word.replace(/([a-z])([A-Z])/g, "$1 $2");

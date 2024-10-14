@@ -4,8 +4,9 @@ import { DataTable } from "primereact/datatable";
 import Page from "../../shared/Page";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
-import { getStorageClassesAction } from "../../store/actions/projectActions";
+
 import { nameTemplate, timeTemplate } from "../../shared/TableHelpers";
+import { getStorageClassesAction } from "../../store/actions/storageActions";
 
 const breadcrumItems = [
   { label: "Storage", url: "/#/storage/disk" },

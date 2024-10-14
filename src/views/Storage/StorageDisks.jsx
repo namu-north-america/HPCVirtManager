@@ -11,13 +11,13 @@ import { Column } from "primereact/column";
 import CustomOverlay from "../../shared/CustomOverlay";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
+
 import {
   getDisksAction,
-  getStorageClassesAction,
   onAddDiskAction,
   onDeleteDiskAction,
   onDiskResizeAction,
-} from "../../store/actions/projectActions";
+} from "../../store/actions/storageActions";
 import CustomModal from "../../shared/CustomModal";
 import {
   CustomDropDown,
@@ -34,7 +34,7 @@ import { showToastAction } from "../../store/slices/commonSlice";
 import {
   showFormErrors,
   filterNamespacesBycrudDataVolume,
-  checkNamespaceValue
+  checkNamespaceValue,
 } from "../../utils/commonFunctions";
 import {
   longOverlayText,
@@ -42,6 +42,7 @@ import {
   timeTemplate,
 } from "../../shared/TableHelpers";
 import { confirmDialog } from "primereact/confirmdialog";
+import { getStorageClassesAction } from "../../store/actions/storageActions";
 
 const breadcrumItems = [
   { label: "Storage", url: "/#/storage/disk" },
@@ -79,7 +80,6 @@ export default function StorageDisks() {
     hasAccess();
   }, [hasAccess]);
 
-  
   const showError = () => {
     dispatch(
       showToastAction({
@@ -174,9 +174,10 @@ export default function StorageDisks() {
     });
   };
   const onOpenUpdateDialog = (item) => {
-    
-
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudDataVolume") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudDataVolume") ||
+      profile?.role === "admin"
+    ) {
       setData({
         name: item.name,
         namespace: item.namespace,
@@ -188,7 +189,6 @@ export default function StorageDisks() {
     } else {
       showError();
     }
-
   };
 
   const actionTemplate = (item) => {
@@ -217,9 +217,10 @@ export default function StorageDisks() {
   const ref = useRef();
 
   const onDelete = (item) => {
-    
-
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudDataVolume") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudDataVolume") ||
+      profile?.role === "admin"
+    ) {
       confirmDialog({
         target: ref.currentTarget,
         header: "Delete Confirmation",
@@ -234,8 +235,6 @@ export default function StorageDisks() {
     } else {
       showError();
     }
-
-
   };
 
   const [search, setSearch] = useState("");
