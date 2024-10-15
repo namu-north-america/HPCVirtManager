@@ -28,7 +28,6 @@ import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
 import { findByLabelText } from "@testing-library/react";
 
-
 export default function ViewVM() {
   const dispatch = useDispatch();
   let { name, namespace } = useParams();
@@ -233,11 +232,17 @@ export default function ViewVM() {
       disabled: data.status !== "Running",
     },
     {
-      label: "Pause",
+      label: data.status === "Paused" ? "Unpause" : "Pause",
       command: () => {
-        dispatch(onPauseVMAction({ name, namespace, type: "pause" }));
+        dispatch(
+          onPauseVMAction({
+            name,
+            namespace,
+            type: data.status === "Paused" ? "unpause" : "pause",
+          })
+        );
       },
-      disabled: data.status !== "Running",
+      disabled: !["Running", "Paused"].includes(data.status),
     },
     {
       label: "Stop",
@@ -282,6 +287,7 @@ export default function ViewVM() {
         severity="secondary"
         icon="pi pi-code"
         onClick={onOpenConsole}
+        disabled={data.status !== "Running"}
       />
       <CustomSplitButton
         label="More Actions"
@@ -371,16 +377,21 @@ export default function ViewVM() {
                       <CustomCardField title="Sockets" value={data?.sockets} />
                       <CustomCardField title="Threads" value={data?.threads} />
                       <CustomCardField title="Memory" value={data?.memory} />
-                      <Grid extraClassNames={'flex justify-content-center'}>
-                   <InfoCircle percentage="7.9%" label="Used from total CPU" color="bg-green-500" />
-                  
-                   </Grid>
-                   <Grid extraClassNames={'flex justify-content-center'}>
-                   <InfoCircle percentage="7.9%" label="Used from total CPU" color="bg-green-500" />
-                  
-                   </Grid>
+                      <Grid extraClassNames={"flex justify-content-center"}>
+                        <InfoCircle
+                          percentage="7.9%"
+                          label="Used from total CPU"
+                          color="bg-green-500"
+                        />
+                      </Grid>
+                      <Grid extraClassNames={"flex justify-content-center"}>
+                        <InfoCircle
+                          percentage="7.9%"
+                          label="Used from total CPU"
+                          color="bg-green-500"
+                        />
+                      </Grid>
                     </CustomCard>
-                   
                   </Col>
                 </Grid>
               </Col>

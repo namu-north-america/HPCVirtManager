@@ -62,7 +62,10 @@ export default function LiveMigrations() {
   );
 
   const completedMigrations = useMemo(
-    () => migrations?.filter((item) => item.completed),
+    () =>
+      migrations?.filter((item) =>
+        ["Succeeded", "Running"].includes(item.status)
+      ),
     [migrations]
   );
 
@@ -83,18 +86,7 @@ export default function LiveMigrations() {
   );
 
   const failedMigrations = useMemo(
-    () =>
-      migrations?.filter(
-        (item) =>
-          ![
-            "Pending",
-            "Scheduling",
-            "Scheduled",
-            "PreparingTarget",
-            "TargetReady",
-            "Running",
-          ].includes(item.status) && !item.completed
-      ),
+    () => migrations?.filter((item) => ["Failed"].includes(item.status)),
     [migrations]
   );
 
@@ -132,7 +124,7 @@ export default function LiveMigrations() {
           <Col size={6}>
             <CustomCard title="Active Migrations">
               <DataTable
-                value={pendingMigrations}
+                value={activeMigrations}
                 tableStyle={{ minWidth: "50rem" }}
               >
                 <Column
@@ -186,7 +178,7 @@ export default function LiveMigrations() {
           <Col size={12}>
             <CustomCard title="Completed Migrations">
               <DataTable
-                value={completedMigrations}
+                value={[...completedMigrations, ...failedMigrations]}
                 tableStyle={{ minWidth: "50rem" }}
               >
                 <Column
