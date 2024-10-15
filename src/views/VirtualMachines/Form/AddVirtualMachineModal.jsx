@@ -123,6 +123,23 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
 
   const onHide = () => {
     setVisible(false);
+    setData({
+      node: "",
+      name: "",
+      namespace: "",
+      sockets: "",
+      cores: "",
+      threads: "",
+      memory: "",
+      memoryType: "Gi",
+      priorityClass: "",
+      storage1: "",
+      networkType: "podNetwork",
+      bindingMode: "bridge",
+      advanced: "",
+      userName: "",
+      password: "",
+    });
   };
 
   const onBasicDetailsNext = () => {

@@ -79,6 +79,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk }) {
           options={[
             { name: "Create a new storage disk", value: "new" },
             { name: "Attach an existing storage disk", value: "existing" },
+            // { name: "Attach an image", value: "image" },
           ]}
           required
           col={12}
