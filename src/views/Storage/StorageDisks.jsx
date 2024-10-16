@@ -43,6 +43,7 @@ import {
 } from "../../shared/TableHelpers";
 import { confirmDialog } from "primereact/confirmdialog";
 import { getStorageClassesAction } from "../../store/actions/storageActions";
+import { getImagesAction } from "../../store/actions/imageActions";
 
 const breadcrumItems = [
   { label: "Storage", url: "/#/storage/disk" },
@@ -52,6 +53,8 @@ export default function StorageDisks() {
   const dispatch = useDispatch();
   const [namespace, setNamespace] = useState([]);
   const { profile, userNamespace } = useSelector((state) => state.user);
+  const { images } = useSelector((state) => state.project);
+
   let {
     disks,
     namespacesDropdown,
@@ -61,6 +64,7 @@ export default function StorageDisks() {
   useEffect(() => {
     dispatch(getDisksAction());
     dispatch(getStorageClassesAction());
+    dispatch(getImagesAction());
   }, [dispatch]);
 
   const hasAccess = useCallback(() => {
@@ -98,7 +102,7 @@ export default function StorageDisks() {
     namespace: "",
     storageClass: "",
     accessMode: "",
-
+    image: "",
     visible: false,
     type: "blank",
     url: "",
@@ -116,10 +120,16 @@ export default function StorageDisks() {
     let ignore = [];
     if (disk?.type === "blank") {
       ignore.push("url");
+      ignore.push("image");
     }
+
+    if (disk?.type === "image") {
+      ignore.push("url");
+    }
+
     if (showFormErrors(disk, setDisk, ignore)) {
       dispatch(
-        onAddDiskAction(disk, setLoading, () => {
+        onAddDiskAction(disk, images, setLoading, () => {
           onHideAddDialog();
         })
       );
@@ -247,7 +257,13 @@ export default function StorageDisks() {
     [search, disks]
   );
 
+  const imagesDropdown = useMemo(
+    () => images.map((item) => item?.name),
+    [images]
+  );
+
   const typesDropdown = [
+    { name: "Image", value: "image" },
     { name: "Blank", value: "blank" },
     { name: "HTTP(s)", value: "http" },
     { name: "Registry", value: "registry" },
@@ -398,7 +414,7 @@ export default function StorageDisks() {
             required
             col={12}
           />
-          {disk?.type !== "blank" && (
+          {disk?.type !== "blank" && disk?.type !== "image" && (
             <CustomInput
               data={disk}
               name="url"
@@ -407,6 +423,17 @@ export default function StorageDisks() {
               onChange={handleChange}
               col={12}
               required
+            />
+          )}
+
+          {disk?.type === "image" && (
+            <CustomDropDown
+              data={disk}
+              onChange={handleChange}
+              name="image"
+              options={imagesDropdown}
+              required
+              col={12}
             />
           )}
         </CustomForm>

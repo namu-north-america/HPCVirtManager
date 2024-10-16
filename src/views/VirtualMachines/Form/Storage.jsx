@@ -80,7 +80,6 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
     () => images.map((item) => item?.name),
     [images]
   );
-  console.log("images==>", images);
 
   return (
     <>
