@@ -5,169 +5,171 @@ import { setLiveMigrations } from "../slices/projectSlice";
 
 import { getVMsAction } from "./projectActions";
 
-const onAddVMAction = (data, disks, setLoading, next) => async (dispatch) => {
-  setLoading(true);
-  let _disks = await Promise.all(
-    disks.map(async (disk, i) => {
-      if (disk?.createType === "new") {
-        let diskData = await adddisk(
-          {
-            ...disk,
-            namespace: data?.namespace,
-            name: `${data?.name}-disk${i + 1}`,
-          },
-          dispatch
-        );
+const onAddVMAction =
+  (data, disks, images, setLoading, next) => async (dispatch) => {
+    setLoading(true);
 
-        let _obj = {
-          cache: disk?.cache,
-          diskType: disk?.diskType,
-          busType: disk?.busType,
-          diskName: `disk${i + 1}`,
-          volumeName: diskData?.name,
-        };
+    console.log("images==>", images);
+    let _disks = await Promise.all(
+      disks.map(async (disk, i) => {
+        if (disk?.createType === "new" || disk?.createType === "image") {
+          let diskData = await adddisk(
+            {
+              ...disk,
+              namespace: data?.namespace,
+              name: `${data?.name}-disk${i + 1}`,
+            },
+            images,
+            dispatch
+          );
 
-        if (disk?.cache) {
-          _obj.cache = disk?.cache;
+          let _obj = {
+            cache: disk?.cache,
+            diskType: disk?.diskType,
+            busType: disk?.busType,
+            diskName: `disk${i + 1}`,
+            volumeName: diskData?.name,
+          };
+
+          if (disk?.cache) {
+            _obj.cache = disk?.cache;
+          }
+
+          return _obj;
+        } else {
+          let _obj = {
+            diskType: disk?.diskType,
+            busType: disk?.busType,
+            diskName: `disk${i + 1}`,
+            volumeName: disk?.disk,
+          };
+          if (disk?.cache) {
+            _obj.cache = disk?.cache;
+          }
+
+          return _obj;
         }
+      })
+    );
 
-        return _obj;
-      } else {
-        let _obj = {
-          diskType: disk?.diskType,
-          busType: disk?.busType,
-          diskName: `disk${i + 1}`,
-          volumeName: disk?.disk,
-        };
-        if (disk?.cache) {
-          _obj.cache = disk?.cache;
-        }
-
-        return _obj;
+    let _deviceDisk = _disks.map((disk, i) => {
+      let busObj = {};
+      if (disk?.busType) {
+        busObj.bus = disk?.busType;
       }
-    })
-  );
 
-  let _deviceDisk = _disks.map((disk, i) => {
-    let busObj = {};
-    if (disk?.busType) {
-      busObj.bus = disk?.busType;
-    }
+      let obj = {
+        bootOrder: i + 1,
+        name: disk?.diskName,
+        [disk?.diskType]: busObj,
+      };
 
-    let obj = {
-      bootOrder: i + 1,
-      name: disk?.diskName,
-      [disk?.diskType]: busObj,
-    };
+      if (disk?.cache) {
+        obj.cache = disk?.cache;
+      }
+      return obj;
+    });
 
-    if (disk?.cache) {
-      obj.cache = disk?.cache;
-    }
-    return obj;
-  });
+    let _volumes = _disks.map((disk, i) => {
+      return {
+        name: disk?.diskName,
+        dataVolume: {
+          name: disk?.volumeName,
+        },
+      };
+    });
 
-  let _volumes = _disks.map((disk, i) => {
-    return {
-      name: disk?.diskName,
-      dataVolume: {
-        name: disk?.volumeName,
+    //add one disk and volume obj for username and password
+    _deviceDisk.push({
+      bootOrder: _deviceDisk.length + 1,
+      name: `disk${_deviceDisk.length + 1}`,
+      disk: {
+        bus: "virtio",
       },
-    };
-  });
+    });
+    _volumes.push({
+      name: `disk${_volumes.length + 1}`,
+      cloudInitNoCloud: {
+        userData: `#cloud-config\nmanage_etc_hosts: true\nhostname: ${data.name}\nuser: ${data.userName}\npassword: ${data.password}\n`,
+        networkData:
+          "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
+      },
+    });
 
-  //add one disk and volume obj for username and password
-  _deviceDisk.push({
-    bootOrder: _deviceDisk.length + 1,
-    name: `disk${_deviceDisk.length + 1}`,
-    disk: {
-      bus: "virtio",
-    },
-  });
-  _volumes.push({
-    name: `disk${_volumes.length + 1}`,
-    cloudInitNoCloud: {
-      userData: `#cloud-config\nmanage_etc_hosts: true\nhostname: ${data.name}\nuser: ${data.userName}\npassword: ${data.password}\n`,
-      networkData:
-        "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
-    },
-  });
-
-  let url = endPoints.ADD_VM({
-    namespace: data.namespace,
-    name: data.name,
-  });
-  let payload = {
-    apiVersion: "kubevirt.io/v1alpha3",
-    kind: "VirtualMachine",
-    metadata: {
-      name: data.name,
+    let url = endPoints.ADD_VM({
       namespace: data.namespace,
-      labels: {
-        "kubevirt.io/domain": data.name,
-        "kubevirt-manager.io/managed": "true",
-        "cloud-init.kubevirt-manager.io/username": data.userName,
+      name: data.name,
+    });
+    let payload = {
+      apiVersion: "kubevirt.io/v1alpha3",
+      kind: "VirtualMachine",
+      metadata: {
+        name: data.name,
+        namespace: data.namespace,
+        labels: {
+          "kubevirt.io/domain": data.name,
+          "kubevirt-manager.io/managed": "true",
+          "cloud-init.kubevirt-manager.io/username": data.userName,
+        },
       },
-    },
-    spec: {
-      running: false,
-      template: {
-        metadata: {},
-        spec: {
-          domain: {
-            devices: {
-              disks: _deviceDisk,
-              interfaces: [
-                {
-                  name: "net1",
-                  [data.bindingMode]: {},
+      spec: {
+        running: false,
+        template: {
+          metadata: {},
+          spec: {
+            domain: {
+              devices: {
+                disks: _deviceDisk,
+                interfaces: [
+                  {
+                    name: "net1",
+                    [data.bindingMode]: {},
+                  },
+                ],
+                networkInterfaceMultiqueue: true,
+              },
+              cpu: {
+                cores: parseInt(data.cores),
+                threads: parseInt(data.threads),
+                sockets: parseInt(data.sockets),
+              },
+              resources: {
+                requests: {
+                  memory: `${data.memory}${data.memoryType}`,
                 },
-              ],
-              networkInterfaceMultiqueue: true,
-            },
-            cpu: {
-              cores: parseInt(data.cores),
-              threads: parseInt(data.threads),
-              sockets: parseInt(data.sockets),
-            },
-            resources: {
-              requests: {
-                memory: `${data.memory}${data.memoryType}`,
               },
             },
-          },
-          networks: [
-            {
-              name: "net1",
-              pod: {},
+            networks: [
+              {
+                name: "net1",
+                pod: {},
+              },
+            ],
+            volumes: _volumes,
+            nodeSelector: {
+              "kubernetes.io/hostname": data.node,
             },
-          ],
-          volumes: _volumes,
-          nodeSelector: {
-            "kubernetes.io/hostname": data.node,
           },
         },
       },
-    },
-  };
-  const res = await api("post", url, payload);
+    };
+    const res = await api("post", url, payload);
 
-  if (res?.status === "Failure") {
-    if (res?.details?.causes) {
-      res?.details?.causes?.forEach((element) => {
+    if (res?.status === "Failure") {
+      if (res?.message) {
         dispatch(
           showToastAction({
             type: "error",
-            title: element?.message,
+            title: res?.message,
           })
         );
-      });
+      }
+    } else if (res?.kind) {
+      dispatch(getVMsAction());
+      next();
     }
-  } else if (res?.kind) {
-    dispatch(getVMsAction());
-    next();
-  }
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
 const onEditVMAction = (data, setLoading, next) => async (dispatch) => {
   setLoading(true);
@@ -324,11 +326,19 @@ const onDeleteVMAction = (data) => async (dispatch) => {
   }
 };
 
-const adddisk = async (data, dispatch) => {
+const adddisk = async (data, images, dispatch) => {
   let url = endPoints.ADD_STORAGE_DISK({
     namespace: data.namespace,
     name: data.name,
   });
+
+  if (data.createType === "image") {
+    let image = images.find((item) => item.name === data.image);
+    if (image) {
+      data.type = image.type;
+      data.url = image.url;
+    }
+  }
 
   let source = {
     [data?.type]: {},

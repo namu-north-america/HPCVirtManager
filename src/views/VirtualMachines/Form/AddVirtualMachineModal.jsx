@@ -32,7 +32,9 @@ import {
 export default function AddVirtualMachineModal({ visible, setVisible }) {
   const stepperRef = useRef(null);
   const dispatch = useDispatch();
-  const { priorityClassesDropdown } = useSelector((state) => state.project);
+  const { priorityClassesDropdown, images } = useSelector(
+    (state) => state.project
+  );
   useEffect(() => {
     dispatch(getNamespacesAction());
     dispatch(getNodesAction());
@@ -79,7 +81,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
     if (showFormErrors(data, setData)) {
       if (validateDisk()) {
         dispatch(
-          onAddVMAction(data, disks, setLoading, () => {
+          onAddVMAction(data, disks, images, setLoading, () => {
             setVisible(false);
             setData({
               node: "",
@@ -106,6 +108,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
                 storageClass: "",
                 accessMode: "",
 
+                image: "",
                 disk: "",
                 type: "blank",
                 url: "",
@@ -163,11 +166,17 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
     return disks.every((disk, i) => {
       let ignore = ["disk"];
       if (disk?.createType === "existing") {
-        ignore = ["name", "size", "storageClass", "accessMode", "osImageUrl"];
+        ignore = ["name", "size", "storageClass", "accessMode", "url", "image"];
       }
       if (disk?.type === "blank") {
         ignore.push("url");
       }
+      console.log(disk?.type);
+
+      if (disk?.createType === "new") {
+        ignore.push("image");
+      }
+      console.log(ignore);
       const setError = ({ formErrors }) => {
         setDiskes((prev) => {
           let arr = [...prev];
@@ -189,6 +198,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
       storageClass: "",
       accessMode: "",
 
+      image: "",
       disk: "",
       type: "blank",
       url: "",
@@ -208,6 +218,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
         storageClass: "",
         accessMode: "",
 
+        image: "",
         disk: "",
         type: "blank",
         url: "",
@@ -254,6 +265,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
               {disks.map((item, i) => (
                 <CustomCard key={i}>
                   <Storage
+                    data={data}
                     disk={item}
                     setDisk={setDiskes}
                     index={i}

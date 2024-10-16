@@ -24,6 +24,7 @@ import {
   filterNamespacesByCrudVMS,
   checkNamespaceValue,
 } from "../../utils/commonFunctions";
+import { getImagesAction } from "../../store/actions/imageActions";
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
@@ -56,10 +57,6 @@ export default function VMList() {
   const dispatch = useDispatch();
   const { profile, userNamespace } = useSelector((state) => state.user);
   let { vms, namespacesDropdown } = useSelector((state) => state.project);
-  console.log("profile",profile);
-  
-
- 
 
   const hasAccess = () => {
     if (profile?.role === "admin") return true;
@@ -167,11 +164,14 @@ export default function VMList() {
 
   useEffect(() => {
     dispatch(getVMsAction());
+    dispatch(getImagesAction());
   }, [dispatch]);
 
   const vmname = (item) => {
-
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       return (
         <Link to={`/virtual-machines/details/${item.namespace}/${item.name}`}>
           {item.name}
@@ -180,7 +180,6 @@ export default function VMList() {
     } else {
       return <>{item.name}</>;
     }
-    
   };
   const [visible, setVisible] = useState(false);
   const [editInfo, setEditInfo] = useState(null);
@@ -198,7 +197,10 @@ export default function VMList() {
   };
 
   const onStart = (item) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       dispatch(
         onChangeVmStatusAction(item, {
           running: true,
@@ -209,16 +211,20 @@ export default function VMList() {
     }
   };
   const onRestart = (item) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       dispatch(onRestartVMAction(item));
     } else {
       showError();
     }
   };
   const onStop = (item) => {
-   
-
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       dispatch(
         onChangeVmStatusAction(item, {
           running: false,
@@ -229,7 +235,10 @@ export default function VMList() {
     }
   };
   const onPauseUnpause = (item, type) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       dispatch(
         onPauseVMAction({ ...item, type }, () => {
           dispatch(getVMsAction());
@@ -240,7 +249,10 @@ export default function VMList() {
     }
   };
   const onMigrate = (item) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       setOpenMigrate(item);
     } else {
       showError();
@@ -254,14 +266,20 @@ export default function VMList() {
     );
   };
   const onEdit = (item) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       setEditInfo(item);
     } else {
       showError();
     }
   };
   const onDelete = (item) => {
-    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||profile?.role === "admin") {
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
+      profile?.role === "admin"
+    ) {
       confirmDialog({
         target: ref.currentTarget,
         header: "Delete Confirmation",
@@ -317,7 +335,6 @@ export default function VMList() {
         onAdd={addVm}
         addText="Add Virtual Machine"
       >
-       
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
           <Column field="name" header="Name" body={vmname}></Column>
           <Column field="status" header="Status" body={statusTemplate}></Column>

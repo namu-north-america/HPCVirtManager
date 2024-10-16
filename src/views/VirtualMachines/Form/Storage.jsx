@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   CustomDropDown,
   CustomForm,
@@ -9,8 +9,8 @@ import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 import { confirmPopup } from "primereact/confirmpopup";
 
-export default function Storage({ disk, setDisk, index, onRemoveDisk }) {
-  const { storageClassesDropdown, accessModeDropdown, disksDropdown } =
+export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
+  const { storageClassesDropdown, accessModeDropdown, disks, images } =
     useSelector((state) => state.project);
 
   const handleChangeDisk = ({ name, value }) => {
@@ -68,6 +68,20 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk }) {
     },
   ];
 
+  const filteredDiskes = useMemo(
+    () =>
+      disks
+        .filter((item) => item.namespace === data?.namespace)
+        .map((item) => item?.name),
+    [disks, data]
+  );
+
+  const imagesDropdown = useMemo(
+    () => images.map((item) => item?.name),
+    [images]
+  );
+  console.log("images==>", images);
+
   return (
     <>
       <CustomForm>
@@ -79,7 +93,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk }) {
           options={[
             { name: "Create a new storage disk", value: "new" },
             { name: "Attach an existing storage disk", value: "existing" },
-            // { name: "Attach an image", value: "image" },
+            { name: "Attach an image", value: "image" },
           ]}
           required
           col={12}
@@ -105,7 +119,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk }) {
           ]}
         />
       </CustomForm>
-      {disk.createType === "new" ? (
+      {disk.createType === "new" && (
         <CustomForm>
           <CustomMemoryInput
             data={disk}
@@ -154,13 +168,53 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk }) {
             />
           )}
         </CustomForm>
-      ) : (
+      )}
+
+      {disk.createType === "existing" && (
         <CustomForm>
           <CustomDropDown
             data={disk}
             onChange={handleChangeDisk}
             name="disk"
-            options={disksDropdown}
+            options={filteredDiskes}
+            required
+            col={12}
+          />
+        </CustomForm>
+      )}
+      {disk.createType === "image" && (
+        <CustomForm>
+          <CustomMemoryInput
+            data={disk}
+            onChange={handleChangeDisk}
+            name="size"
+            typeName="memoryType"
+            onTypeChange={handleChangeDisk}
+            required
+            keyfilter="pint"
+            col={12}
+          />
+          <CustomDropDown
+            data={disk}
+            onChange={handleChangeDisk}
+            name="storageClass"
+            options={storageClassesDropdown}
+            required
+            col={12}
+          />
+          <CustomDropDown
+            data={disk}
+            onChange={handleChangeDisk}
+            name="accessMode"
+            options={accessModeDropdown}
+            required
+            col={12}
+          />
+          <CustomDropDown
+            data={disk}
+            onChange={handleChangeDisk}
+            name="image"
+            options={imagesDropdown}
             required
             col={12}
           />

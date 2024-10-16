@@ -64,8 +64,6 @@ const getNodesAction = () => async (dispatch) => {
   const res = await api("get", endPoints.NODES);
   let items = [];
   if (res?.items) {
-    console.log("node list logs", res);
-
     items = res.items;
   }
 
@@ -242,8 +240,6 @@ const getPriorityClassAction = () => async (dispatch) => {
   if (res?.items) {
     items = res.items;
   }
-  console.log("getPriorityClassAction", res);
-
   dispatch(setPriorityClasses(items));
 };
 

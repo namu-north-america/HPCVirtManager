@@ -15,8 +15,11 @@ import {
 
 const formValidation = (name, value, state, ignore = []) => {
   const formErrors = { ...state?.formErrors };
+
   if (ignore.includes(name)) {
-    if (formErrors[name]) formErrors[name] = "";
+    if (formErrors[name]) {
+      formErrors[name] = "";
+    }
     return formErrors;
   }
   switch (name) {
@@ -50,6 +53,7 @@ const formValidation = (name, value, state, ignore = []) => {
     case "storageClass":
     case "accessMode":
     case "disk":
+    case "image":
       if (equal(length(value))) {
         formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
       } else if (!regularString(value)) {
