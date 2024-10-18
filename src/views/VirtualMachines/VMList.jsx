@@ -56,6 +56,9 @@ const breadcrumItems = [
 export default function VMList() {
   const dispatch = useDispatch();
   const { profile, userNamespace } = useSelector((state) => state.user);
+
+  console.log("userNamespace",userNamespace);
+  
   let { vms, namespacesDropdown } = useSelector((state) => state.project);
 
   const hasAccess = () => {

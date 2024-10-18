@@ -105,6 +105,7 @@ export default function AddUserModal({ visible, setVisible }) {
   const onAddUser = () => {
     setLoading(true);
     let parsed = {};
+   
     if (role.role === "user") {
       const newDataArray = nameSpace.map((item) => {
         // Create a new object based on the original item
@@ -116,6 +117,7 @@ export default function AddUserModal({ visible, setVisible }) {
           newItem.crudVMS = true;
           newItem.viewDataVolume = true;
           newItem.crudDataVolume = true;
+          newItem.crudImage = true;
         }
 
         return newItem; // Return the modified item
@@ -139,12 +141,15 @@ export default function AddUserModal({ visible, setVisible }) {
       };
     }
 
+    
+    
     dispatch(onAddUserAction(parsed));
-    setLoading(false);
+    
     setTimeout(() => {
-      onHide();    // Close modal
-      resetdata(); // Reset data
-    }, 2000); // 5 seconds delay
+       onHide();    // Close modal
+      resetdata();
+      setLoading(false); // Reset data
+    }, 4000); // 4 seconds delay
   };
 
   const resetdata = () => {
@@ -164,6 +169,7 @@ export default function AddUserModal({ visible, setVisible }) {
         crudVMS: "",
         viewDataVolume: "",
         crudDataVolume: "",
+        crudImage:""
       },
     ]);
 
@@ -209,6 +215,7 @@ export default function AddUserModal({ visible, setVisible }) {
       crudVMS: "",
       viewDataVolume: "",
       crudDataVolume: "",
+      crudImage:""
     },
   ]);
 
@@ -223,6 +230,7 @@ export default function AddUserModal({ visible, setVisible }) {
         crudVMS: "",
         viewDataVolume: "",
         crudDataVolume: "",
+        crudImage:""
       },
     ]);
   };

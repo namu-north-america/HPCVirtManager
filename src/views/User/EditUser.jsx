@@ -486,6 +486,21 @@ export default function EditUser() {
                       AttachDetach Data Volumes to/from VMs.
                     </label>
                   </li>
+                  <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="assignRoles"
+                        disabled
+                        checked={checkPermission(perm,"crudImage")}
+                      />
+                      Create/Edit/Delete Images.
+                    </label>
+                  </li>
                  
                 </ul>
               </div>

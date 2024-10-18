@@ -101,6 +101,22 @@ const filterNamespacesBycrudDataVolume =(namespaces, data)=> {
   return result;
 }
 
+const filterNamespacesByCrudImages =(namespaces, data)=> {
+  const result = [];
+
+  // Loop through the data to find matching namespaces
+  for (const entry of data) {
+    if (
+      namespaces.includes(entry.namespace) &&  // Check if the namespace is in the list
+      entry.crudImage === "yes"                  // Check if crudVMS is "yes"
+    ) {
+      result.push(entry);
+    }
+  }
+
+  return result;
+}
+
 const checkNamespaceValue = (data, namespaceName, key)=> {
   // Find the object that matches the given namespace
   
@@ -119,6 +135,7 @@ const checkNamespaceValue = (data, namespaceName, key)=> {
 export {
   filterNamespacesByCrudVMS,
   filterNamespacesBycrudDataVolume,
+  filterNamespacesByCrudImages,
   hasPermission,
   checkNamespaceValue,
   capitalizeCamelCase,

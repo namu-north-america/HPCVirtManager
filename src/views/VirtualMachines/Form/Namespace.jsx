@@ -95,6 +95,13 @@ export default function Namespace({
           label="Create/Resize/Delete Data Volumes"
           onChange={handleChangeDisk}
         />
+        <CustomCheckbox
+          data={nameSpace}
+          name="crudImage"
+          col={12}
+          label="Create/Edit/Delete Image"
+          onChange={handleChangeDisk}
+        />
       </div>)}
     </>
   );
