@@ -23,8 +23,7 @@ import {
   CustomDropDown,
   CustomForm,
   CustomInput,
-  CustomPasswordInput,
-  CustomPassword
+  CustomPassword,
 } from "../../../shared/AllInputs";
 
 export default function AddUserModal({ visible, setVisible }) {
@@ -74,8 +73,6 @@ export default function AddUserModal({ visible, setVisible }) {
   const handleChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, data);
     setData((prev) => ({ ...prev, [name]: value, formErrors }));
-    
-    
   };
   const handleRoleChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, role);
@@ -124,13 +121,13 @@ export default function AddUserModal({ visible, setVisible }) {
         return newItem; // Return the modified item
       });
 
-       parsed = transformData(newDataArray);
+      parsed = transformData(newDataArray);
       parsed.username = data.userName;
       parsed.email = data.email;
       parsed.department = data.department;
       parsed.password = data.password;
       parsed.role = role.role;
-      parsed.status = 'in-active'
+      parsed.status = "in-active";
     } else {
       parsed = {
         username: data.userName,
@@ -138,18 +135,44 @@ export default function AddUserModal({ visible, setVisible }) {
         department: data.department,
         password: data.password,
         role: "admin",
-        status : 'in-active'
+        status: "in-active",
       };
     }
 
-    console.log('parsed data',parsed);
-    
     dispatch(onAddUserAction(parsed));
     setLoading(false);
-    //close modal
-    onHide();
+    setTimeout(() => {
+      onHide();    // Close modal
+      resetdata(); // Reset data
+    }, 2000); // 5 seconds delay
+  };
 
+  const resetdata = () => {
+    setRole({
+      role: "",
+      clusterPermission: "cluster-01",
+      namespacePermission: "All Namespaces",
+    });
 
+    setNameSpace(() => [
+      {
+        userManagement: true,
+        userCustom: false,
+        namespace: "",
+        manageCluster: "",
+        viewVMs: "",
+        crudVMS: "",
+        viewDataVolume: "",
+        crudDataVolume: "",
+      },
+    ]);
+
+    setData({
+      email: "",
+      userName: "",
+      password: "",
+      department: "",
+    });
   };
 
   const onHide = () => {
@@ -250,13 +273,13 @@ export default function AddUserModal({ visible, setVisible }) {
                   col={12}
                 />
 
-       <CustomPassword
-          data={data}
-          onChange={handleChange}
-          name="password"
-          required
-          col="12"
-        />
+                <CustomPassword
+                  data={data}
+                  onChange={handleChange}
+                  name="password"
+                  required
+                  col="12"
+                />
                 <CustomInput
                   data={data}
                   onChange={handleChange}

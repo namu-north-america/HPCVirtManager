@@ -42,6 +42,8 @@ export const userSlice = createSlice({
         }
       
         state.userNamespace= result;
+        console.log("namespaces",state.userNamespace);
+        
       }
     },
     setUserList: (state, action) => {

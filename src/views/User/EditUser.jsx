@@ -49,6 +49,7 @@ export default function EditUser() {
   const [onOpenMigrate, setOpenMigrate] = useState(false);
   const [editInfo, setEditInfo] = useState(null);
   const [user, setUser] = useState(null);
+  const [namespacePermission, setNamespacePermission] = useState([]);
 
   const moreActions = [
     {
@@ -121,6 +122,34 @@ export default function EditUser() {
 
   useEffect(() => {
   
+
+  if (user && user.role === "user") {
+        
+        
+    const result = [];
+
+    // Loop through the object to find all namespaces
+    for (const key in user) {
+      if (key.startsWith('namespace')) {
+        const namespaceValue = user[key];
+  
+        // Collect all keys that start with this namespaceValue, remove the prefix
+        const relatedData = { namespace: namespaceValue };
+        for (const relatedKey in user) {
+          if (relatedKey.startsWith(namespaceValue)) {
+            const strippedKey = relatedKey.replace(`${namespaceValue}-`, ''); // Strip prefix
+            relatedData[strippedKey] = user[relatedKey];
+          }
+        }   
+        result.push(relatedData);
+      }
+    }
+    
+    
+    setNamespacePermission(result)
+    
+  }
+  
     setPermission({
       viewCluster: true,
       crudNode: checkKeyValue(user, "crudNode"),
@@ -140,6 +169,14 @@ export default function EditUser() {
     });
     // eslint-disable-next-line
   }, [user]);
+
+  const checkPermission =(permissionObj, key) =>{
+    
+    
+    // Ensure the key exists in the object and return true if the value is "yes"
+    console.log("permissionObj", permissionObj, permissionObj[key] === "yes");
+    return permissionObj[key] === "yes" ;
+  }
 
   const statusTemplate = (item) => {
     switch (item.status) {
@@ -231,9 +268,9 @@ export default function EditUser() {
           </Col>
           <Col size={8}>
             <CustomCard title={"Role ( " + data.role + " )"}>
-              <div className="flex gap-5">
-                <label>Permissions</label>
-                <ul style={{ listStyle: "none", padding: 0 }}>
+              <div className="">
+                <label className="title">General Permissions</label>
+                <ul  style={{ listStyle: "none", padding: 0 ,marginLeft:5}}>
                   <li>
                     <label
                       style={{
@@ -280,84 +317,7 @@ export default function EditUser() {
                   </li>
                   <hr />
 
-                  <li>
-                    <label
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        name="vmOperations"
-                        disabled
-                        checked
-                      />
-                      View VMs.
-                    </label>
-                  </li>
-                  <li>
-                    <label
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        name="vmOperations"
-                        disabled
-                        checked={permission.crudVMS}
-                      />
-                      Create/Edit/Migrate/Delete VMs.
-                    </label>
-                  </li>
-                  <hr />
-
-                  <li>
-                    <label
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        name="dataVolumes"
-                        disabled
-                        checked
-                      />
-                      View Data Volumes.
-                    </label>
-                  </li>
-                  <li>
-                    <label
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        name="dataVolumes"
-                        disabled
-                        checked={permission.crudDataVolume}
-                      />
-                      Create/Resize/Delete Data Volumes.
-                    </label>
-                  </li>
-                  <li>
-                    <label
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        name="assignRoles"
-                        disabled
-                        checked={permission.crudDataVolume}
-                      />
-                      AttachDetach Data Volumes to/from VMs.
-                    </label>
-                  </li>
-                  <hr />
+                  
 
                   <li>
                     <label
@@ -419,8 +379,120 @@ export default function EditUser() {
                       Mange Users profiles.
                     </label>
                   </li>
+                  {user && user.role === "admin" &&(
+                    <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="assignRoles"
+                        disabled
+                        checked={true}
+                      />
+                      Mange All Namespaces.
+                    </label>
+                  </li>
+                  )
+
+                  }
+                 
+                 
                 </ul>
               </div>
+
+              {
+                namespacePermission.map((perm, index) => (
+                  <div className="" key={index}>
+                <label className="title">{perm.namespace+ " namespace"}</label>
+                <ul style={{ listStyle: "none", padding: 0 ,marginLeft:5}}>
+                  <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="vmOperations"
+                        disabled
+                        checked
+                      />
+                      View VMs.
+                    </label>
+                  </li>
+                  <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="vmOperations"
+                        disabled
+                        checked={checkPermission(perm,"crudVMS")}
+                      />
+                      Create/Edit/Migrate/Delete VMs.
+                    </label>
+                  </li>
+                  <hr />
+
+                  <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="dataVolumes"
+                        disabled
+                        checked
+                      />
+                      View Data Volumes.
+                    </label>
+                  </li>
+                  <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="dataVolumes"
+                        disabled
+                        
+                        checked={checkPermission(perm,"crudDataVolume")}
+                      />
+                      Create/Resize/Delete Data Volumes.
+                    </label>
+                  </li>
+                  <li>
+                    <label
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name="assignRoles"
+                        disabled
+                        checked={checkPermission(perm,"crudDataVolume")}
+                      />
+                      AttachDetach Data Volumes to/from VMs.
+                    </label>
+                  </li>
+                 
+                </ul>
+              </div>
+                ))
+              }
+
+              
             </CustomCard>
           </Col>
         </Grid>
