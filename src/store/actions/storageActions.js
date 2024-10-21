@@ -96,72 +96,88 @@ const onDiskResizeAction =
   };
 
 const onAddDiskAction =
-  (data, images, setLoading, next) => async (dispatch) => {
-    setLoading(true);
-    let url = endPoints.ADD_STORAGE_DISK({
-      namespace: data.namespace,
-      name: data.name,
-    });
+  (data, images, setLoading, next) => async (dispatch, getState) => {
+    try {
+      let { project } = getState();
+      const diskName = data.name;
+      const diskNamespace = data.namespace;
 
-    if (data.type === "image") {
-      let image = images.find((item) => item.name === data.image);
-      if (image) {
-        data.type = image.type;
-        data.url = image.url;
+      let existingDisks = project.disks;
+
+      let diskNameCheck = existingDisks.find(
+        (item) => item.name === diskName && item.namespace === diskNamespace
+      );
+      if (diskNameCheck) {
+        throw new Error(
+          `Disk ${diskName} with name/namespace combination already exists!`
+        );
       }
-    }
 
-    let source = {
-      [data?.type]: {},
-    };
-
-    if (data?.url) {
-      source[data?.type]["url"] = data?.url;
-    }
-
-    let payload = {
-      apiVersion: "cdi.kubevirt.io/v1beta1",
-      kind: "DataVolume",
-      metadata: {
-        name: data.name,
+      setLoading(true);
+      let url = endPoints.ADD_STORAGE_DISK({
         namespace: data.namespace,
-        annotations: {
-          "cdi.kubevirt.io/storage.deleteAfterCompletion": "false",
+        name: data.name,
+      });
+
+      if (data.type === "image") {
+        let image = images.find((item) => item.name === data.image);
+        if (image) {
+          data.type = image.type;
+          data.url = image.url;
+        }
+      }
+
+      let source = {
+        [data?.type]: {},
+      };
+
+      if (data?.url) {
+        source[data?.type]["url"] = data?.url;
+      }
+
+      let payload = {
+        apiVersion: "cdi.kubevirt.io/v1beta1",
+        kind: "DataVolume",
+        metadata: {
+          name: data.name,
+          namespace: data.namespace,
+          annotations: {
+            "cdi.kubevirt.io/storage.deleteAfterCompletion": "false",
+          },
+          labels: {},
         },
-        labels: {},
-      },
-      spec: {
-        pvc: {
-          storageClassName: data.storageClass,
-          accessModes: [data.accessMode],
-          resources: {
-            requests: {
-              storage: `${data.size}${data?.memoryType}`,
+        spec: {
+          pvc: {
+            storageClassName: data.storageClass,
+            accessModes: [data.accessMode],
+            resources: {
+              requests: {
+                storage: `${data.size}${data?.memoryType}`,
+              },
             },
           },
+          source,
         },
-        source,
-      },
-    };
-    const res = await api("post", url, payload);
+      };
+      const res = await api("post", url, payload);
 
-    if (res?.status === "Failure") {
-      if (res?.details?.causes) {
-        res?.details?.causes?.forEach((element) => {
-          dispatch(
-            showToastAction({
-              type: "error",
-              title: element?.message,
-            })
-          );
-        });
+      if (res?.status === "Failure") {
+        throw new Error(res?.message);
+      } else if (res?.kind) {
+        dispatch(getDisksAction());
+        next(res?.metadata);
       }
-    } else if (res?.kind) {
-      dispatch(getDisksAction());
-      next(res?.metadata);
-    }
 
-    setLoading(false);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      dispatch(
+        showToastAction({
+          type: "error",
+          title: error.message,
+        })
+      );
+    }
   };
 
 const onDeleteDiskAction = (data) => async (dispatch) => {

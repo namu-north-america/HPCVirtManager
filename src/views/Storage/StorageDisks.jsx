@@ -139,7 +139,18 @@ export default function StorageDisks() {
     setDisk((prev) => ({ ...prev, visible: true }));
   };
   const onHideAddDialog = () => {
-    setDisk((prev) => ({ ...prev, visible: false }));
+    setDisk((prev) => ({
+      name: "",
+      size: "",
+      memoryType: "Gi",
+      namespace: "",
+      storageClass: "",
+      accessMode: "",
+      image: "",
+      visible: false,
+      type: "blank",
+      url: "",
+    }));
   };
 
   const [data, setData] = useState({
@@ -258,9 +269,16 @@ export default function StorageDisks() {
   );
 
   const imagesDropdown = useMemo(
-    () => images.map((item) => item?.name),
-    [images]
+    () =>
+      images
+        .filter((item) => item.namespace === disk.namespace)
+        .map((item) => item?.name),
+    [images, disk.namespace]
   );
+
+  useEffect(() => {
+    setDisk((prev) => ({ ...prev, image: "" }));
+  }, [disk.namespace]);
 
   const typesDropdown = [
     { name: "Image", value: "image" },

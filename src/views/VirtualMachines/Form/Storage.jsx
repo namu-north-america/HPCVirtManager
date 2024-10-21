@@ -77,7 +77,10 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   );
 
   const imagesDropdown = useMemo(
-    () => images.map((item) => item?.name),
+    () =>
+      images
+        .filter((item) => item.namespace === data?.namespace)
+        .map((item) => item?.name),
     [images]
   );
 

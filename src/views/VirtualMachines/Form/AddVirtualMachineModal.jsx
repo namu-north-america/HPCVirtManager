@@ -143,6 +143,23 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
       userName: "",
       password: "",
     });
+    setDiskes([
+      {
+        createType: "new",
+        diskType: "disk",
+        busType: "",
+        memoryType: "Gi",
+        size: "",
+        storageClass: "",
+        accessMode: "",
+
+        image: "",
+        disk: "",
+        type: "blank",
+        url: "",
+        cache: "",
+      },
+    ]);
   };
 
   const onBasicDetailsNext = () => {

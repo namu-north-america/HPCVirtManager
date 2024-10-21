@@ -21,48 +21,63 @@ const getImagesAction = () => async (dispatch) => {
 
   dispatch(setImages(items));
 };
-const onAddImageAction = (data, setLoading, next) => async (dispatch) => {
-  setLoading(true);
-  let url = endPoints.ADD_IMAGE({
-    namespace: data.namespace,
-  });
+const onAddImageAction =
+  (data, setLoading, next) => async (dispatch, getState) => {
+    try {
+      let { project } = getState();
 
-  let payload = {
-    apiVersion: "kubevirt-manager.io/v1",
-    kind: "Image",
-    metadata: {
-      name: data?.name,
-      namespace: data?.namespace,
-    },
-    spec: {
-      type: data?.type,
-      readableName: data?.readableName,
-      readableDescription: data?.readableDescription,
-      [data?.type]: {
-        url: data?.url,
-      },
-    },
-  };
+      let existingImages = project.images;
 
-  const res = await api("post", url, payload);
-
-  if (res?.status === "Failure") {
-    if (res?.details?.causes) {
-      res?.details?.causes?.forEach((element) => {
-        dispatch(
-          showToastAction({
-            type: "error",
-            title: element?.message,
-          })
+      let imageNameCheck = existingImages.find(
+        (item) => item.name === data?.name && item.namespace === data?.namespace
+      );
+      if (imageNameCheck) {
+        throw new Error(
+          `Image ${data?.name} with name/namespace combination already exists!`
         );
+      }
+
+      setLoading(true);
+      let url = endPoints.ADD_IMAGE({
+        namespace: data.namespace,
       });
+
+      let payload = {
+        apiVersion: "kubevirt-manager.io/v1",
+        kind: "Image",
+        metadata: {
+          name: data?.name,
+          namespace: data?.namespace,
+        },
+        spec: {
+          type: data?.type,
+          readableName: data?.readableName,
+          readableDescription: data?.readableDescription,
+          [data?.type]: {
+            url: data?.url,
+          },
+        },
+      };
+
+      const res = await api("post", url, payload);
+
+      if (res?.status === "Failure") {
+        throw new Error(res?.message);
+      } else if (res?.kind) {
+        dispatch(getImagesAction());
+        next();
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      dispatch(
+        showToastAction({
+          type: "error",
+          title: error.message,
+        })
+      );
     }
-  } else if (res?.kind) {
-    dispatch(getImagesAction());
-    next();
-  }
-  setLoading(false);
-};
+  };
 const onEditImageAction = (data, setLoading, next) => async (dispatch) => {
   setLoading(true);
   let payload = {

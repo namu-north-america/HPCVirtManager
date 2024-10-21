@@ -76,7 +76,15 @@ export default function Images() {
     setImage((prev) => ({ ...prev, visible: true }));
   };
   const onHideAddDialog = () => {
-    setImage((prev) => ({ ...prev, visible: false }));
+    setImage((prev) => ({
+      name: "",
+      namespace: "",
+      readableName: "",
+      readableDescription: "",
+      type: "http",
+      url: "",
+      visible: false,
+    }));
   };
 
   const onOpenViewDialog = (item) => {
