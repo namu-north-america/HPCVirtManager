@@ -33,11 +33,19 @@ import { showFormErrors } from "../utils/commonFunctions";
 import { longOverlayText, timeTemplate } from "../shared/TableHelpers";
 import { confirmDialog } from "primereact/confirmdialog";
 import { Link } from "react-router-dom";
+import {
+  filterNamespacesByCrudImages,
+  checkNamespaceValue
+} from "../utils/commonFunctions";
+import { showToastAction } from "../store/slices/commonSlice";
 
 const breadcrumItems = [{ label: "Images", url: "/#/images" }];
 export default function Images() {
   const dispatch = useDispatch();
+  const [namespace,setNamespace]= useState([])
   let { images, namespacesDropdown } = useSelector((state) => state.project);
+  const { profile, userNamespace } = useSelector((state) => state.user);
+
 
   const onLoad = useCallback(() => {
     dispatch(getImagesAction());
@@ -141,16 +149,32 @@ export default function Images() {
     });
   };
   const onOpenUpdateDialog = (item) => {
-    setData({
-      name: item.name,
-      namespace: item.namespace,
-      readableName: item.readableName,
-      readableDescription: item.readableDescription,
-      url: item.url,
-      visible: true,
-    });
-  };
+    
 
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudImage") ||
+      profile?.role === "admin"
+    ) {
+      setData({
+        name: item.name,
+        namespace: item.namespace,
+        readableName: item.readableName,
+        readableDescription: item.readableDescription,
+        url: item.url,
+        visible: true,
+      });
+    } else {
+      showError();
+    }
+  };
+  const showError = () => {
+    dispatch(
+      showToastAction({
+        type: "error",
+        title: "Sorry You have no permission!",
+      })
+    );
+  };
   const actionTemplate = (item) => {
     return (
       <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
@@ -176,17 +200,27 @@ export default function Images() {
   const ref = useRef();
 
   const onDelete = (item) => {
-    confirmDialog({
-      target: ref.currentTarget,
-      header: "Delete Confirmation",
-      message: `Do you want to delete ${item.namespace} - ${item.name} ?`,
-      icon: "pi pi-info-circle",
-      rejectClassName: "p-button-outlined p-button-secondary",
-      acceptClassName: " primary-button",
-      accept: () => {
-        dispatch(onDeleteImageAction(item));
-      },
-    });
+
+    if (
+      checkNamespaceValue(userNamespace, item.namespace, "crudImage") ||
+      profile?.role === "admin"
+    ) {
+      confirmDialog({
+        target: ref.currentTarget,
+        header: "Delete Confirmation",
+        message: `Do you want to delete ${item.namespace} - ${item.name} ?`,
+        icon: "pi pi-info-circle",
+        rejectClassName: "p-button-outlined p-button-secondary",
+        acceptClassName: " primary-button",
+        accept: () => {
+          dispatch(onDeleteImageAction(item));
+        },
+      });
+    } else {
+      showError();
+    }
+
+   
   };
 
   const [search, setSearch] = useState("");
@@ -213,6 +247,20 @@ export default function Images() {
       </Link>
     );
   };
+
+  const hasAccess = useCallback(() => {
+    if (profile?.role === "admin") {
+      setNamespace(namespacesDropdown);
+    } else {
+      const filteredNamespaces = filterNamespacesByCrudImages(namespacesDropdown, userNamespace);
+      const namespaceArray = filteredNamespaces.map(item => item.namespace);
+      setNamespace(namespaceArray);
+    }
+  }, [profile, namespacesDropdown, userNamespace]);
+  // create hasAccess dispatch
+  useEffect(() => {
+    hasAccess()
+  }, [hasAccess]);
 
   return (
     <>
@@ -313,7 +361,7 @@ export default function Images() {
             data={image}
             onChange={handleChange}
             name="namespace"
-            options={namespacesDropdown}
+            options={namespace}
             required
             col={12}
           />

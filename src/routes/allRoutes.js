@@ -54,7 +54,7 @@ export const PrivateRoutes = [
     path: "/images",
     name: "Images",
     element: <Images />,
-    role: "admin",
+    role: "shared",
   },
   {
     path: "/clusters",
