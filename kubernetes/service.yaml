@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hpc-virt-manager
+  namespace: hpc-virt-manager
+  labels:
+    app: hpc-virt-manager
+    hpc-virt-manager.io/version: 1.0.0
+spec:
+  type: ClusterIP
+  selector:
+    app: hpc-virt-manager
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

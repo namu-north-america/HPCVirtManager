@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hpc-virt-manager
+  namespace: hpc-virt-manager
+  labels:
+    app: hpc-virt-manager
+    hpc-virt-manager.io/version: 1.0.0
+  annotations:
+    nginx.org/location-snippets: |
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection $connection_upgrade;
+spec:
+  ingressClassName: my-ingress-class
+  tls:
+    - hosts:
+        - my-host.com
+  rules:
+    - host: my-host.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hpc-virt-manager
+                port:
+                  number: 8080

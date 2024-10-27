@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hpc-virt-manager
+  labels:
+    app: hpc-virt-manager
+    hpc-virt-manager.io/version: 1.0.0
