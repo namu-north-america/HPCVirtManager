@@ -10,7 +10,7 @@ import {
 import CustomCard, { CustomCardField } from "../../shared/CustomCard";
 import InfoCircle from "./Form/InfoCircle";
 import Grid, { Col } from "../../shared/Grid";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getVolumesAction,
   onChangeVmStatusAction,
@@ -27,6 +27,7 @@ import constants from "../../constants";
 import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
 import { findByLabelText } from "@testing-library/react";
+import { getVmCpuStats, getVmMemoryStats, getVmStorageStats } from "../../store/actions/reportingActions";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -86,10 +87,27 @@ export default function ViewVM() {
     },
   ];
 
+  const vmStats = useSelector((state) => state.reporting.vmStats[name] || {
+    cpu: { used: 0, total: 0 },
+    memory: { used: 0, total: 0 },
+    storage: { used: 0, total: 0 }
+  });
+
   useEffect(() => {
-    onInitialLoad();
-    // eslint-disable-next-line
-  }, [name, namespace]);
+    if (name) {
+      dispatch(getVmCpuStats(name));
+      dispatch(getVmMemoryStats(name));
+      dispatch(getVmStorageStats(name));
+      
+      const interval = setInterval(() => {
+        dispatch(getVmCpuStats(name));
+        dispatch(getVmMemoryStats(name));
+        dispatch(getVmStorageStats(name));
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }
+  }, [name, dispatch]);
 
   const onInitialLoad = () => {
     dispatch(
@@ -296,11 +314,36 @@ export default function ViewVM() {
       />
     </>
   );
+const calculatePercentage = (used, total) => {
+  if (!total || total === 0) return 0;
+  const percentage = (used / total) * 100;
+  return isFinite(percentage) ? percentage.toFixed(1) : 0;
+};
 
   const getSource = (item) => {
     let source = item?.spec?.source;
     return source?.http || source?.registry || source?.gcs || source?.s3;
   };
+
+  useEffect(() => {
+    console.log('VM CPU Stats:', {
+      used: vmStats?.cpu?.used,
+      total: vmStats?.cpu?.total,
+      available: vmStats?.cpu?.total - vmStats?.cpu?.used
+    });
+    
+    console.log('VM Memory Stats:', {
+      used: vmStats?.memory?.used,
+      total: vmStats?.memory?.total,
+      available: vmStats?.memory?.total - vmStats?.memory?.used
+    });
+    
+    console.log('VM Storage Stats:', {
+      used: vmStats?.storage?.used,
+      total: vmStats?.storage?.total,
+      available: vmStats?.storage?.total - vmStats?.storage?.used
+    });
+  }, [vmStats]);
 
   return (
     <>
@@ -311,89 +354,102 @@ export default function ViewVM() {
         <TabView style={{ background: "transprent" }}>
           <TabPanel header="Overview">
             <Grid>
-              <Col size={8}>
-                <Grid>
-                  <Col size={5}>
-                    <CustomCard title="Status">
-                      <CustomCardField title="Name" value={name} />
-                      <CustomCardField
-                        title="Status"
-                        value={data?.status}
-                        template={statusTemplate(data)}
-                      />
-                      <CustomCardField
-                        title="Conditions"
-                        value={data?.conditions?.type}
-                      />
-                      <CustomCardField
-                        title="Created"
-                        value={data.created && timeAgo(data.created)}
-                      />
-                      <CustomCardField
-                        title="Uptime"
-                        value={
-                          data?.conditions?.lastTransitionTime &&
-                          moment(data?.conditions?.lastTransitionTime).fromNow()
-                        }
-                      />
-                    </CustomCard>
-                    {/* <CustomCard title="Labels">
-                      {data?.labels &&
-                        Object.entries(data?.labels).map(([key, value]) => (
-                          <CustomChip value={`${key}: ${value}`} />
-                        ))}
-                    </CustomCard> */}
-                  </Col>
-                  <Col size={7}>
-                    <CustomCard title="Details">
-                      <CustomCardField title="Namespace" value={namespace} />
-                      <CustomCardField
-                        title="Node"
-                        template={<Link>{data?.node}</Link>}
-                      />
-                      <CustomCardField
-                        title="Cluster"
-                        value={data?.cluster}
-                        template={<Link>{data?.cluster}</Link>}
-                      />
-                      <CustomCardField
-                        title="IP Address"
-                        value={data?.ipAddress}
-                      />
-                    </CustomCard>
-                    <CustomCard title="Mounted Components">
-                      <CustomCardField
-                        title="Storage Disks"
-                        value={volumes?.length}
-                        // value={data?.storageDisks?.length}
-                      />
-                      <CustomCardField
-                        title="Networking (NIC)"
-                        value={data?.networks?.length}
-                      />
-                    </CustomCard>
-                    <CustomCard title="Allocated Resources">
-                      <CustomCardField title="Cores" value={data?.cores} />
-                      <CustomCardField title="Sockets" value={data?.sockets} />
-                      <CustomCardField title="Threads" value={data?.threads} />
-                      <CustomCardField title="Memory" value={data?.memory} />
-                      <Grid extraClassNames={"flex justify-content-center"}>
-                        <InfoCircle
-                          percentage="7.9%"
-                          label="Used from total CPU"
-                          color="bg-green-500"
-                        />
-                      </Grid>
-                      <Grid extraClassNames={"flex justify-content-center"}>
-                        <InfoCircle
-                          percentage="7.9%"
-                          label="Used from total CPU"
-                          color="bg-green-500"
-                        />
-                      </Grid>
-                    </CustomCard>
-                  </Col>
-                </Grid>
+              <Col size={5}>
+                <CustomCard title="Status">
+                  <CustomCardField title="Name" value={name} />
+                  <CustomCardField
+                    title="Status"
+                    value={data?.status}
+                    template={statusTemplate(data)}
+                  />
+                  <CustomCardField
+                    title="Conditions"
+                    value={data?.conditions?.type}
+                  />
+                  <CustomCardField
+                    title="Created"
+                    value={data.created && timeAgo(data.created)}
+                  />
+                  <CustomCardField
+                    title="Uptime"
+                    value={
+                      data?.conditions?.lastTransitionTime &&
+                      moment(data?.conditions?.lastTransitionTime).fromNow()
+                    }
+                  />
+                  
+                </CustomCard>
+                <CustomCard title="VM Metrics">
+                  <Grid>
+                    <Col size={4}>
+                      <CustomCard>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-500">
+                            {(vmStats?.cpu?.used || 0).toFixed(2)}%
+                          </div>
+                          <div className="text-sm text-gray-600">CPU Usage</div>
+                        </div>
+                      </CustomCard>
+                    </Col>
+                    
+                    <Col size={4}>
+                      <CustomCard>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-blue-500">
+                            {(vmStats?.memory?.used || 0).toFixed(2)} GB      
+                          </div>
+                          <div className="text-sm text-gray-600">Memory Usage</div>
+                        </div>
+                      </CustomCard>
+                    </Col>
+                    
+                    <Col size={4}>
+                      <CustomCard>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-purple-500">
+                            {(vmStats?.storage?.used || 0).toFixed(2)} GB
+                          </div>
+                          <div className="text-sm text-gray-600">Storage Usage</div>
+                        </div>
+                      </CustomCard>
+                    </Col>
+                  </Grid>
+                </CustomCard>
+              </Col>
+              <Col size={5}>
+                <CustomCard title="Details">
+                  <CustomCardField title="Namespace" value={namespace} />
+                  <CustomCardField
+                    title="Node"
+                    template={<Link>{data?.node}</Link>}
+                  />
+                  <CustomCardField
+                    title="Cluster"
+                    value={data?.cluster}
+                    template={<Link>{data?.cluster}</Link>}
+                  />
+                  <CustomCardField
+                    title="IP Address"
+                    value={data?.ipAddress}
+                  />
+                </CustomCard>
+                <CustomCard title="Mounted Components">
+                  <CustomCardField
+                    title="Storage Disks"
+                    value={volumes?.length}
+                    // value={data?.storageDisks?.length}
+                  />
+                  <CustomCardField
+                    title="Networking (NIC)"
+                    value={data?.networks?.length}
+                  />
+                </CustomCard>
+                <CustomCard title="Allocated Resources">
+                  <CustomCardField title="Cores" value={data?.cores} />
+                  <CustomCardField title="Sockets" value={data?.sockets} />
+                  <CustomCardField title="Threads" value={data?.threads} />
+                  <CustomCardField title="Memory" value={data?.memory} />
+                  </CustomCard>
               </Col>
             </Grid>
           </TabPanel>

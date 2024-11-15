@@ -7,6 +7,14 @@ const initialState = {
   nodeMemory: {total:0,used:0},
   nodeStorage: {total:0,used:0},
   nodeCpu: {total:0,used:0},
+  vmCpu: { total: 0, used: 0 },
+  vmMemory: { total: 0, used: 0 },
+  vmStorage: { total: 0, used: 0 },
+  vmStats: {
+    // Will store stats by VM name
+    // Example structure:
+    // "vm1": { cpu: {used, total}, memory: {used, total}, storage: {used, total} }
+  }
 };
 
 export const reportingSlice = createSlice({
@@ -38,9 +46,29 @@ export const reportingSlice = createSlice({
       if(type==="total") state.nodeCpu.total=size
       else state.nodeCpu.used=size
     },
-    
+    setVmCpuStats: (state, action) => {
+      const { vmName, used, total } = action.payload;
+      if (!state.vmStats[vmName]) {
+        state.vmStats[vmName] = { cpu: {}, memory: {}, storage: {} };
+      }
+      state.vmStats[vmName].cpu = { used, total };
+    },
+    setVmMemoryStats: (state, action) => {
+      const { vmName, used, total } = action.payload;
+      if (!state.vmStats[vmName]) {
+        state.vmStats[vmName] = { cpu: {}, memory: {}, storage: {} };
+      }
+      state.vmStats[vmName].memory = { used, total };
+    },
+    setVmStorageStats: (state, action) => {
+      const { vmName, used, total } = action.payload;
+      if (!state.vmStats[vmName]) {
+        state.vmStats[vmName] = { cpu: {}, memory: {}, storage: {} };
+      }
+      state.vmStats[vmName].storage = { used, total };
+    }
   },
 });
-export const { setClusterCpuInfo,setMemoryInfo,setStorageInfo ,setNodeMemory,setNodeStorage,setNodeCpu} =
+export const { setClusterCpuInfo,setMemoryInfo,setStorageInfo ,setNodeMemory,setNodeStorage,setNodeCpu, setVmCpuStats, setVmMemoryStats, setVmStorageStats} =
 reportingSlice.actions;
 export default reportingSlice.reducer;

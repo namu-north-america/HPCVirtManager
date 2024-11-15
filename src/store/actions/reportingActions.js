@@ -1,4 +1,4 @@
-import { setClusterCpuInfo,setMemoryInfo,setStorageInfo } from "../slices/reportingSlice";
+import { setClusterCpuInfo,setMemoryInfo,setStorageInfo, setVmCpuStats, setVmMemoryStats, setVmStorageStats } from "../slices/reportingSlice";
 import prometheusApi from "../../services/prometheusApi";
 import endPoints from "../../services/endPoints";
 
@@ -86,4 +86,71 @@ const getMemoryUsage = () => async (dispatch) => {
     console.log("getMemoryUsage error", res);
   }
 };
-export { getMemoryUsage, getCPUUsage, getCPUTotalCores, onGetStorageAction };
+
+const bytesToGB = (bytes) => {
+  return bytes / (1024 * 1024 * 1024); // Convert bytes to GB
+};
+
+const getVmCpuStats = (vmName) => async (dispatch) => {
+  const usedQuery = `sum(rate(kubevirt_vmi_vcpu_seconds_total{name="${vmName}"}[5m]))`;
+  const totalQuery = `sum(kubevirt_vmi_vcpu_cores{name="${vmName}"})`;
+  
+  try {
+    const [usedRes, totalRes] = await Promise.all([
+      prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(usedQuery)}`),
+      prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(totalQuery)}`)
+    ]);
+
+    if (usedRes?.status === "success" && totalRes?.status === "success") {
+      const used = (parseFloat(usedRes?.data?.result[0]?.value[1] || 0));
+      const total = (parseFloat(totalRes?.data?.result[0]?.value[1] || 0));
+      
+      dispatch(setVmCpuStats({ vmName, used, total }));
+    }
+  } catch (error) {
+    console.error("getVmCpuUsage error", error);
+  }
+};
+const getVmMemoryStats = (vmName) => async (dispatch) => {
+  const usedQuery = `sum(kubevirt_vmi_memory_available_bytes{name="${vmName}"})`;
+  const totalQuery = `sum(kubevirt_vmi_memory_size_bytes{name="${vmName}"})`;
+  
+  try {
+    const [usedRes, totalRes] = await Promise.all([
+      prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(usedQuery)}`),
+      prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(totalQuery)}`)
+    ]);
+
+    if (usedRes?.status === "success" && totalRes?.status === "success") {
+      const used = bytesToGB(parseFloat(usedRes?.data?.result[0]?.value[1] || 0));
+      const total = bytesToGB(parseFloat(totalRes?.data?.result[0]?.value[1] || 0));
+      
+      dispatch(setVmMemoryStats({ vmName, used, total }));
+    }
+  } catch (error) {
+    console.error("getVmMemoryUsage error", error);
+  }
+};
+
+const getVmStorageStats = (vmName) => async (dispatch) => {
+  const usedQuery = `sum(kubevirt_vmi_storage_read_traffic_bytes_total{name="${vmName}"})`;
+  const totalQuery = `sum(kubevirt_vmi_storage_capacity_bytes{name="${vmName}"})`;
+  
+  try {
+    const [usedRes, totalRes] = await Promise.all([
+      prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(usedQuery)}`),
+      prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(totalQuery)}`)
+    ]);
+
+    if (usedRes?.status === "success" && totalRes?.status === "success") {
+      const used = bytesToGB(parseFloat(usedRes?.data?.result[0]?.value[1] || 0));
+      const total = bytesToGB(parseFloat(totalRes?.data?.result[0]?.value[1] || 0));
+      
+      dispatch(setVmStorageStats({ vmName, used, total }));
+    }
+  } catch (error) {
+    console.error("getVmStorageUsage error", error);
+  }
+};
+  
+export { getMemoryUsage, getCPUUsage, getCPUTotalCores, onGetStorageAction, getVmCpuStats, getVmMemoryStats, getVmStorageStats };
