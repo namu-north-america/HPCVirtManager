@@ -1,6 +1,4 @@
-// import api from "../../services/api";
 import { authenticate, isAuthenticated } from "../../services/auth";
-// import endPoints from "../../services/endPoints";
 import { showToastAction } from "../slices/commonSlice";
 import {
   setUserProfile,

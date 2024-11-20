@@ -54,4 +54,9 @@ export const sidebarItems = [
     link: "/users",
     icon: "pi pi-users",
   },
+  {
+    title: "SSH Keys",
+    link: "/sshkeys",
+    icon: "pi pi-key",
+  },
 ];

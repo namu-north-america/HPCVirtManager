@@ -8,6 +8,10 @@ import { getVMsAction } from "./projectActions";
 const onAddVMAction =
   (data, disks, images, setLoading, next) => async (dispatch, getState) => {
     try {
+      const { sshKeys } = getState().sshKeys;
+      const selectedKey = sshKeys.find(key => key.name === data.sshKey);
+      const sshKeyValue = selectedKey ? selectedKey.sshPublicKey : '';
+
       let { project } = getState();
       let { vms } = project;
       let { name, namespace } = data;
@@ -103,6 +107,22 @@ const onAddVMAction =
         return obj;
       });
 
+      let _accessCredentials = [];
+      if (data.sshKey) {
+        _accessCredentials.push({
+          sshPublicKey: {
+            source: {
+              secret: {
+                secretName: data.sshKey
+              }
+            },
+            propagationMethod: {
+              noCloud: {}
+            }
+          }
+        });
+      }
+
       let _volumes = _disks.map((disk, i) => {
         return {
           name: disk?.diskName,
@@ -178,6 +198,7 @@ const onAddVMAction =
                   pod: {},
                 },
               ],
+              accessCredentials: _accessCredentials,
               volumes: _volumes,
               nodeSelector: {
                 "kubernetes.io/hostname": data.node,
@@ -186,6 +207,7 @@ const onAddVMAction =
           },
         },
       };
+      console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
       const res = await api("post", url, payload);
 
       if (res?.status === "Failure") {

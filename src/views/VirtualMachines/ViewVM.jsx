@@ -28,17 +28,22 @@ import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
 import { findByLabelText } from "@testing-library/react";
 import { getVmCpuStats, getVmMemoryStats, getVmStorageStats } from "../../store/actions/reportingActions";
+import { VncScreen } from 'react-vnc';
+import { Dialog } from 'primereact/dialog';
+import { showToastAction } from '../../store/slices/commonSlice';
 
 export default function ViewVM() {
   const dispatch = useDispatch();
   let { name, namespace } = useParams();
 
+  const [showVncDialog, setShowVncDialog] = useState(false);
+
   const onOpenConsole = () => {
-    window.open(
-      `${constants.baseUrl}/assets/noVNC/vnc.html?resize=scale&autoconnect=1&path=/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`,
-      "mywindow",
-      "menubar=1,resizable=1,width=500,height=350"
-    );
+    setShowVncDialog(true);
+  };
+
+  const onCloseConsole = () => {
+    setShowVncDialog(false);
   };
 
   const breadcrumItems = [
@@ -305,7 +310,7 @@ export default function ViewVM() {
         severity="secondary"
         icon="pi pi-code"
         onClick={onOpenConsole}
-        disabled={data.status !== "Running"}
+        // disabled={data.status !== "Running"}
       />
       <CustomSplitButton
         label="More Actions"
@@ -518,6 +523,38 @@ const calculatePercentage = (used, total) => {
           </TabPanel>
         </TabView>
       </Page>
+
+      <Dialog
+        header={`Console: ${name}`}
+        visible={showVncDialog}
+        style={{ width: '80vw' }}
+        modal
+        onHide={onCloseConsole}
+        maximizable
+      >
+        <div style={{ height: '70vh', width: '100%' }}>
+          <VncScreen
+            url={`ws://${constants.baseUrl.replace(/^https?:\/\//, '')}/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+            scaleViewport
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#000'
+            }}
+            onConnect={() => console.log('VNC Connected')}
+            onDisconnect={() => console.log('VNC Disconnected')}
+            onError={(error) => {
+              console.error('VNC Error:', error);
+              dispatch(showToastAction({
+                type: 'error',
+                title: 'Console Error',
+                message: 'Failed to connect to VM console'
+              }));
+            }}
+            wsProtocols={['binary']}
+          />
+        </div>
+      </Dialog>
     </>
   );
 }

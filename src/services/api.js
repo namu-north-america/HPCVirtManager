@@ -1,6 +1,6 @@
 import axios from "axios";
-// import constants from "../constants";
 import { isAuthenticated, logout } from "./auth";
+import endPoints from "./endPoints";
 
 const api = async (
   method,

@@ -107,7 +107,6 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
                 size: "",
                 storageClass: "",
                 accessMode: "",
-
                 image: "",
                 disk: "",
                 type: "blank",

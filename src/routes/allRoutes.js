@@ -11,6 +11,7 @@ import StorageDisks from "../views/Storage/StorageDisks";
 import StorageClasses from "../views/Storage/StorageClasses";
 import ViewVM from "../views/VirtualMachines/ViewVM";
 import Images from "../views/Images";
+import SSHKeys from '../views/SSHKeys';
 
 export const PrivateRoutes = [
   {
@@ -92,5 +93,10 @@ export const PrivateRoutes = [
     element: <UpdateUser />,
     role: "shared",
   },
-  
+  {
+    path: "/sshkeys",
+    name: "SSH Keys",
+    element: <SSHKeys />,
+    role: "shared",
+  },
 ];
