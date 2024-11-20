@@ -12,6 +12,9 @@ import StorageClasses from "../views/Storage/StorageClasses";
 import ViewVM from "../views/VirtualMachines/ViewVM";
 import Images from "../views/Images";
 import SSHKeys from '../views/SSHKeys';
+import AddVirtualMachine from "../views/VirtualMachines/AddVirtualMachine";
+import VMTemplate from "../views/VirtualMachines/VMTemplate";
+import AddVMTemplate from "../views/VirtualMachines/AddVMTemplate";
 
 export const PrivateRoutes = [
   {
@@ -27,16 +30,33 @@ export const PrivateRoutes = [
     role: "shared",
   },
   {
+    path: "/virtual-machines/add",
+    name: "Add Virtual Machine",
+    element: <AddVirtualMachine />,
+    role: "shared",
+  },
+  {
     path: "/virtual-machines/details/:namespace/:name",
     name: "Virtual Machines",
     element: <ViewVM />,
     role: "shared",
   },
-
   {
     path: "/virtual-machines/live-migrations",
     name: "Live Migrations",
     element: <LiveMigrations />,
+    role: "shared",
+  },
+  {
+    path: "/virtual-machines/templates",
+    name: "VM Templates",
+    element: <VMTemplate />,
+    role: "shared",
+  },
+  {
+    path: "/virtual-machines/templates/add",
+    name: "New VM Template",
+    element: <AddVMTemplate />,
     role: "shared",
   },
   {

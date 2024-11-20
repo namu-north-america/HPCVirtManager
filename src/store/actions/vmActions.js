@@ -219,9 +219,16 @@ const onAddVMAction =
             })
           );
         }
+        if (next) next(false);
       } else if (res?.kind) {
         dispatch(getVMsAction());
-        next();
+        dispatch(
+          showToastAction({
+            type: "success",
+            title: "Virtual Machine created successfully",
+          })
+        );
+        if (next) next(true);
       }
       setLoading(false);
     } catch (error) {

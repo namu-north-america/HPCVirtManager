@@ -20,7 +20,6 @@ import Storage from "./Storage";
 import Review from "./Review";
 import { onAddVMAction } from "../../../store/actions/vmActions";
 import CustomCard from "../../../shared/CustomCard";
-import CustomModal from "../../../shared/CustomModal";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import UserData from "./UserData";
@@ -29,12 +28,13 @@ import {
   getStorageClassesAction,
 } from "../../../store/actions/storageActions";
 
-export default function AddVirtualMachineModal({ visible, setVisible }) {
+export default function AddVirtualMachineForm({ onClose }) {
   const stepperRef = useRef(null);
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector(
     (state) => state.project
   );
+
   useEffect(() => {
     dispatch(getNamespacesAction());
     dispatch(getNodesAction());
@@ -70,6 +70,24 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
     }
   }, [priorityClassesDropdown]);
 
+  const [disks, setDiskes] = useState([
+    {
+      createType: "new",
+      diskType: "disk",
+      busType: "",
+      memoryType: "Gi",
+      size: "",
+      storageClass: "",
+      accessMode: "",
+
+      image: "",
+      disk: "",
+      type: "blank",
+      url: "",
+      cache: "",
+    },
+  ]);
+
   const handleChange = ({ name, value }) => {
     const formErrors = formValidation(name, value, data);
     setData((prev) => ({ ...prev, [name]: value, formErrors }));
@@ -82,7 +100,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
       if (validateDisk()) {
         dispatch(
           onAddVMAction(data, disks, images, setLoading, () => {
-            setVisible(false);
+            onClose();
             setData({
               node: "",
               name: "",
@@ -111,6 +129,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
                 disk: "",
                 type: "blank",
                 url: "",
+                cache: "",
               },
             ]);
           })
@@ -121,44 +140,6 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
     } else {
       stepperRef.current.setActiveStep(0);
     }
-  };
-
-  const onHide = () => {
-    setVisible(false);
-    setData({
-      node: "",
-      name: "",
-      namespace: "",
-      sockets: "",
-      cores: "",
-      threads: "",
-      memory: "",
-      memoryType: "Gi",
-      priorityClass: "",
-      storage1: "",
-      networkType: "podNetwork",
-      bindingMode: "bridge",
-      advanced: "",
-      userName: "",
-      password: "",
-    });
-    setDiskes([
-      {
-        createType: "new",
-        diskType: "disk",
-        busType: "",
-        memoryType: "Gi",
-        size: "",
-        storageClass: "",
-        accessMode: "",
-
-        image: "",
-        disk: "",
-        type: "blank",
-        url: "",
-        cache: "",
-      },
-    ]);
   };
 
   const onBasicDetailsNext = () => {
@@ -178,6 +159,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
       stepperRef.current.nextCallback();
     }
   };
+
   const validateDisk = () => {
     return disks.every((disk, i) => {
       let ignore = ["disk"];
@@ -203,24 +185,6 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
       return showFormErrors(disk, setError, ignore);
     });
   };
-
-  const [disks, setDiskes] = useState([
-    {
-      createType: "new",
-      diskType: "disk",
-      busType: "",
-      memoryType: "Gi",
-      size: "",
-      storageClass: "",
-      accessMode: "",
-
-      image: "",
-      disk: "",
-      type: "blank",
-      url: "",
-      cache: "",
-    },
-  ]);
 
   const onAddMoreDisk = () => {
     setDiskes((prev) => [
@@ -252,11 +216,7 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
   };
 
   return (
-    <CustomModal
-      title="Adding a Virtual Machine"
-      visible={visible}
-      onHide={onHide}
-    >
+    <div>
       <ConfirmPopup />
       <Stepper ref={stepperRef} orientation="vertical">
         <StepperPanel header="Basic Settings">
@@ -393,6 +353,6 @@ export default function AddVirtualMachineModal({ visible, setVisible }) {
           </Buttonlayout>
         </StepperPanel>
       </Stepper>
-    </CustomModal>
+    </div>
   );
 }
