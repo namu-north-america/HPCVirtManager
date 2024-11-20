@@ -1,17 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const BreadcrumbContext = createContext();
 
 export function BreadcrumbProvider({ children }) {
   const [breadcrumbItems, setBreadcrumbItems] = useState([]);
+  const location = useLocation();
 
-  useEffect(() => {
-    console.log('Breadcrumb items updated:', breadcrumbItems);
-  }, [breadcrumbItems]);
+  const updateBreadcrumb = (items) => {
+    setBreadcrumbItems(items);
+  };
 
   const value = {
     breadcrumbItems,
     setBreadcrumbItems,
+    updateBreadcrumb
   };
 
   return (
