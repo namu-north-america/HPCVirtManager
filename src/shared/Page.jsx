@@ -16,10 +16,15 @@ export default function Page({
 }) {
   return (
     <div className="page">
-      <div className="mb-4">
+      <div className="page-header">
         <div className="flex justify-content-between align-items-center flex-wrap">
           <div className="flex-column">
-            {title && <div className="page-title">{title}</div>}
+            <div className="flex align-items-center gap-2">
+              {title && <div className="page-title">{title}</div>}
+              {onAdd && (
+                <CustomButton label={addText} icon="pi pi-plus" onClick={onAdd} />
+              )}
+            </div>
             {description && <div className="page-description">{description}</div>}
           </div>
           <div className="flex align-items-center gap-2">
@@ -31,9 +36,6 @@ export default function Page({
               />
             )}
             {titleAction}
-            {onAdd && (
-              <CustomButton label={addText} icon="pi pi-plus" onClick={onAdd} />
-            )}
             {onRefresh && (
               <CustomButtonOutlined
                 label="Refresh"
@@ -46,7 +48,9 @@ export default function Page({
         </div>
         {headers}
       </div>
-      {children}
+      <div className="page-content">
+        {children}
+      </div>
     </div>
   );
 }

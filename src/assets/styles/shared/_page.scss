@@ -1,9 +1,18 @@
 .page {
+  .page-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+
+  .page-content {
+    padding: 0 1.25rem 1.5rem 1.5rem;
+    background-color: $bg-color-secondary;
+    border-radius: 8px;
+  }
+
   .page-title {
     font-size: 1.5rem;
     font-weight: 600;
     color: $text-color-primary;
-    margin-bottom: 0.5rem;
   }
 
   .page-description {

@@ -1,10 +1,10 @@
 .p-datatable {
   background-color: $white-color !important;
   border: 0.5px solid $border-color;
-  border-radius: $border-radius;
+  border-radius: 6px;
   
   .p-datatable-wrapper {
-    border-radius: $border-radius;
+    border-radius: 6px;
     overflow: hidden;
   }
   
@@ -13,7 +13,7 @@
     color: $text-color-primary;
     font-weight: 600;
     padding: 0.5rem 1rem;
-    border-width: 0 0 1px 0;
+    border-width: 0 0 2px 0;
     border-color: $border-color;
   }
 

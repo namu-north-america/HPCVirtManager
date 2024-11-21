@@ -406,8 +406,12 @@ export const CustomSearch = ({ value = "", onChange, placeholder = "Search" }) =
 
   return (
     <InputText
-      className="p-inputtext-sm surface-200"
-      style={{ width: '200px' }}
+      className="p-inputtext-sm"
+      style={{ 
+        width: '200px',
+        padding: '0.5rem 1rem',
+        backgroundColor: '#ffffff'
+      }}
       value={search}
       onChange={handleChange}
       placeholder={placeholder}

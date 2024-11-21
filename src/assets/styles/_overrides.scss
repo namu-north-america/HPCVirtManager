@@ -31,9 +31,33 @@
     cursor: pointer;
   }
 }
-.primary-button {
-  background-color: $primary-color;
-  border-color: $primary-color;
+.p-button {
+  border-radius: 6px;
+  font-weight: 500;
+  &.p-button-sm {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+.p-button.p-button-primary:not(.p-button-outlined):not(.p-button-text),
+.p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-info):not(.p-button-success):not(.p-button-warning):not(.p-button-help):not(.p-button-danger) {
+  background: linear-gradient(135deg, #09214B 0%, #0A2756 100%);
+  border: none;
+  color: #ffffff;
+
+  &:enabled:hover {
+    background: linear-gradient(135deg, #0A2756 0%, #0C2E66 100%);
+    border: none;
+  }
+
+  &:enabled:active {
+    background: linear-gradient(135deg, #0C2E66 0%, #0D3475 100%);
+    border: none;
+  }
+
+  &:enabled:focus {
+    box-shadow: 0 0 0 2px rgba(9, 33, 75, 0.2);
+  }
 }
 .primary-button-outlined {
   color: $primary-color;
@@ -93,11 +117,6 @@
 .p-tabview .p-tabview-nav li .p-tabview-nav-link {
   color: #4e5b7696 !important;
 }
-.p-button.p-button-sm {
-  font-size: 0.875rem;
-  padding: 0.5rem 0.8rem;
-}
-
 .p-button.p-button-icon-only {
   width: 30px;
   padding: 0;

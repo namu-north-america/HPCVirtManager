@@ -21,8 +21,11 @@ export default function EditVmModal({ visible, setVisible }) {
     memory: "",
   });
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
+    if (!visible) return;
+    
     const { size, memoryType } = splitMemoryString(visible?.memory);
     setData({
       name: visible?.name,
@@ -35,11 +38,12 @@ export default function EditVmModal({ visible, setVisible }) {
     });
   }, [visible]);
 
+  if (!visible) return null;
+
   const handleChange = ({ name, value }) => {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const dispatch = useDispatch();
   const onUpdate = () => {
     dispatch(
       onEditVMAction(data, setLoading, () => {
@@ -47,6 +51,7 @@ export default function EditVmModal({ visible, setVisible }) {
       })
     );
   };
+
   return (
     <CustomModal
       title="Edit Virtual Machine"
