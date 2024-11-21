@@ -11,59 +11,11 @@ const yamlSchemaConfig = {
   uri: "https://github.com/remcohaszing/monaco-yaml/blob/HEAD/examples/demo/src/schema.json",
 };
 
-const yamlDefaultValue = `
-apiVersion: kubevirt.io/v1
-kind: VirtualMachine
-metadata:
-  name: vm-fedora
-  namespace: default
-spec:
-  dataVolumeTemplates:
-  - metadata:
-     name: datavolume-iso
-    spec:
-      storage:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 10Gi
-        storageClassName: nfs-client
-      source:
-        http:
-          url: https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
-  running: false
-  template:
-    metadata:
-      labels:
-        kubevirt.io/vm: vm-fedora
-    spec:
-      domain:
-        cpu:
-          cores: 2
-        devices:
-          disks:
-          - disk:
-              bus: virtio
-            name: datavolume-iso
-        machine:
-          type: ""
-        resources:
-          requests:
-            memory: 4G
-      volumes:
-      - dataVolume:
-          name: datavolume-iso
-        name: datavolume-iso
-`.replace(/:$/m, ": ");
-
 window.MonacoEnvironment = {
   getWorker(moduleId, label) {
     switch (label) {
       case "editorWorkerService":
-        return new Worker(
-          new URL("monaco-editor/esm/vs/editor/editor.worker", import.meta.url)
-        );
+        return new Worker(new URL("monaco-editor/esm/vs/editor/editor.worker", import.meta.url));
       case "yaml":
         return new Worker(new URL("monaco-yaml/yaml.worker", import.meta.url));
       default:
@@ -72,7 +24,7 @@ window.MonacoEnvironment = {
   },
 };
 
-function YamlEditor({ data }) {
+function YamlEditor({ data, templateData = {} }) {
   const monacoRef = useRef(null);
   const [yamlData, setYamlData] = useState({});
   const [yaml, setYaml] = useState("");
@@ -90,7 +42,7 @@ function YamlEditor({ data }) {
   return (
     <div className="editor">
       <Editor
-        defaultValue={yamlDefaultValue}
+        defaultValue={templateData.template}
         onMount={handleOnMount}
         language="yaml"
         theme="vs-dark"

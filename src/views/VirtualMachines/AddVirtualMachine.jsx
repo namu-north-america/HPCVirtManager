@@ -19,7 +19,6 @@ export default function AddVirtualMachine() {
 
   const handleTemplateSelect = (template) => {
     // TODO: Pre-fill form with template data
-    console.log("template selection____", template);
     setIsTemplateModalOpen(false);
     setSelectedTemplate(template);
   };
@@ -67,10 +66,7 @@ export default function AddVirtualMachine() {
           </div>
         }
       >
-        <AddVirtualMachineForm
-          onClose={handleClose}
-          template={selectedTemplate}
-        />
+        <AddVirtualMachineForm onClose={handleClose} />
       </Page>
     </>
   );

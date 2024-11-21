@@ -1,45 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getNamespacesAction,
-  getNodesAction,
-  getPriorityClassAction,
-} from "../../../store/actions/projectActions";
+import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ConfirmPopup } from "primereact/confirmpopup";
-import CustomButton, {
-  Buttonlayout,
-  CustomButtonOutlined,
-} from "../../../shared/CustomButton";
+import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
 import Grid, { Col } from "../../../shared/Grid";
 import BasicDetails from "./BasicDetails";
 import Network from "./Network";
 import Storage from "./Storage";
 import Review from "./Review";
 import UserData from "./UserData";
+import { setSelectedTemplate } from "../../../store/slices/projectSlice";
 import { onAddVMAction } from "../../../store/actions/vmActions";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import formValidation from "../../../utils/validations";
-import {
-  getDisksAction,
-  getStorageClassesAction,
-} from "../../../store/actions/storageActions";
+import { getDisksAction, getStorageClassesAction } from "../../../store/actions/storageActions";
 import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
 import Advanced from "./Advanced";
 
-export default function AddVirtualMachineForm({ onClose, template = null }) {
+export default function AddVirtualMachineForm({ onClose }) {
   const dispatch = useDispatch();
-  const { priorityClassesDropdown, images } = useSelector(
-    (state) => state.project
-  );
-  console.log("template___", template);
+  const { priorityClassesDropdown, images, selectedTemplate } = useSelector((state) => state.project);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(template);
+  // const [selectedTemplate, setSelectedTemplate] = useState(template);
 
   useEffect(() => {
     dispatch(getNamespacesAction());
@@ -108,7 +96,7 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
 
   const onAddVM = () => {
     if (showFormErrors(data, setData)) {
-      if (validateDisk()) {
+      if (validateDisk() || selectedTemplate) {
         setLoading(true);
         dispatch(
           onAddVMAction(data, disks, images, setLoading, () => {
@@ -127,11 +115,11 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
   };
 
   useEffect(() => {
-    if (selectedTemplate || template) {
+    if (Object.keys(selectedTemplate).length) {
       setActiveIndex(4);
       setCompletedSteps((prev) => [...new Set([0, 1, 2, 3])]);
     }
-  }, [selectedTemplate, template]);
+  }, [selectedTemplate]);
 
   const validateStep = (index) => {
     switch (index) {
@@ -168,17 +156,14 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
       if (disk?.createType === "existing") {
         ignore = ["name", "size", "storageClass", "accessMode", "url", "image"];
       } else if (disk?.createType === "new") {
-        ignore =
-          disk?.type === "blank" ? ["disk", "url", "image"] : ["disk", "image"];
+        ignore = disk?.type === "blank" ? ["disk", "url", "image"] : ["disk", "image"];
       } else if (disk?.createType === "image") {
         ignore = ["disk", "url"];
       }
 
       // Always validate busType and cache
       const requiredFields = ["diskType", "createType", "busType", "cache"];
-      const missingRequired = requiredFields.filter(
-        (field) => !disk[field] && !ignore.includes(field)
-      );
+      const missingRequired = requiredFields.filter((field) => !disk[field] && !ignore.includes(field));
 
       if (missingRequired.length > 0) {
         const setError = ({ formErrors }) => {
@@ -189,9 +174,7 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
               ...missingRequired.reduce(
                 (acc, field) => ({
                   ...acc,
-                  [field]: `${
-                    field.charAt(0).toUpperCase() + field.slice(1)
-                  } is required!`,
+                  [field]: `${field.charAt(0).toUpperCase() + field.slice(1)} is required!`,
                 }),
                 {}
               ),
@@ -242,22 +225,17 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
     setDisks((prev) => {
       const newDisks = [...prev];
       if (direction === "up" && index > 0) {
-        [newDisks[index], newDisks[index - 1]] = [
-          newDisks[index - 1],
-          newDisks[index],
-        ];
+        [newDisks[index], newDisks[index - 1]] = [newDisks[index - 1], newDisks[index]];
       } else if (direction === "down" && index < newDisks.length - 1) {
-        [newDisks[index], newDisks[index + 1]] = [
-          newDisks[index + 1],
-          newDisks[index],
-        ];
+        [newDisks[index], newDisks[index + 1]] = [newDisks[index + 1], newDisks[index]];
       }
       return newDisks;
     });
   };
 
   const handleTemplateSelect = (template) => {
-    setSelectedTemplate(template);
+    // setSelectedTemplate(template);
+    dispatch(setSelectedTemplate(template));
     // TODO: Use the selected template to pre-fill form values
   };
 
@@ -277,12 +255,7 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
           <>
             <BasicDetails data={data} handleChange={handleChange} />
             <Buttonlayout>
-              <CustomButton
-                label="Next"
-                icon="pi pi-arrow-right"
-                iconPos="right"
-                onClick={() => onStepChange(1)}
-              />
+              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(1)} />
             </Buttonlayout>
           </>
         );
@@ -306,17 +279,8 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
               Add More Disk
             </button>
             <Buttonlayout>
-              <CustomButtonOutlined
-                label="Previous"
-                icon="pi pi-arrow-left"
-                onClick={() => onStepChange(0)}
-              />
-              <CustomButton
-                label="Next"
-                icon="pi pi-arrow-right"
-                iconPos="right"
-                onClick={() => onStepChange(2)}
-              />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(0)} />
+              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(2)} />
             </Buttonlayout>
           </>
         );
@@ -325,17 +289,8 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
           <>
             <Network data={data} handleChange={handleChange} />
             <Buttonlayout>
-              <CustomButtonOutlined
-                label="Previous"
-                icon="pi pi-arrow-left"
-                onClick={() => onStepChange(1)}
-              />
-              <CustomButton
-                label="Next"
-                icon="pi pi-arrow-right"
-                iconPos="right"
-                onClick={() => onStepChange(3)}
-              />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(1)} />
+              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(3)} />
             </Buttonlayout>
           </>
         );
@@ -344,40 +299,18 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
           <>
             <UserData data={data} handleChange={handleChange} />
             <Buttonlayout>
-              <CustomButtonOutlined
-                label="Previous"
-                icon="pi pi-arrow-left"
-                onClick={() => onStepChange(2)}
-              />
-              <CustomButton
-                label="Next"
-                icon="pi pi-arrow-right"
-                iconPos="right"
-                onClick={() => onStepChange(4)}
-              />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(2)} />
+              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(4)} />
             </Buttonlayout>
           </>
         );
       case 4:
         return (
           <>
-            <Advanced
-              data={data}
-              handleChange={handleChange}
-              template={template}
-            />
+            <Advanced data={data} handleChange={handleChange} template={selectedTemplate} />
             <Buttonlayout>
-              <CustomButtonOutlined
-                label="Previous"
-                icon="pi pi-arrow-left"
-                onClick={() => onStepChange(2)}
-              />
-              <CustomButton
-                label="Next"
-                icon="pi pi-arrow-right"
-                iconPos="right"
-                onClick={() => onStepChange(4)}
-              />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(2)} />
+              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(4)} />
             </Buttonlayout>
           </>
         );
@@ -386,17 +319,8 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
           <>
             <Review data={data} disks={disks} />
             <Buttonlayout>
-              <CustomButtonOutlined
-                label="Previous"
-                icon="pi pi-arrow-left"
-                onClick={() => onStepChange(3)}
-              />
-              <CustomButton
-                loading={loading}
-                label="Create"
-                icon="pi pi-check"
-                onClick={onAddVM}
-              />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
+              <CustomButton loading={loading} label="Create" icon="pi pi-check" onClick={onAddVM} />
             </Buttonlayout>
           </>
         );
@@ -420,9 +344,9 @@ export default function AddVirtualMachineForm({ onClose, template = null }) {
               {steps.map((step, index) => (
                 <li
                   key={index}
-                  className={`step-item ${
-                    activeIndex === index ? "active" : ""
-                  } ${completedSteps.includes(index) ? "completed" : ""}`}
+                  className={`step-item ${activeIndex === index ? "active" : ""} ${
+                    completedSteps.includes(index) ? "completed" : ""
+                  }`}
                   onClick={() => onStepChange(index)}
                   role="button"
                   tabIndex={0}

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = {
   vms: [],
   migrations: [],
@@ -15,6 +16,8 @@ const initialState = {
   accessModeDropdown: ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"],
   bindingModeDropdown: ["bridge", "masquerade"],
   priorityClassesDropdown: [],
+  templates: [],
+  selectedTemplate: {},
 };
 
 export const projectSlice = createSlice({
@@ -36,9 +39,7 @@ export const projectSlice = createSlice({
     },
     setNamespaces: (state, action) => {
       state.namespaces = action.payload;
-      state.namespacesDropdown = action.payload.map(
-        (item) => item?.metadata?.name
-      );
+      state.namespacesDropdown = action.payload.map((item) => item?.metadata?.name);
     },
     setStorageClasses: (state, action) => {
       state.storageClasses = action.payload;
@@ -53,9 +54,14 @@ export const projectSlice = createSlice({
       state.images = action.payload;
     },
     setPriorityClasses: (state, action) => {
-      state.priorityClassesDropdown = action.payload
-        .map((item) => item?.metadata?.name)
-        .reverse();
+      state.priorityClassesDropdown = action.payload.map((item) => item?.metadata?.name).reverse();
+    },
+
+    setTemplates: (state, action) => {
+      state.templates = action.payload;
+    },
+    setSelectedTemplate: (state, action) => {
+      state.selectedTemplate = { ...action.payload };
     },
   },
 });
@@ -69,5 +75,7 @@ export const {
   setDisks,
   setPriorityClasses,
   setImages,
+  setTemplates,
+  setSelectedTemplate,
 } = projectSlice.actions;
 export default projectSlice.reducer;
