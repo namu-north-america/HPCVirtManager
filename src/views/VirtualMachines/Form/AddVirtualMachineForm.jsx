@@ -29,17 +29,17 @@ import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
 import Advanced from "./Advanced";
 
-export default function AddVirtualMachineForm({ onClose }) {
+export default function AddVirtualMachineForm({ onClose, template = null }) {
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector(
     (state) => state.project
   );
-
+  console.log("template___", template);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(template);
 
   useEffect(() => {
     dispatch(getNamespacesAction());
@@ -125,6 +125,13 @@ export default function AddVirtualMachineForm({ onClose }) {
       setActiveIndex(0);
     }
   };
+
+  useEffect(() => {
+    if (selectedTemplate || template) {
+      setActiveIndex(4);
+      setCompletedSteps((prev) => [...new Set([0, 1, 2, 3])]);
+    }
+  }, [selectedTemplate, template]);
 
   const validateStep = (index) => {
     switch (index) {
@@ -354,7 +361,11 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 4:
         return (
           <>
-            <Advanced data={data} handleChange={handleChange} />
+            <Advanced
+              data={data}
+              handleChange={handleChange}
+              template={template}
+            />
             <Buttonlayout>
               <CustomButtonOutlined
                 label="Previous"

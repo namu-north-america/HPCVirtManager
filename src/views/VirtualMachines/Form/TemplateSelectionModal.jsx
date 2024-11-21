@@ -29,7 +29,7 @@ export default function TemplateSelectionModal({ isOpen, onClose, onSelect }) {
     onSelect(template);
     onClose();
   };
-
+  console.log('modal is open_____________')
   return (
     <Modal
       isOpen={isOpen}
