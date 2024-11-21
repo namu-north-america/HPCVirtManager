@@ -10,7 +10,7 @@ import WindowsLogo from "../../../assets/images/svg/windows-logo.svg";
 import RedHatLogo from "../../../assets/images/svg/redhat-logo.svg";
 
 export const yamlTemplate = `
-apiVersion: kubevirt.io/v1
+apiVersion: kubevirt.io/v1alpha3
 kind: VirtualMachine
 metadata:
   name: vm-fedora

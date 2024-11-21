@@ -29,6 +29,8 @@ export default function AddVirtualMachineForm({ onClose }) {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   // const [selectedTemplate, setSelectedTemplate] = useState(template);
 
+  const isTemplateMode = Object.keys(selectedTemplate).length;
+
   useEffect(() => {
     dispatch(getNamespacesAction());
     dispatch(getNodesAction());
@@ -98,8 +100,8 @@ export default function AddVirtualMachineForm({ onClose }) {
   };
 
   const onAddVM = () => {
-    if (showFormErrors(data, setData)) {
-      if (validateDisk() || selectedTemplate) {
+    if (showFormErrors(data, setData) || isTemplateMode) {
+      if (validateDisk() || isTemplateMode) {
         setLoading(true);
         dispatch(
           onAddVMAction(data, disks, images, setLoading, () => {
@@ -120,7 +122,7 @@ export default function AddVirtualMachineForm({ onClose }) {
   useEffect(() => {
     if (Object.keys(selectedTemplate).length) {
       setActiveIndex(4);
-      setCompletedSteps((prev) => [...new Set([0, 1, 2, 3])]);
+      setCompletedSteps((prev) => [...new Set([0, 1, 2, 3, 4])]);
     }
   }, [selectedTemplate]);
 
@@ -140,9 +142,9 @@ export default function AddVirtualMachineForm({ onClose }) {
   };
 
   const onStepChange = (index) => {
-    if (index > activeIndex) {
+    if (index > activeIndex && !isTemplateMode) {
       // Moving forward
-      if (validateStep(index)) {
+      if (validateStep(activeIndex)) {
         setCompletedSteps((prev) => [...new Set([...prev, activeIndex])]);
         setActiveIndex(index);
       }

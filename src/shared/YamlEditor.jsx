@@ -58,6 +58,7 @@ function YamlEditor({ data, templateData = {}, onChange }) {
         cores: yamlDataObject.spec?.template.spec.domain.cpu.cores,
         sockets: yamlDataObject.spec?.template.spec.domain.cpu.sockets,
         threads: yamlDataObject.spec?.template.spec.domain.cpu.threads,
+        advanced: yamlDataObject,
       };
 
       for (const name in newData) {
