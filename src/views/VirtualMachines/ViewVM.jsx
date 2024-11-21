@@ -31,6 +31,7 @@ import { getVmCpuStats, getVmMemoryStats, getVmStorageStats } from "../../store/
 import { VncScreen } from 'react-vnc';
 import { Dialog } from 'primereact/dialog';
 import { showToastAction } from '../../store/slices/commonSlice';
+import YamlEditor from "../../shared/YamlEditor";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -459,7 +460,7 @@ const calculatePercentage = (used, total) => {
             </Grid>
           </TabPanel>
           <TabPanel header="YAML">
-            <CustomCodeEditor value={data?.yaml} />
+            <YamlEditor value={data?.yaml} />
           </TabPanel>
           <TabPanel header="Disk">
             <Grid>

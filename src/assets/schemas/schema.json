@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "properties": {
+    "apiVersion": { "enum": ["kubevirt.io/v1alpha3", "kubevirt.io/v1"] },
+    "kind": { "const": "VirtualMachine" },
+    "metadata": {
+      "name": {},
+      "namespace": {},
+      "labels": {
+        "kubevirt.io/domain": {},
+        "kubevirt-manager.io/managed": {},
+        "cloud-init.kubevirt-manager.io/username": {}
+      }
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "template": {
+          "type": "object",
+          "properties": {
+            "metadata": { "type": "object", "properties": {} },
+            "spec": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "object",
+                  "properties": {
+                    "devices": {
+                      "type": "object",
+                      "properties": {
+                        "disks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "bootOrder": { "type": "integer" },
+                              "disk": {
+                                "type": "object",
+                                "properties": { "bus": { "enum": ["virtio"] } }
+                              },
+                              "name": { "type": "string" }
+                            }
+                          }
+                        },
+                        "interfaces": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "networkInterfaceMultiqueue": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "cpu": {
+                      "type": "object",
+                      "properties": {
+                        "cores": { "type": "integer" },
+                        "threads": { "type": "integer" },
+                        "sockets": { "type": "integer" }
+                      },
+                      "required": ["cores"]
+                    },
+                    "resources": {
+                      "type": "object",
+                      "properties": {
+                        "requests": {
+                          "type": "object",
+                          "properties": {
+                            "memory": { "pattern": "^\\d+(Pi|Ti|Gi|Mi)$" },
+                            "description": "You can insert values like 64Pi, 24Ti, or 100Mi"
+                          },
+                          "required": ["memory"]
+                        }
+                      }
+                    }
+                  }
+                },
+                "volumes": {},
+                "nodeSelector": {
+                  "type": "object",
+                  "properties": {
+                    "kubernetes.io/hostname": { "enum": ["master", "worker-1"] }
+                  }
+                }
+              },
+              "required": []
+            }
+          }
+        }
+      }
+    }
+  }
+}

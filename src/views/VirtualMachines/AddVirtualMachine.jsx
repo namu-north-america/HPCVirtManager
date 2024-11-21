@@ -11,6 +11,7 @@ export default function AddVirtualMachine() {
   const navigate = useNavigate();
   const { setBreadcrumbItems } = useBreadcrumb();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState();
 
   const handleClose = () => {
     navigate("/virtual-machines/list");
@@ -18,7 +19,9 @@ export default function AddVirtualMachine() {
 
   const handleTemplateSelect = (template) => {
     // TODO: Pre-fill form with template data
+    console.log("template selection____", template);
     setIsTemplateModalOpen(false);
+    setSelectedTemplate(template);
   };
 
   const handleImportYAML = () => {
@@ -64,7 +67,10 @@ export default function AddVirtualMachine() {
           </div>
         }
       >
-        <AddVirtualMachineForm onClose={handleClose} />
+        <AddVirtualMachineForm
+          onClose={handleClose}
+          template={selectedTemplate}
+        />
       </Page>
     </>
   );

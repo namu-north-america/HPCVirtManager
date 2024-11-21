@@ -25,20 +25,21 @@ import {
   getDisksAction,
   getStorageClassesAction,
 } from "../../../store/actions/storageActions";
-import TemplateSelectionModal from './TemplateSelectionModal';
+import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
+import Advanced from "./Advanced";
 
-export default function AddVirtualMachineForm({ onClose }) {
+export default function AddVirtualMachineForm({ onClose, template = null }) {
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector(
     (state) => state.project
   );
-
+  console.log("template___", template);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(template);
 
   useEffect(() => {
     dispatch(getNamespacesAction());
@@ -125,6 +126,13 @@ export default function AddVirtualMachineForm({ onClose }) {
     }
   };
 
+  useEffect(() => {
+    if (selectedTemplate || template) {
+      setActiveIndex(4);
+      setCompletedSteps((prev) => [...new Set([0, 1, 2, 3])]);
+    }
+  }, [selectedTemplate, template]);
+
   const validateStep = (index) => {
     switch (index) {
       case 0:
@@ -143,7 +151,7 @@ export default function AddVirtualMachineForm({ onClose }) {
   const onStepChange = (index) => {
     if (index > activeIndex) {
       // Moving forward
-      if (validateStep(activeIndex)) {
+      if (validateStep(index)) {
         setCompletedSteps((prev) => [...new Set([...prev, activeIndex])]);
         setActiveIndex(index);
       }
@@ -156,29 +164,37 @@ export default function AddVirtualMachineForm({ onClose }) {
   const validateDisk = () => {
     return disks.every((disk, i) => {
       let ignore = ["disk", "url", "image"];
-      
+
       if (disk?.createType === "existing") {
         ignore = ["name", "size", "storageClass", "accessMode", "url", "image"];
       } else if (disk?.createType === "new") {
-        ignore = disk?.type === "blank" ? ["disk", "url", "image"] : ["disk", "image"];
+        ignore =
+          disk?.type === "blank" ? ["disk", "url", "image"] : ["disk", "image"];
       } else if (disk?.createType === "image") {
         ignore = ["disk", "url"];
       }
 
       // Always validate busType and cache
       const requiredFields = ["diskType", "createType", "busType", "cache"];
-      const missingRequired = requiredFields.filter(field => !disk[field] && !ignore.includes(field));
-      
+      const missingRequired = requiredFields.filter(
+        (field) => !disk[field] && !ignore.includes(field)
+      );
+
       if (missingRequired.length > 0) {
         const setError = ({ formErrors }) => {
           setDisks((prev) => {
             let arr = [...prev];
             arr[i]["formErrors"] = {
               ...formErrors,
-              ...missingRequired.reduce((acc, field) => ({
-                ...acc,
-                [field]: `${field.charAt(0).toUpperCase() + field.slice(1)} is required!`
-              }), {})
+              ...missingRequired.reduce(
+                (acc, field) => ({
+                  ...acc,
+                  [field]: `${
+                    field.charAt(0).toUpperCase() + field.slice(1)
+                  } is required!`,
+                }),
+                {}
+              ),
             };
             return arr;
           });
@@ -225,10 +241,16 @@ export default function AddVirtualMachineForm({ onClose }) {
   const onMoveDisk = (index, direction) => {
     setDisks((prev) => {
       const newDisks = [...prev];
-      if (direction === 'up' && index > 0) {
-        [newDisks[index], newDisks[index - 1]] = [newDisks[index - 1], newDisks[index]];
-      } else if (direction === 'down' && index < newDisks.length - 1) {
-        [newDisks[index], newDisks[index + 1]] = [newDisks[index + 1], newDisks[index]];
+      if (direction === "up" && index > 0) {
+        [newDisks[index], newDisks[index - 1]] = [
+          newDisks[index - 1],
+          newDisks[index],
+        ];
+      } else if (direction === "down" && index < newDisks.length - 1) {
+        [newDisks[index], newDisks[index + 1]] = [
+          newDisks[index + 1],
+          newDisks[index],
+        ];
       }
       return newDisks;
     });
@@ -244,6 +266,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     { label: "Storage" },
     { label: "Network" },
     { label: "User Data" },
+    { label: "Advance" },
     { label: "Review" },
   ];
 
@@ -338,6 +361,29 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 4:
         return (
           <>
+            <Advanced
+              data={data}
+              handleChange={handleChange}
+              template={template}
+            />
+            <Buttonlayout>
+              <CustomButtonOutlined
+                label="Previous"
+                icon="pi pi-arrow-left"
+                onClick={() => onStepChange(2)}
+              />
+              <CustomButton
+                label="Next"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                onClick={() => onStepChange(4)}
+              />
+            </Buttonlayout>
+          </>
+        );
+      case 5:
+        return (
+          <>
             <Review data={data} disks={disks} />
             <Buttonlayout>
               <CustomButtonOutlined
@@ -374,20 +420,18 @@ export default function AddVirtualMachineForm({ onClose }) {
               {steps.map((step, index) => (
                 <li
                   key={index}
-                  className={`step-item ${activeIndex === index ? 'active' : ''} ${
-                    completedSteps.includes(index) ? 'completed' : ''
-                  }`}
+                  className={`step-item ${
+                    activeIndex === index ? "active" : ""
+                  } ${completedSteps.includes(index) ? "completed" : ""}`}
                   onClick={() => onStepChange(index)}
                   role="button"
                   tabIndex={0}
                   aria-label={`Step ${index + 1}: ${step.label}`}
-                  aria-current={activeIndex === index ? 'step' : undefined}
+                  aria-current={activeIndex === index ? "step" : undefined}
                 >
                   <span className="step-number">{index + 1}</span>
                   <div className="step-content">
-                    <h3 className="step-title">
-                      {step.label}
-                    </h3>
+                    <h3 className="step-title">{step.label}</h3>
                   </div>
                 </li>
               ))}
