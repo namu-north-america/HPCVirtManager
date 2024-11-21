@@ -6,12 +6,15 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import { CustomButtonOutlined } from "../../shared/CustomButton";
 import TemplateSelectionModal from "./Form/TemplateSelectionModal";
+import { setSelectedTemplate } from "../../store/slices/projectSlice";
+import { useDispatch } from "react-redux";
 
 export default function AddVirtualMachine() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { setBreadcrumbItems } = useBreadcrumb();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState();
+  // const [selectedTemplate, setSelectedTemplate] = useState();
 
   const handleClose = () => {
     navigate("/virtual-machines/list");
@@ -20,7 +23,7 @@ export default function AddVirtualMachine() {
   const handleTemplateSelect = (template) => {
     // TODO: Pre-fill form with template data
     setIsTemplateModalOpen(false);
-    setSelectedTemplate(template);
+    dispatch(setSelectedTemplate(template));
   };
 
   const handleImportYAML = () => {
