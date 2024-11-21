@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -13,7 +12,7 @@ import { fetchAllSSHKeysAction, deleteSSHKeyAction, createSSHKeyAction } from '.
 import { showToastAction } from '../store/slices/commonSlice';
 import { Dropdown } from 'primereact/dropdown';
 import { getNamespacesAction } from '../store/actions/projectActions';
-
+import Page from '../shared/Page';
 
 const SSHKeys = () => {
   const ref = useRef();
@@ -26,27 +25,22 @@ const SSHKeys = () => {
   });
   const dispatch = useDispatch();
 
-
   const { profile } = useSelector((state) => state.user);
   const { sshKeys, loading } = useSelector((state) => state.sshKeys);
   const { namespaces } = useSelector((state) => state.project);
-
 
   useEffect(() => {
     dispatch(fetchAllSSHKeysAction());
   }, [dispatch]);
 
-
   useEffect(() => {
     dispatch(getNamespacesAction());
   }, [dispatch]);
-
 
   const handleEdit = (record) => {
     if (profile.role !== 'admin') return showError();
     window.location.href = `/#/sshkeys/${record.name}`;
   };
-
 
   const handleDelete = (record) => {
     if (profile.role !== 'admin') return showError();
@@ -72,7 +66,6 @@ const SSHKeys = () => {
     );
   };
 
-  // Add new SSH key
   const handleAddNew = () => {
     if (profile.role !== 'admin') return showError();
     setVisible(true);
@@ -115,7 +108,6 @@ const SSHKeys = () => {
     );
   };
 
-
   const actionBodyTemplate = (rowData) => (
     <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
       <div>
@@ -130,47 +122,22 @@ const SSHKeys = () => {
     </CustomOverlay>
   );
 
-
   const dateBodyTemplate = (rowData) => {
     return new Date(rowData.createdAt).toLocaleString();
   };
 
-
-  const header = (
-    <div className="flex justify-content-end">
-      <div className="flex align-items-center gap-2">
-        <Button
-          label="+ New SSH Key"
-          className="p-button-dark"
-          size="small"
-          onClick={handleAddNew}
-        />
-        <Button
-          icon="pi pi-refresh"
-          severity="primary"
-          size="small"
-          onClick={() => dispatch(fetchAllSSHKeysAction())}
-        />
-        <span className="p-input-icon-left">
-          <i className="pi pi-search" />
-          <InputText
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Search..."
-            size="small"
-          />
-        </span>
-      </div>
-    </div>
-  );
-
   return (
-    <>
-      <Card>
+    <Page 
+      title="SSH Keys" 
+      subtitle="Manage SSH keys for secure access to virtual machines"
+      onSearch={setGlobalFilter}
+      onRefresh={() => dispatch(fetchAllSSHKeysAction())}
+      onAdd={handleAddNew}
+      addText="New SSH Key"
+    >
         <DataTable
           value={sshKeys}
           loading={loading}
-          header={header}
           globalFilter={globalFilter}
           emptyMessage="No SSH keys found"
           responsiveLayout="scroll"
@@ -180,7 +147,6 @@ const SSHKeys = () => {
           <Column field="createdAt" header="Created" body={dateBodyTemplate} sortable />
           <Column body={actionBodyTemplate} exportable={false} style={{ width: '8rem' }} />
         </DataTable>
-      </Card>
 
       <Dialog 
         header="New SSH Key"
@@ -230,7 +196,7 @@ const SSHKeys = () => {
           </div>
         </div>
       </Dialog>
-    </>
+    </Page>
   );
 };
 

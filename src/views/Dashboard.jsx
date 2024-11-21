@@ -22,12 +22,14 @@ export default function Dashboard() {
   const [cpuUsage, setCpuUsage] = React.useState(0);
   const [memory, setMemory] = React.useState(0);
   const [storage, setStorage] = React.useState(0);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
     onInitialLoad();
   }, [dispatch]);
 
   const onInitialLoad = () => {
+    setIsLoading(true);
     dispatch(getNodesAction());
     dispatch(getVMsAction());
     dispatch(getDisksAction());
@@ -50,12 +52,20 @@ export default function Dashboard() {
       : null;
     setCpuUsage(usage);
   }, [clusterCpuInfo]);
+
   useEffect(() => {
     setMemory(memoryInfo);
   }, [memoryInfo]);
+
   useEffect(() => {
     setStorage(storageInfo);
   }, [storageInfo]);
+
+  useEffect(() => {
+    if (vms.length > 0) {
+      setIsLoading(false);
+    }
+  }, [vms]);
 
   const getVMsByStatus = (status) => {
     if (status) {
@@ -130,15 +140,13 @@ export default function Dashboard() {
               <CustomCardValue title="Others" value={others} />
             </Grid>
             <Grid extraClassNames="justify-content-center">
-            
-              <PieChart
-                labels={["Total", "Running", "Paused", "Stopped", "Others"]}
-                series={[total, running, paused, stopped, others]}
-              />
-            
-              
+              {!isLoading && (
+                <PieChart
+                  labels={["Running", "Paused", "Stopped", "Others"]}
+                  series={[running, paused, stopped, others]}
+                />
+              )}
             </Grid>
-            
           </CustomCard>
         </Col>
         <Col>
