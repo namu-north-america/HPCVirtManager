@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MenuItem from "./MenuItem";
 import classNames from "classnames";
+import { Tooltip } from 'primereact/tooltip';
 
 export default function SidebarItem(props) {
   const navigate = useNavigate();
@@ -13,8 +14,12 @@ export default function SidebarItem(props) {
   const _icon = props.icon;
   const [isOpen, setIsOpen] = useState(false);
 
+  const itemRef = useRef(null);
+
   const handleToggle = () => {
-    setIsOpen(!isOpen);
+    if (!props.isCollapsed) {
+      setIsOpen(!isOpen);
+    }
   };
 
   const onItemClick = () => {
@@ -39,25 +44,24 @@ export default function SidebarItem(props) {
   return (
     <>
       <div
-        className={classNames("sidebar-item flex justify-content-between align-items-center", {
+        ref={itemRef}
+        className={classNames("sidebar-item", {
           active: isOpen || getActive(_link),
         })}
         onClick={onItemClick}
+        data-pr-tooltip={props.isCollapsed ? _title : null}
       >
         <div className="flex align-items-center">
-          {_icon && <i className={`text-lg mr-2 ${_icon}`}></i>}
-          <span>{_title}</span>
+          {_icon && <i className={`${_icon} text-lg`} />}
+          <span className="ml-2">{_title}</span>
         </div>
-        {_items && _items.length && (
-          <i
-            className={classNames("open-icon pi pi-angle-right my-auto", {
-              open: isOpen,
-            })}
-          ></i>
+        {_items?.length > 0 && !props.isCollapsed && (
+          <i className={classNames("open-icon pi pi-angle-right", { open: isOpen })} />
         )}
       </div>
-
-      {isOpen && (
+      <Tooltip target={itemRef} position="right" />
+      
+      {isOpen && !props.isCollapsed && _items && (
         <div className="menu-items">
           {_items.map((item, i) => (
             <MenuItem
@@ -65,7 +69,8 @@ export default function SidebarItem(props) {
               Svg={item?.icon}
               title={item?.title}
               items={item?.items}
-              link={item?.link ? _link + item?.link : _link}
+              link={_link + item?.link}
+              isCollapsed={props.isCollapsed}
             />
           ))}
         </div>

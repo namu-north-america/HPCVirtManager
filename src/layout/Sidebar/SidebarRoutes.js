@@ -43,11 +43,11 @@ export const sidebarItems = [
     link: "/images",
     icon: "pi pi-save",
   },
-  {
-    title: "Clusters",
-    link: "/clusters",
-    icon: "pi pi-sitemap",
-  },
+  // {
+  //   title: "Clusters",
+  //   link: "/clusters",
+  //   icon: "pi pi-sitemap",
+  // },
   {
     title: "Nodes",
     link: "/nodes",

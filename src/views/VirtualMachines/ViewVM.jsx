@@ -356,8 +356,11 @@ const calculatePercentage = (used, total) => {
       <EditVmModal visible={editInfo} setVisible={setEditInfo} />
       <MigrateModal visible={onOpenMigrate} setVisible={setOpenMigrate} />
       <CustomBreadcrum items={breadcrumItems} />
-      <Page title={name} headers={headers}>
-        <TabView style={{ background: "transprent" }}>
+      <Page title={name}>
+        <div className="flex align-items-center gap-2 mb-3">
+          {headers}
+        </div>
+        <TabView>
           <TabPanel header="Overview">
             <Grid>
               <Col size={5}>

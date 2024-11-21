@@ -194,7 +194,10 @@ export default function VMList() {
               >
                 Migrate
               </div>
-              <div className="cursor-pointer mb-2" onClick={() => onEdit(item)}>
+              <div
+                className="cursor-pointer mb-2"
+                onClick={() => onEdit(item)}
+              >
                 Edit VM
               </div>
               <div className="cursor-pointer" onClick={() => onDelete(item)}>
@@ -318,14 +321,7 @@ export default function VMList() {
     );
   };
   const onEdit = (item) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
-      navigate("/virtual-machines/edit", { state: item });
-    } else {
-      showError();
-    }
+    setEditVisible(item);
   };
   const onDelete = (item) => {
     if (

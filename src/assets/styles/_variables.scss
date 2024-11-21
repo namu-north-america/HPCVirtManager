@@ -17,6 +17,7 @@ $white-color: #ffffff;
 $border-color: #e5e7eb;
 $bg-color-primary: #ffffff;
 $bg-color-secondary: #f4f6f9;
+$bg-color-dark: #09214B;
 
 $text-color-primary: #1F2937;
 $text-label-color: #4e5b76;
@@ -29,7 +30,8 @@ $gutter: 5px;
 $sidebar-width: 250px;
 $topbar-height: 3rem;
 
-$menu-item-hover: #E6EDF5;
+$menu-item-hover: rgba(255, 255, 255, 0.1);
+$menu-item-secondary: #959ba4;
 
 // Status Colors
 $status-ready: #22C55E;

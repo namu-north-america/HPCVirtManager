@@ -1,97 +1,23 @@
 @media (min-width: 992px) {
   .layout-wrapper {
-    &.layout-overlay {
-      .layout-main-container {
-        margin-left: 0;
-      }
-
-      .layout-sidebar {
-        transform: translateX(-100%);
-        left: 0;
-        top: 0;
-        height: 100vh;
-      }
-      .toggle-button {
-        display: none;
-      }
-
-      &.layout-overlay-sidebar-active {
-        .layout-sidebar {
-          transform: translateX(0);
-        }
-      }
-    }
-
     &.layout-static {
-      .layout-main-container {
-        margin-left: $sidebar-width;
-      }
       .layout-topbar {
         margin-left: $sidebar-width;
-        width: calc(100% - $sidebar-width);
+        width: calc(100% - #{$sidebar-width});
       }
-      .toggle-container {
-        display: none;
-      }
-
-      &.layout-static-sidebar-inactive {
-        .layout-sidebar {
-          transform: translateX(-100%);
-          left: 0;
-        }
-
-        .layout-main-container {
-          margin-left: 0;
-        }
-      }
-    }
-  }
-}
-//For Mobile
-@media (max-width: 991px) {
-  .layout-wrapper {
-    .toggle-container {
-      width: 100px;
-      margin-right: 25px;
-      .toggle-button2 {
-        right: -20px;
-      }
-    }
-    .layout-main-container {
-      margin-left: 0;
-    }
-
-    .layout-sidebar {
-      transform: translateX(-100%);
-      left: 0;
-      top: $topbar-height;
-      height: calc(100vh - $topbar-height);
-      .logo {
-        display: none;
+      .layout-main-container {
+        margin-left: $sidebar-width;
       }
     }
 
-    .toggle-button {
-      display: none;
-    }
-
-    .toggle-button2 {
-      rotate: 0;
-      transition: $transitionDuration;
-    }
-
-    &.layout-mobile-sidebar-active {
-      .layout-sidebar {
-        transform: translateX(0);
+    &.layout-collapsed {
+      .layout-topbar {
+        margin-left: $sidebar-collapsed-width;
+        width: calc(100% - #{$sidebar-collapsed-width});
       }
-      .toggle-button2 {
-        rotate: 180deg;
-        transition: $transitionDuration;
+      .layout-main-container {
+        margin-left: $sidebar-collapsed-width;
       }
     }
-  }
-
-  .body-overflow-hidden {
-    overflow: scroll;
   }
 }

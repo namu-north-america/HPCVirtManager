@@ -1,7 +1,7 @@
 .layout-topbar {
   position: fixed;
   height: $topbar-height;
-  z-index: 9;
+  z-index: 1002;
   left: 0;
   top: 0;
   width: 100%;
@@ -11,8 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: $transitionDuration;
-  background-color: $bg-color-secondary;
+  transition: margin-left $transitionDuration;
+  background-color: $white-color;
 
   .p-breadcrumb {
     background: transparent !important;
