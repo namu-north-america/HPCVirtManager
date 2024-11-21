@@ -42,7 +42,10 @@ export default function AddVirtualMachineForm({ onClose }) {
       setIsTemplateModalOpen(true);
     }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      dispatch(setSelectedTemplate({}));
+    };
   }, []);
 
   const [data, setData] = useState({
