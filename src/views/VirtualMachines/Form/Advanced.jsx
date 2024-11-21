@@ -1,11 +1,12 @@
 import React from "react";
 import { CustomForm } from "../../../shared/AllInputs";
 import CustomCodeEditor from "../../../shared/CustomCodeEditor";
+import YamlEditor from "../../../shared/YamlEditor";
 
 export default function Advanced({ data, handleChange }) {
   return (
     <CustomForm>
-      <CustomCodeEditor data={data} onChange={handleChange} name="advanced" />
+      <YamlEditor data={data} onChange={handleChange} name="advanced" />
     </CustomForm>
   );
 }
