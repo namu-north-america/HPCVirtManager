@@ -28,6 +28,7 @@ import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
 import { findByLabelText } from "@testing-library/react";
 import { getVmCpuStats, getVmMemoryStats, getVmStorageStats } from "../../store/actions/reportingActions";
+import YamlEditor from "../../shared/YamlEditor";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -454,7 +455,7 @@ const calculatePercentage = (used, total) => {
             </Grid>
           </TabPanel>
           <TabPanel header="YAML">
-            <CustomCodeEditor value={data?.yaml} />
+            <YamlEditor value={data?.yaml} />
           </TabPanel>
           <TabPanel header="Disk">
             <Grid>
