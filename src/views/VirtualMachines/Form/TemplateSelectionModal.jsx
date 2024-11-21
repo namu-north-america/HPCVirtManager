@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import Modal from '../../../shared/Modal/Modal';
 import { TabView, TabPanel } from 'primereact/tabview';
 import './TemplateSelectionModal.scss';
+import { setSelectedTemplate, setTemplates } from '../../../store/slices/vmSlice';
+import FedoraLogo from '../../../assets/images/svg/fedora-logo.svg';
+import UbuntuLogo from '../../../assets/images/svg/ubuntu-logo.svg';
+import WindowsLogo from '../../../assets/images/svg/windows-logo.svg';
+import RedHatLogo from '../../../assets/images/svg/redhat-logo.svg';
 
 const prebuiltTemplates = [
-  { id: 1, name: 'Fedora', icon: 'pi pi-desktop', subtitle: 'Linux Distribution' },
-  { id: 2, name: 'Ubuntu', icon: 'pi pi-desktop', subtitle: 'Linux Distribution' },
-  { id: 3, name: 'Windows', icon: 'pi pi-microsoft', subtitle: 'Windows Server' },
-  { id: 4, name: 'RHEL', icon: 'pi pi-desktop', subtitle: 'Enterprise Linux' },
+  { id: 1, name: 'Fedora', logo: FedoraLogo, subtitle: 'Linux Distribution' },
+  { id: 2, name: 'Ubuntu', logo: UbuntuLogo, subtitle: 'Linux Distribution' },
+  { id: 3, name: 'Windows', logo: WindowsLogo, subtitle: 'Windows Server' },
+  { id: 4, name: 'RHEL', logo: RedHatLogo, subtitle: 'Enterprise Linux' },
 ];
 
 const TemplateCard = ({ template, onSelect }) => (
@@ -25,6 +31,7 @@ const TemplateCard = ({ template, onSelect }) => (
 export default function TemplateSelectionModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState(0);
   const dispatch = useDispatch();
+
   const handleTemplateSelect = (template) => {
     dispatch(setSelectedTemplate(template));
     onClose();
@@ -32,7 +39,7 @@ export default function TemplateSelectionModal({ isOpen, onClose }) {
 
   useEffect(() => {
     dispatch(setTemplates(prebuiltTemplates));
-  }, []);
+  }, [dispatch]);
 
   return (
     <Modal
