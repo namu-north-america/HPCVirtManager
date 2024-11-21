@@ -312,8 +312,8 @@ export default function AddVirtualMachineForm({ onClose }) {
           <>
             <Advanced data={data} handleChange={handleChange} template={selectedTemplate} />
             <Buttonlayout>
-              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(2)} />
-              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(4)} />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
+              <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(5)} />
             </Buttonlayout>
           </>
         );
@@ -322,7 +322,7 @@ export default function AddVirtualMachineForm({ onClose }) {
           <>
             <Review data={data} disks={disks} />
             <Buttonlayout>
-              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
+              <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(4)} />
               <CustomButton loading={loading} label="Create" icon="pi pi-check" onClick={onAddVM} />
             </Buttonlayout>
           </>
