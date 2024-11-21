@@ -165,19 +165,20 @@ $sidebar-collapsed-width: 70px;
     margin: 0 0;
   }
   .menu-items {
-    padding-left: 38px;
-    padding-right: 10px;
+    /*padding-left: 38px;
+    padding-right: 10px;*/
     transition: $transitionDuration;
-
     cursor: pointer;
     margin: 5px 0;
     div {
-      color: $text-color-secondary;
-      font-size: 14px;
+      color: $white-color;
+      font-size: 1rem;
       font-weight: 600;
       margin: 15px 0;
+      padding-left: 58px;
+      padding-right: 10px;
       &.active {
-        color: $text-color-primary;
+        color: $white-color;
         font-weight: 800;
       }
     }
@@ -199,6 +200,43 @@ $sidebar-collapsed-width: 70px;
     & .active {
       color: $text-color-primary;
       font-weight: 800;
+    }
+  }
+
+  .menu-item {
+    padding: 12px 18px;
+    margin: 1px 0;
+    cursor: pointer;
+    transition: $transitionDuration;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: $menu-item-secondary;
+    }
+
+    span {
+      color: $white-color;
+      font-size: 1em;
+      font-weight: 600;
+      line-height: 24px;
+    }
+
+    &:hover {
+      background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.08) 0%, 
+        rgba(255, 236, 179, 0.15) 50%, 
+        rgba(255, 248, 225, 0.02) 100%
+      );
+    }
+
+    &.active {
+      background-color: $menu-item-hover;
     }
   }
 
