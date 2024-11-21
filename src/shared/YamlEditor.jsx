@@ -51,16 +51,18 @@ function YamlEditor({ data, templateData = {}, onChange }) {
   }, [templateData]);
 
   useEffect(() => {
-    const newData = {
-      name: yamlDataObject.metadata?.name,
-      namespace: yamlDataObject.metadata?.namespace,
-      cores: yamlDataObject.spec?.template.spec.domain.cpu.cores,
-      sockets: yamlDataObject.spec?.template.spec.domain.cpu.sockets,
-      threads: yamlDataObject.spec?.template.spec.domain.cpu.threads,
-    };
+    if (onChange) {
+      const newData = {
+        name: yamlDataObject.metadata?.name,
+        namespace: yamlDataObject.metadata?.namespace,
+        cores: yamlDataObject.spec?.template.spec.domain.cpu.cores,
+        sockets: yamlDataObject.spec?.template.spec.domain.cpu.sockets,
+        threads: yamlDataObject.spec?.template.spec.domain.cpu.threads,
+      };
 
-    for (const name in newData) {
-      onChange({ name, value: newData[name] });
+      for (const name in newData) {
+        onChange({ name, value: newData[name] });
+      }
     }
   }, [yamlDataObject]);
 

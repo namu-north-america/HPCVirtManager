@@ -9,7 +9,7 @@ import UbuntuLogo from "../../../assets/images/svg/ubuntu-logo.svg";
 import WindowsLogo from "../../../assets/images/svg/windows-logo.svg";
 import RedHatLogo from "../../../assets/images/svg/redhat-logo.svg";
 
-const yamlTemplate = `
+export const yamlTemplate = `
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
