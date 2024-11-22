@@ -5,6 +5,31 @@ import { setLiveMigrations } from "../slices/projectSlice";
 
 import { getVMsAction } from "./projectActions";
 
+const addVMRequest = async (payload, url, dispatch, next) => {
+  const res = await api("post", url, payload);
+
+  if (res?.status === "Failure") {
+    if (res?.message) {
+      dispatch(
+        showToastAction({
+          type: "error",
+          title: res?.message,
+        })
+      );
+    }
+    if (next) next(false);
+  } else if (res?.kind) {
+    dispatch(getVMsAction());
+    dispatch(
+      showToastAction({
+        type: "success",
+        title: "Virtual Machine created successfully",
+      })
+    );
+    if (next) next(true);
+  }
+}
+
 const onAddVMAction =
   (data, disks, images, setLoading, next) => async (dispatch, getState) => {
     try {
@@ -14,7 +39,17 @@ const onAddVMAction =
 
       let { project } = getState();
       let { vms } = project;
-      let { name, namespace } = data;
+      let name, namespace;
+      let { advanced } = data;
+
+      if (advanced) {
+        namespace = advanced.metadata.namespace;
+        name = advanced.metadata.name;
+      } else {
+        name = data.name;
+        namespace = data.namespace;
+      }
+      
       if (vms?.length && name) {
         let vmNameCheck = vms.find(
           (item) => item.name === name && item.namespace === namespace
@@ -26,12 +61,24 @@ const onAddVMAction =
               title: "VM with name/namespace combination already exists!",
             })
           );
+          setLoading(false);
           return;
         }
       }
 
       setLoading(true);
 
+      if(advanced) {
+        let url = endPoints.ADD_VM({
+          namespace: data.namespace,
+          name: data.name,
+        });
+        next(false);
+        await addVMRequest(advanced, url, dispatch, next);
+        setLoading(false);
+        return;
+      }
+      
       let _disks = await Promise.all(
         disks.map(async (disk, i) => {
           if (disk?.createType === "new" || disk?.createType === "image") {
@@ -207,29 +254,7 @@ const onAddVMAction =
           },
         },
       };
-      // console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
-      const res = await api("post", url, payload);
-
-      if (res?.status === "Failure") {
-        if (res?.message) {
-          dispatch(
-            showToastAction({
-              type: "error",
-              title: res?.message,
-            })
-          );
-        }
-        if (next) next(false);
-      } else if (res?.kind) {
-        dispatch(getVMsAction());
-        dispatch(
-          showToastAction({
-            type: "success",
-            title: "Virtual Machine created successfully",
-          })
-        );
-        if (next) next(true);
-      }
+      await addVMRequest(payload, url, dispatch, next);
       setLoading(false);
     } catch (error) {
       setLoading(false);

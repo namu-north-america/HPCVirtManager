@@ -32,6 +32,7 @@ import { VncScreen } from 'react-vnc';
 import { Dialog } from 'primereact/dialog';
 import { showToastAction } from '../../store/slices/commonSlice';
 import YamlEditor from "../../shared/YamlEditor";
+import { yamlTemplate } from "./Form/TemplateSelectionModal";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -165,7 +166,7 @@ export default function ViewVM() {
     sockets: "",
     threads: "",
     memory: "",
-    yaml: "",
+    yaml: yamlTemplate,
   });
 
   const [volumes, setVolumes] = useState([]);
@@ -463,7 +464,7 @@ const calculatePercentage = (used, total) => {
             </Grid>
           </TabPanel>
           <TabPanel header="YAML">
-            <YamlEditor value={data?.yaml} />
+            <YamlEditor value={data?.yaml} templateData={{ template: data.yaml }}/>
           </TabPanel>
           <TabPanel header="Disk">
             <Grid>

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Editor from "@monaco-editor/react";
 import jsYaml from "js-yaml";
@@ -24,10 +24,10 @@ window.MonacoEnvironment = {
   },
 };
 
-function YamlEditor({ data, templateData = {} }) {
+function YamlEditor({ data, templateData = {}, onChange }) {
   const monacoRef = useRef(null);
-  const [yamlData, setYamlData] = useState({});
-  const [yaml, setYaml] = useState("");
+  const [yamlDataObject, setYamlDataObject] = useState({});
+  const [yaml, setYaml] = useState(templateData.template);
   // const project = useSelector((state) => state.project);
 
   const handleOnMount = useCallback((editor, monaco) => {
@@ -37,7 +37,35 @@ function YamlEditor({ data, templateData = {} }) {
     });
   }, []);
 
-  const yamlJsonReverse = (stringOrObject) => {};
+  const parseYamlToObject = useCallback((yamlString) => {
+    try {
+      const jsonObject = jsYaml.load(yamlString, "utf8");
+      setYamlDataObject(jsonObject);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  useEffect(() => {
+    parseYamlToObject(templateData.template);
+  }, [templateData]);
+
+  useEffect(() => {
+    if (onChange) {
+      const newData = {
+        name: yamlDataObject.metadata?.name,
+        namespace: yamlDataObject.metadata?.namespace,
+        cores: yamlDataObject.spec?.template.spec.domain.cpu.cores,
+        sockets: yamlDataObject.spec?.template.spec.domain.cpu.sockets,
+        threads: yamlDataObject.spec?.template.spec.domain.cpu.threads,
+        advanced: yamlDataObject,
+      };
+
+      for (const name in newData) {
+        onChange({ name, value: newData[name] });
+      }
+    }
+  }, [yamlDataObject]);
 
   return (
     <div className="editor">
@@ -49,12 +77,7 @@ function YamlEditor({ data, templateData = {} }) {
         value={yaml}
         options={{ tabSize: 2 }}
         onValidate={(value) => {}}
-        onChange={(value, ev) => {
-          try {
-            const jsonObject = jsYaml.load(value, "utf8");
-            setYamlData(jsonObject);
-          } catch (err) {}
-        }}
+        onChange={parseYamlToObject}
       />
     </div>
   );
