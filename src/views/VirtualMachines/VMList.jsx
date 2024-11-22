@@ -342,7 +342,8 @@ export default function VMList() {
       checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
       profile?.role === "admin"
     ) {
-      navigate("/virtual-machines/migrate", { state: item });
+      setSelectedVM(item);
+      setMigrateVisible(true);
     } else {
       showError();
     }
@@ -418,7 +419,16 @@ export default function VMList() {
           <Column field="cluster" header="Cluster"></Column>
           <Column body={actionTemplate}></Column>
         </DataTable>
-        <MigrateModal visible={migrateVisible} setVisible={setMigrateVisible} />
+        {migrateVisible && (
+          <MigrateModal
+            visible={migrateVisible}
+            onHide={() => {
+              setMigrateVisible(false);
+              setSelectedVM(null);
+            }}
+            vm={selectedVM}
+          />
+        )}
         <EditVmModal visible={editVisible} setVisible={setEditVisible} />
       </Page>
       <Dialog

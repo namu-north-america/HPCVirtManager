@@ -8,33 +8,42 @@ import CustomButton, {
 import { useDispatch, useSelector } from "react-redux";
 import { onMigrateVMAction } from "../../../store/actions/vmActions";
 
-export default function MigrateModal({ visible, setVisible }) {
+export default function MigrateModal({ visible, setVisible, onHide, vm }) {
   const dispatch = useDispatch();
   let { nodes } = useSelector((state) => state.project);
   nodes = nodes.map((item) => ({ name: item.name, value: item.name }));
-  let unSelected = nodes.filter((item) => item?.name !== visible?.node);
+  const currentVM = vm || visible; // Support both vm prop and visible object
+  let unSelected = nodes.filter((item) => item?.name !== currentVM?.node);
   const [data, setData] = useState({
     migratingFrom: "",
     migratingTo: "",
   });
 
   useEffect(() => {
-    setData((prev) => ({ ...prev, migratingFrom: visible?.node }));
-  }, [visible?.node]);
+    setData((prev) => ({ ...prev, migratingFrom: currentVM?.node }));
+  }, [currentVM?.node]);
 
   const handleChange = ({ name, value }) => {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleHide = () => {
+    if (onHide) {
+      onHide();
+    } else if (setVisible) {
+      setVisible(false);
+    }
+  };
+
   const onSubmit = () => {
-    dispatch(onMigrateVMAction(visible, () => setVisible(false)));
+    dispatch(onMigrateVMAction(currentVM, handleHide));
   };
 
   return (
     <CustomModal
       title="Migrating Virtual Machine From Node to Node"
       visible={visible}
-      onHide={() => setVisible(false)}
+      onHide={handleHide}
     >
       <p>
         <i className="pi pi-exclamation-triangle"></i>Note: The VM needs to be
@@ -65,7 +74,7 @@ export default function MigrateModal({ visible, setVisible }) {
         <CustomButtonOutlined
           label="Cancel"
           severity="secondary"
-          onClick={() => setVisible(false)}
+          onClick={handleHide}
         />
         <CustomButton label="Migrate" onClick={onSubmit} />
       </Buttonlayout>
