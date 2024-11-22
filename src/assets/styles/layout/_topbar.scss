@@ -11,8 +11,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: margin-left $transitionDuration;
+  transition: all $transition-duration ease;
   background-color: $white-color;
+  margin-left: $sidebar-width;  
+
+  &.collapsed {
+    margin-left: $sidebar-collapsed-width;  
+  }
 
   .p-breadcrumb {
     background: transparent !important;

@@ -18,6 +18,10 @@ export default function Layout({ children }) {
     "layout-mobile-sidebar-active": mobileMenuActive,
   });
 
+  const mainContainerClass = classNames("layout-main-container", {
+    "collapsed": !isSidebarOpen
+  });
+
   const toggleSidebar = () => {
     if (isDesktop()) {
       setIsSidebarOpen(prev => !prev);
@@ -29,8 +33,8 @@ export default function Layout({ children }) {
   return (
     <div className={wrapperClass}>
       <Sidebar isCollapsed={!isSidebarOpen} toggleSidebar={toggleSidebar} />
-      <div className="layout-main-container">
-        <Topbar toggleSidebar={toggleSidebar} />
+      <div className={mainContainerClass}>
+        <Topbar isCollapsed={!isSidebarOpen} toggleSidebar={toggleSidebar} />
         <div className="layout-main">{children}</div>
       </div>
     </div>

@@ -7,8 +7,9 @@ import { getImageUrl } from "../utils/commonFunctions";
 import { ReactComponent as Logo } from "../assets/images/svg/Logo.svg";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useBreadcrumb } from "../context/BreadcrumbContext";
+import classNames from "classnames";
 
-export default function Topbar({ toggleSidebar }) {
+export default function Topbar({ toggleSidebar, isCollapsed }) {
   const dispatch = useDispatch();
   const { breadcrumbItems } = useBreadcrumb();
 
@@ -40,8 +41,12 @@ export default function Topbar({ toggleSidebar }) {
   const shouldShowBreadcrumbs = breadcrumbItems?.length > 0 && window.location.hash !== "#/dashboard";
   console.log('Should show breadcrumbs:', shouldShowBreadcrumbs, window.location.hash);
   
+  const topbarClass = classNames("layout-topbar px-4", {
+    'collapsed': isCollapsed
+  });
+
   return (
-    <div className="layout-topbar px-4">
+    <div className={topbarClass}>
       <div className="flex align-items-center w-full">
         <div className="flex align-items-center">
           <div

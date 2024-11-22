@@ -75,6 +75,12 @@ export default function ViewVM() {
   };
   const moreActions = [
     {
+      label: "Open Console",
+      command: () => {
+        onOpenConsole();
+      },
+    },
+    {
       label: "Migrate",
       command: () => {
         setOpenMigrate(data);
@@ -284,14 +290,14 @@ export default function ViewVM() {
       disabled: data.status !== "Running",
     },
   ];
-  const headers = (
+  const renderButtons = () => (
     <>
       <CustomButtonOutlined
         label="Start"
-        severity="secondary"
+        severity="success"
         icon="pi pi-play"
-        disabled={data?.status === "Running"}
-        onClick={onStart}
+        onClick={data.status === "Stopped" ? () => onStart() : null}
+        // disabled={data.status !== "Stopped"}
       />
       <CustomSplitButton
         label="Shutdown"
@@ -311,7 +317,7 @@ export default function ViewVM() {
         label="Console"
         severity="secondary"
         icon="pi pi-code"
-        onClick={onOpenConsole}
+        onClick={() => setShowVncDialog(true)}  // Call local function directly
         // disabled={data.status !== "Running"}
       />
       <CustomSplitButton
@@ -321,11 +327,12 @@ export default function ViewVM() {
       />
     </>
   );
-const calculatePercentage = (used, total) => {
-  if (!total || total === 0) return 0;
-  const percentage = (used / total) * 100;
-  return isFinite(percentage) ? percentage.toFixed(1) : 0;
-};
+
+  const calculatePercentage = (used, total) => {
+    if (!total || total === 0) return 0;
+    const percentage = (used / total) * 100;
+    return isFinite(percentage) ? percentage.toFixed(1) : 0;
+  };
 
   const getSource = (item) => {
     let source = item?.spec?.source;
@@ -359,7 +366,7 @@ const calculatePercentage = (used, total) => {
       <CustomBreadcrum items={breadcrumItems} />
       <Page title={name}>
         <div className="flex align-items-center gap-2 mb-3">
-          {headers}
+          {renderButtons()}
         </div>
         <TabView>
           <TabPanel header="Overview">
