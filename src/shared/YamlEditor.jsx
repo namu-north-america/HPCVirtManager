@@ -51,7 +51,7 @@ function YamlEditor({ data, templateData = {}, onChange }) {
   }, [templateData]);
 
   useEffect(() => {
-    if (onChange) {
+    if (onChange && Object.keys(templateData).length) {
       const newData = {
         name: yamlDataObject.metadata?.name,
         namespace: yamlDataObject.metadata?.namespace,
