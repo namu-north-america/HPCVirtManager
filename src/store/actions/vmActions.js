@@ -207,7 +207,7 @@ const onAddVMAction =
           },
         },
       };
-      console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
+      // console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
       const res = await api("post", url, payload);
 
       if (res?.status === "Failure") {

@@ -63,5 +63,6 @@ const endPoints = {
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",
 };
+
 export default endPoints;
-// unpause
+
