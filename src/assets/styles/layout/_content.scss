@@ -5,10 +5,14 @@
   justify-content: space-between;
   padding: $topbar-height 0 0 0;
   transition: margin-left $transitionDuration;
+  position: relative;
+  z-index: 1;  // Much lower z-index
 }
 
 .layout-main {
   height: calc(100vh - 3rem - $topbar-height);
   overflow-y: auto;
   padding: 0;
+  position: relative;
+  z-index: 1;  // Much lower z-index
 }
