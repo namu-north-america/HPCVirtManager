@@ -27,6 +27,8 @@ export default function AddVirtualMachineForm({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [templateErrors, setTemplateErrors] = useState([]);
+
   // const [selectedTemplate, setSelectedTemplate] = useState(template);
 
   const isTemplateMode = Object.keys(selectedTemplate).length;
@@ -136,13 +138,15 @@ export default function AddVirtualMachineForm({ onClose }) {
         return true;
       case 3:
         return showFormErrors(data, setData);
+      case 4:
+        return templateErrors.length === 0;
       default:
         return true;
     }
   };
 
   const onStepChange = (index) => {
-    if (index > activeIndex && !isTemplateMode) {
+    if (index > activeIndex) {
       // Moving forward
       if (validateStep(activeIndex)) {
         setCompletedSteps((prev) => [...new Set([...prev, activeIndex])]);
@@ -312,7 +316,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 4:
         return (
           <>
-            <Advanced data={data} handleChange={handleChange} template={selectedTemplate} />
+            <Advanced data={data} handleChange={handleChange} template={selectedTemplate} onValidate={setTemplateErrors}/>
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(5)} />

@@ -53,6 +53,8 @@ spec:
       - dataVolume:
           name: datavolume-iso
         name: datavolume-iso
+      nodeSelector:
+        kubernetes.io/hostname:
 `.replace(/:$/m, ": ");
 
 const prebuiltTemplates = [

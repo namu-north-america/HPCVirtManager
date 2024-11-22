@@ -2,7 +2,6 @@ import api from "../../services/api";
 import endPoints from "../../services/endPoints";
 import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations } from "../slices/projectSlice";
-
 import { getVMsAction } from "./projectActions";
 
 const addVMRequest = async (payload, url, dispatch, next) => {
@@ -202,7 +201,6 @@ const onAddVMAction =
         })
       );
 
-      console.log('disks are ______', _disks);
       let _deviceDisk = _getDevices(_disks);
 
       let _accessCredentials = [];

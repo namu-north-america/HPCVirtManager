@@ -24,10 +24,11 @@ window.MonacoEnvironment = {
   },
 };
 
-function YamlEditor({ data, templateData = {}, onChange }) {
+function YamlEditor({ data, templateData = {}, onChange, onValidate }) {
   const monacoRef = useRef(null);
   const [yamlDataObject, setYamlDataObject] = useState({});
   const [yaml, setYaml] = useState(templateData.template);
+  const [errors, setErrors] = useState([]);
   // const project = useSelector((state) => state.project);
 
   const handleOnMount = useCallback((editor, monaco) => {
@@ -36,6 +37,11 @@ function YamlEditor({ data, templateData = {}, onChange }) {
       schemas: [yamlSchemaConfig],
     });
   }, []);
+
+  const validate = (errors) => {
+    setErrors(errors);
+    onValidate(errors);
+  };
 
   const parseYamlToObject = useCallback((yamlString) => {
     try {
@@ -76,9 +82,12 @@ function YamlEditor({ data, templateData = {}, onChange }) {
         theme="vs-dark"
         value={yaml}
         options={{ tabSize: 2 }}
-        onValidate={(value) => {}}
+        onValidate={(value) => {
+          validate(value);
+        }}
         onChange={parseYamlToObject}
       />
+      <div>{errors.length ? <small className="p-error">Fix errors of the Yaml template and go on!!</small> : null}</div>
     </div>
   );
 }
