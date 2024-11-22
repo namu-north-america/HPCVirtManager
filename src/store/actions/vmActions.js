@@ -30,6 +30,53 @@ const addVMRequest = async (payload, url, dispatch, next) => {
   }
 }
 
+const addDiskByYamlTemplate = async (namespace, template) => {
+  
+  let url = endPoints.ADD_STORAGE_DISK({
+    namespace: namespace,
+    name: template.metadata.name,
+  });
+  
+  template.apiVersion = "cdi.kubevirt.io/v1beta1";
+  template.kind= "DataVolume";
+
+  const res = await api("post", url, template);
+  if (res?.status === "Failure") {
+    throw new Error(res?.message);
+  }
+
+  return res.metadata;
+}
+
+const _getDevices = (_disks) => {
+  return _disks.map((disk, i) => {
+    let busObj = {};
+    if (disk?.busType) {
+      busObj.bus = disk?.busType;
+    }
+
+    let obj = {
+      bootOrder: i + 1,
+      name: disk?.diskName,
+      [disk?.diskType]: busObj,
+    };
+
+    if (disk?.cache) {
+      obj.cache = disk?.cache;
+    }
+    return obj;
+  });
+}
+
+const _getVolumes = (_disks) => _disks.map((disk, i) => {
+  return {
+    name: disk?.diskName,
+    dataVolume: {
+      name: disk?.volumeName,
+    },
+  };
+});
+
 const onAddVMAction =
   (data, disks, images, setLoading, next) => async (dispatch, getState) => {
     try {
@@ -69,12 +116,31 @@ const onAddVMAction =
       setLoading(true);
 
       if(advanced) {
+        let _disks = await Promise.all(
+          advanced.spec.dataVolumeTemplates.map(async (disk, i) => {
+            const metadata = await addDiskByYamlTemplate(namespace, disk);
+            return {
+              diskName: `disk${i + 1}`,
+              volumeName: metadata?.name
+            }
+          })
+        );
+
         let url = endPoints.ADD_VM({
           namespace: data.namespace,
           name: data.name,
         });
+        
         next(false);
+
+        const _deviceDisk = _getDevices(_disks);
+        const _volumes = _getVolumes(_disks);
+        
+        advanced.spec.template.spec.domain.devices.disks = _deviceDisk;
+        advanced.spec.template.spec.volumes = _volumes;
+
         await addVMRequest(advanced, url, dispatch, next);
+        
         setLoading(false);
         return;
       }
@@ -82,8 +148,8 @@ const onAddVMAction =
       let _disks = await Promise.all(
         disks.map(async (disk, i) => {
           if (disk?.createType === "new" || disk?.createType === "image") {
-            const diskName = `${data?.name.trim()}-disk${i + 1}`;
-            const diskNamespace = data?.namespace;
+            const diskName = `${name.trim()}-disk${i + 1}`;
+            const diskNamespace = namespace;
 
             let existingDisks = project.disks;
 
@@ -136,23 +202,8 @@ const onAddVMAction =
         })
       );
 
-      let _deviceDisk = _disks.map((disk, i) => {
-        let busObj = {};
-        if (disk?.busType) {
-          busObj.bus = disk?.busType;
-        }
-
-        let obj = {
-          bootOrder: i + 1,
-          name: disk?.diskName,
-          [disk?.diskType]: busObj,
-        };
-
-        if (disk?.cache) {
-          obj.cache = disk?.cache;
-        }
-        return obj;
-      });
+      console.log('disks are ______', _disks);
+      let _deviceDisk = _getDevices(_disks);
 
       let _accessCredentials = [];
       if (data.sshKey) {
@@ -170,14 +221,7 @@ const onAddVMAction =
         });
       }
 
-      let _volumes = _disks.map((disk, i) => {
-        return {
-          name: disk?.diskName,
-          dataVolume: {
-            name: disk?.volumeName,
-          },
-        };
-      });
+      let _volumes = _getVolumes(_disks);
 
       //add one disk and volume obj for username and password
       _deviceDisk.push({
