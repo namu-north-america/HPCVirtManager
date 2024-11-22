@@ -4,7 +4,7 @@ import endPoints from "../../services/endPoints";
 
 const onGetStorageAction = () => async (dispatch) => {
   const cpuQuery =
-    "(sum(container_fs_usage_bytes)/sum(kube_persistentvolume_capacity_bytes))*100";
+    "100 * sum(node_filesystem_size_bytes - node_filesystem_free_bytes) / sum(node_filesystem_size_bytes)";
   const res = await prometheusApi(
     "get",
     `/api/v1/query?query=${encodeURIComponent(cpuQuery)}`
@@ -25,7 +25,7 @@ const onGetStorageAction = () => async (dispatch) => {
 const getCPUUsage = (totalCores) => async (dispatch) => {
  
   const cpuQuery =
-    "sum(rate(container_cpu_usage_seconds_total[10m])) by (cluster)";
+    "(sum(kube_pod_container_resource_requests) / sum(machine_memory_bytes))*100";
   const res = await prometheusApi(
     "get",
     `/api/v1/query?query=${encodeURIComponent(cpuQuery)}`
@@ -47,7 +47,7 @@ const getCPUUsage = (totalCores) => async (dispatch) => {
   }
 };
 const getCPUTotalCores = () => async (dispatch) => {
-  const cpuQuery = "(sum(rate(container_cpu_usage_seconds_total[10m])) by (cluster)/sum(machine_cpu_cores))*100";
+  const cpuQuery = "(sum(kube_pod_container_resource_requests) / sum(machine_memory_bytes))*100";
   const res = await prometheusApi(
     "get",
     `/api/v1/query?query=${encodeURIComponent(cpuQuery)}`
@@ -69,7 +69,7 @@ const numericValue = parseFloat(value); // Convert to number
   }
 };
 const getMemoryUsage = () => async (dispatch) => {
-  const cpuQuery = "(sum(container_memory_usage_bytes) / sum(kube_node_status_allocatable{resource='memory'}))*100";
+  const cpuQuery = "100 * sum(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)";
   const res = await prometheusApi(
     "get",
     `/api/v1/query?query=${encodeURIComponent(cpuQuery)}`
