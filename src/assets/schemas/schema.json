@@ -58,7 +58,7 @@
                         "threads": { "type": "integer" },
                         "sockets": { "type": "integer" }
                       },
-                      "required": ["cores"]
+                      "required": ["cores", "threads", "sockets"]
                     },
                     "resources": {
                       "type": "object",

@@ -32,7 +32,7 @@ import { VncScreen } from 'react-vnc';
 import { Dialog } from 'primereact/dialog';
 import { showToastAction } from '../../store/slices/commonSlice';
 import YamlEditor from "../../shared/YamlEditor";
-import { yamlTemplate } from "./Form/TemplateSelectionModal";
+import { yamlTemplate } from "../../store/slices/vmSlice";
 
 export default function ViewVM() {
   const dispatch = useDispatch();

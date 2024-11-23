@@ -24,10 +24,10 @@ window.MonacoEnvironment = {
   },
 };
 
-function YamlEditor({ data, templateData = {}, onChange, onValidate }) {
+function YamlEditor({ defaultValue, onChange, onValidate }) {
   const monacoRef = useRef(null);
   const [yamlDataObject, setYamlDataObject] = useState({});
-  const [yaml, setYaml] = useState(templateData.template);
+  const [yaml, setYaml] = useState(defaultValue);
   const [errors, setErrors] = useState([]);
   // const project = useSelector((state) => state.project);
 
@@ -47,36 +47,22 @@ function YamlEditor({ data, templateData = {}, onChange, onValidate }) {
     try {
       const jsonObject = jsYaml.load(yamlString, "utf8");
       setYamlDataObject(jsonObject);
+      setYaml(yamlString);
+      onChange(yamlString, jsonObject);
     } catch (err) {
       console.log(err);
     }
   }, []);
 
   useEffect(() => {
-    parseYamlToObject(templateData.template);
-  }, [templateData]);
+    parseYamlToObject(yaml);
+  }, [yaml]);
 
-  useEffect(() => {
-    if (onChange && Object.keys(templateData).length) {
-      const newData = {
-        name: yamlDataObject.metadata?.name,
-        namespace: yamlDataObject.metadata?.namespace,
-        cores: yamlDataObject.spec?.template.spec.domain.cpu.cores,
-        sockets: yamlDataObject.spec?.template.spec.domain.cpu.sockets,
-        threads: yamlDataObject.spec?.template.spec.domain.cpu.threads,
-        advanced: yamlDataObject,
-      };
-
-      for (const name in newData) {
-        onChange({ name, value: newData[name] });
-      }
-    }
-  }, [yamlDataObject]);
-
+  useEffect(() => {}, []);
   return (
     <div className="editor">
       <Editor
-        defaultValue={templateData.template}
+        defaultValue={defaultValue}
         onMount={handleOnMount}
         language="yaml"
         theme="vs-dark"

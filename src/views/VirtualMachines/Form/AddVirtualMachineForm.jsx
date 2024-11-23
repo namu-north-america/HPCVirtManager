@@ -11,7 +11,7 @@ import Network from "./Network";
 import Storage from "./Storage";
 import Review from "./Review";
 import UserData from "./UserData";
-import { setSelectedTemplate } from "../../../store/slices/projectSlice";
+import { setSelectedTemplate } from "../../../store/slices/vmSlice";
 import { onAddVMAction } from "../../../store/actions/vmActions";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import formValidation from "../../../utils/validations";
@@ -22,7 +22,8 @@ import Advanced from "./Advanced";
 
 export default function AddVirtualMachineForm({ onClose }) {
   const dispatch = useDispatch();
-  const { priorityClassesDropdown, images, selectedTemplate } = useSelector((state) => state.project);
+  const { priorityClassesDropdown, images } = useSelector((state) => state.project);
+  const { selectedTemplate } = useSelector((state) => state.vm);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([]);
@@ -316,7 +317,12 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 4:
         return (
           <>
-            <Advanced data={data} handleChange={handleChange} template={selectedTemplate} onValidate={setTemplateErrors}/>
+            <Advanced
+              data={data}
+              handleChange={handleChange}
+              template={selectedTemplate}
+              onValidate={setTemplateErrors}
+            />
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(5)} />

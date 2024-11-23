@@ -6,7 +6,7 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import { CustomButtonOutlined } from "../../shared/CustomButton";
 import TemplateSelectionModal from "./Form/TemplateSelectionModal";
-import { setSelectedTemplate } from "../../store/slices/projectSlice";
+import { setSelectedTemplate } from "../../store/slices/vmSlice";
 import { useDispatch } from "react-redux";
 
 export default function AddVirtualMachine() {

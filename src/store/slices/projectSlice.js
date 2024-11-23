@@ -16,8 +16,6 @@ const initialState = {
   accessModeDropdown: ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"],
   bindingModeDropdown: ["bridge", "masquerade"],
   priorityClassesDropdown: [],
-  templates: [],
-  selectedTemplate: {},
 };
 
 export const projectSlice = createSlice({
@@ -56,13 +54,6 @@ export const projectSlice = createSlice({
     setPriorityClasses: (state, action) => {
       state.priorityClassesDropdown = action.payload.map((item) => item?.metadata?.name).reverse();
     },
-
-    setTemplates: (state, action) => {
-      state.templates = action.payload;
-    },
-    setSelectedTemplate: (state, action) => {
-      state.selectedTemplate = { ...action.payload };
-    },
   },
 });
 export const {
@@ -75,7 +66,5 @@ export const {
   setDisks,
   setPriorityClasses,
   setImages,
-  setTemplates,
-  setSelectedTemplate,
 } = projectSlice.actions;
 export default projectSlice.reducer;
