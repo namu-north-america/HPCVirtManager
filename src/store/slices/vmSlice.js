@@ -34,15 +34,13 @@ spec:
       domain:
         cpu:
           cores: 2
-          sockets: 1
-          threads: 3
         devices:
           disks:
           - disk:
               bus: virtio
             name: datavolume-iso
         machine:
-          type: ""
+          type:
         resources:
           requests:
             memory: 4G

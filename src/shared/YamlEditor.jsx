@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 import Editor from "@monaco-editor/react";
 import jsYaml from "js-yaml";
 import { configureMonacoYaml } from "monaco-yaml";
@@ -24,12 +23,11 @@ window.MonacoEnvironment = {
   },
 };
 
-function YamlEditor({ defaultValue, onChange, onValidate }) {
+function YamlEditor({ defaultValue, onChange, onValidate, value }) {
   const monacoRef = useRef(null);
   const [yamlDataObject, setYamlDataObject] = useState({});
   const [yaml, setYaml] = useState(defaultValue);
   const [errors, setErrors] = useState([]);
-  // const project = useSelector((state) => state.project);
 
   const handleOnMount = useCallback((editor, monaco) => {
     monacoRef.current = configureMonacoYaml(monaco, {
@@ -58,7 +56,10 @@ function YamlEditor({ defaultValue, onChange, onValidate }) {
     parseYamlToObject(yaml);
   }, [yaml]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    setYaml(value);
+  }, [value]);
+
   return (
     <div className="editor">
       <Editor

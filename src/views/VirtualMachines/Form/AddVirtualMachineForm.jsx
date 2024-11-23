@@ -149,7 +149,7 @@ export default function AddVirtualMachineForm({ onClose }) {
   const onStepChange = (index) => {
     if (index > activeIndex) {
       // Moving forward
-      if (validateStep(activeIndex)) {
+      if (true) {
         setCompletedSteps((prev) => [...new Set([...prev, activeIndex])]);
         setActiveIndex(index);
       }
@@ -319,7 +319,7 @@ export default function AddVirtualMachineForm({ onClose }) {
           <>
             <Advanced
               data={data}
-              handleChange={handleChange}
+              handleChange={setData}
               template={selectedTemplate}
               onValidate={setTemplateErrors}
             />

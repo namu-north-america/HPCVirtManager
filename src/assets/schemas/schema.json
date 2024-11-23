@@ -66,7 +66,7 @@
                         "requests": {
                           "type": "object",
                           "properties": {
-                            "memory": { "pattern": "^\\d+(Pi|Ti|Gi|Mi)$" },
+                            "memory": { "pattern": "^\\d+(Pi|Ti|Gi|Mi|G|T|P|M)$" },
                             "description": "You can insert values like 64Pi, 24Ti, or 100Mi"
                           },
                           "required": ["memory"]
