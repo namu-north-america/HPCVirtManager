@@ -265,13 +265,15 @@ export default function Images() {
   return (
     <>
       <div ref={ref}></div>
-      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="Images"
         onSearch={setSearch}
-        onRefresh={onLoad}
+        onRefresh={() => {
+          dispatch(getImagesAction());
+        }}
         onAdd={onOpenAddDialog}
-        addText="Create New Image"
+        breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
+        addText="New Image"
       >
         <DataTable value={images}>
           <Column field="namespace" header="Namespace" />

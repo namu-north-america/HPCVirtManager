@@ -41,7 +41,7 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
   const shouldShowBreadcrumbs = breadcrumbItems?.length > 0 && window.location.hash !== "#/dashboard";
   console.log('Should show breadcrumbs:', shouldShowBreadcrumbs, window.location.hash);
   
-  const topbarClass = classNames("layout-topbar px-4", {
+  const topbarClass = classNames("layout-topbar", {
     'collapsed': isCollapsed
   });
 
@@ -60,13 +60,14 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
           </div>
         </div>
 
-        <div className="flex-grow-1 mx-4" style={{ minHeight: '24px' }}>
+        <div className="flex-grow-1 mx-3 flex align-items-center" style={{ minHeight: '24px' }}>
           {shouldShowBreadcrumbs && (
             <BreadCrumb 
               model={breadcrumbItems} 
-              className="border-none p-0"
+              className="border-none p-0 w-full"
               pt={{
-                root: { className: 'bg-transparent border-none p-0' }
+                root: { className: 'bg-transparent border-none p-0' },
+                separator: { className: 'text-[10px]' }
               }}
             />
           )}

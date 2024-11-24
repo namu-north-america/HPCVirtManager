@@ -292,7 +292,6 @@ export default function StorageDisks() {
   return (
     <>
       <div ref={ref}></div>
-      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="Storage Disks"
         onSearch={setSearch}
@@ -300,7 +299,8 @@ export default function StorageDisks() {
           dispatch(getDisksAction());
         }}
         onAdd={onOpenAddDialog}
-        addText="Create New Storage Disk"
+        breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
+        addText="New Storage Disk"
       >
         <DataTable value={disks}>
           <Column

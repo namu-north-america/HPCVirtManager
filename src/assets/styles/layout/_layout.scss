@@ -4,3 +4,40 @@
 @import "./_responsive";
 @import "./scrollbar";
 @import "./authPageLayout.scss";
+
+.layout-wrapper {
+  min-height: 100vh;
+}
+
+.layout-main-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: space-between;
+  padding: calc($topbar-height + 0.6rem) 1.4rem 2rem 1.4rem;
+  margin-left: $sidebar-width;
+  transition: margin-left $transition-duration;
+}
+
+.layout-main {
+  flex: 1 1 auto;
+}
+
+.layout-sidebar {
+  position: fixed;
+  width: $sidebar-width;
+  height: calc(100vh);
+  z-index: 999;
+  overflow-y: auto;
+  user-select: none;
+  top: 0;
+  left: 0;
+  transition: transform $transition-duration, left $transition-duration;
+  background-color: $bg-color-dark;
+  border-right: 1px solid $border-color;
+  padding: 0;
+  
+  &.layout-sidebar-collapsed {
+    width: $sidebar-collapsed-width;
+  }
+}

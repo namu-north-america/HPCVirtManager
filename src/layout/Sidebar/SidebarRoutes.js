@@ -2,7 +2,7 @@ export const sidebarItems = [
   {
     title: "Dashboard",
     link: "/dashboard",
-    icon: "pi pi-home",
+    icon: "pi pi-th-large",
   },
   {
     title: "Virtual Machines",

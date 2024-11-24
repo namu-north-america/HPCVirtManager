@@ -53,7 +53,20 @@ const statusTemplate = (item) => {
     }
   };
 
-  return <span className={getStatusClass(item.status)}>{item.status}</span>;
+  return (
+    <span className={getStatusClass(item.status)}>
+      <i style={{ 
+        display: 'inline-block',
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        backgroundColor: 'currentColor',
+        marginRight: '6px',
+        verticalAlign: 'middle'
+      }}></i>
+      {item.status}
+    </span>
+  );
 };
 
 const osTemplate = (item) => {
@@ -407,7 +420,7 @@ export default function VMList() {
         }}
         onAdd={onAdd}
         breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
-        addText="Add Virtual Machine"
+        addText="New VM"
       >
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
           <Column field="status" header="Status" body={statusTemplate}></Column>
