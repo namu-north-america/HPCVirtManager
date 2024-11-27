@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import jsYaml from "js-yaml";
 import { configureMonacoYaml } from "monaco-yaml";
-import schema from "../assets/schemas/schema.json";
+import schema from "../assets/schemas/original-virtual-machine.json";
 
 const yamlSchemaConfig = {
   schema,
   fileMatch: ["*"],
-  uri: "https://github.com/remcohaszing/monaco-yaml/blob/HEAD/examples/demo/src/schema.json",
+  uri: "http://json-schema.org/schema",
 };
 
 window.MonacoEnvironment = {
@@ -23,6 +23,8 @@ window.MonacoEnvironment = {
   },
 };
 
+let current;
+
 function YamlEditor({ defaultValue, onChange, onValidate, value }) {
   const monacoRef = useRef(null);
   const [yamlDataObject, setYamlDataObject] = useState({});
@@ -30,10 +32,15 @@ function YamlEditor({ defaultValue, onChange, onValidate, value }) {
   const [errors, setErrors] = useState([]);
 
   const handleOnMount = useCallback((editor, monaco) => {
-    monacoRef.current = configureMonacoYaml(monaco, {
-      enableSchemaRequest: true,
-      schemas: [yamlSchemaConfig],
-    });
+    if (!current) {
+      monacoRef.current = configureMonacoYaml(monaco, {
+        enableSchemaRequest: true,
+        schemas: [yamlSchemaConfig],
+      });
+      current = monacoRef.current;
+    } else {
+      monacoRef.current = current;
+    }
   }, []);
 
   const validate = (errors) => {

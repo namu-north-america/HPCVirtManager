@@ -15,7 +15,7 @@ spec:
   - metadata:
      name: datavolume-iso
     spec:
-      storage:
+      pvc:
         accessModes:
         - ReadWriteOnce
         resources:

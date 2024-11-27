@@ -3,16 +3,16 @@ import formValidation from "./validations";
 import constants from "../constants";
 
 const showFormErrors = (data, setData, ignore) => {
-  let formErrors = {};
+  let formErrors = data.formErrors || {};
+
   entries(data).forEach(([key, value]) => {
     formErrors = {
-      ...formErrors,
-      ...formValidation(key, value, data, ignore),
+      // ...formErrors,
+      ...formValidation(key, value, { formErrors }, ignore),
     };
   });
 
   console.log(formErrors);
-  
   setData({ ...data, formErrors });
   return !values(formErrors).some((v) => notEqual(v, ""));
 };
@@ -50,7 +50,7 @@ function convertKiToMBorGB(input) {
   }
 }
 function bytesToGB(bytes) {
-  const gb = bytes / (1024 ** 3); // 1 GB = 1024^3 bytes
+  const gb = bytes / 1024 ** 3; // 1 GB = 1024^3 bytes
   return gb.toFixed(2); // Rounds to 2 decimal places
 }
 
@@ -62,75 +62,73 @@ function splitMemoryString(string = "") {
 }
 
 // permissions.js
- const hasPermission = (permissions, requiredPermission) => {
+const hasPermission = (permissions, requiredPermission) => {
   if (permissions.hasOwnProperty(requiredPermission) && permissions.requiredPermission === true) {
-    return true
+    return true;
   } else {
     return false;
   }
-  
 };
-const filterNamespacesByCrudVMS =(namespaces, data)=> {
+const filterNamespacesByCrudVMS = (namespaces, data) => {
   const result = [];
 
   // Loop through the data to find matching namespaces
   for (const entry of data) {
     if (
-      namespaces.includes(entry.namespace) &&  // Check if the namespace is in the list
-      entry.crudVMS === "yes"                  // Check if crudVMS is "yes"
+      namespaces.includes(entry.namespace) && // Check if the namespace is in the list
+      entry.crudVMS === "yes" // Check if crudVMS is "yes"
     ) {
       result.push(entry);
     }
   }
 
   return result;
-}
-const filterNamespacesBycrudDataVolume =(namespaces, data)=> {
+};
+const filterNamespacesBycrudDataVolume = (namespaces, data) => {
   const result = [];
 
   // Loop through the data to find matching namespaces
   for (const entry of data) {
     if (
-      namespaces.includes(entry.namespace) &&  // Check if the namespace is in the list
-      entry.crudDataVolume === "yes"                  // Check if crudDataVolume is "yes"
+      namespaces.includes(entry.namespace) && // Check if the namespace is in the list
+      entry.crudDataVolume === "yes" // Check if crudDataVolume is "yes"
     ) {
       result.push(entry);
     }
   }
 
   return result;
-}
+};
 
-const filterNamespacesByCrudImages =(namespaces, data)=> {
+const filterNamespacesByCrudImages = (namespaces, data) => {
   const result = [];
 
   // Loop through the data to find matching namespaces
   for (const entry of data) {
     if (
-      namespaces.includes(entry.namespace) &&  // Check if the namespace is in the list
-      entry.crudImage === "yes"                  // Check if crudVMS is "yes"
+      namespaces.includes(entry.namespace) && // Check if the namespace is in the list
+      entry.crudImage === "yes" // Check if crudVMS is "yes"
     ) {
       result.push(entry);
     }
   }
 
   return result;
-}
+};
 
-const checkNamespaceValue = (data, namespaceName, key)=> {
+const checkNamespaceValue = (data, namespaceName, key) => {
   // Find the object that matches the given namespace
-  
-  const namespaceObject = data.find(item => item.namespace === namespaceName);
-  
+
+  const namespaceObject = data.find((item) => item.namespace === namespaceName);
+
   // If the namespace exists and the key is present, check if its value is 'yes'
   if (namespaceObject && key in namespaceObject) {
     return namespaceObject[key] === "yes";
   }
-  
+
   // If namespace or key doesn't exist, return false
   return false;
-}
-
+};
 
 export {
   filterNamespacesByCrudVMS,

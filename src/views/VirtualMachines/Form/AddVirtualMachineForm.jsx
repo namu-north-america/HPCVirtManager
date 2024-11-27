@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
+import {v4} from "uuid";
 import { Button } from "primereact/button";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
@@ -73,6 +74,7 @@ export default function AddVirtualMachineForm({ onClose }) {
 
   const [disks, setDisks] = useState([
     {
+      uuid: v4(),
       createType: "new",
       diskType: "disk",
       busType: "",
@@ -317,12 +319,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 4:
         return (
           <>
-            <Advanced
-              data={data}
-              handleChange={setData}
-              template={selectedTemplate}
-              onValidate={setTemplateErrors}
-            />
+            <Advanced data={data} disks={disks} handleChange={setData} template={selectedTemplate} onValidate={setTemplateErrors} setDisks={setDisks} />
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(5)} />

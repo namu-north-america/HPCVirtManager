@@ -4,6 +4,25 @@ import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations } from "../slices/projectSlice";
 import { getVMsAction } from "./projectActions";
 
+
+// spec:
+//   dataVolumeTemplates:
+//   - metadata:
+//       name: datavolume-iso
+//     spec:
+//       storage:
+//         accessModes:
+//         - ReadWriteOnce
+//         resources:
+//           requests:
+//             storage: 10Gi
+//         storageClassName: nfs-client
+//       source:
+//         http:
+//           url: >-
+//             https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
+
+
 const addVMRequest = async (payload, url, dispatch, next) => {
   const res = await api("post", url, payload);
 
@@ -47,23 +66,27 @@ const addDiskByYamlTemplate = async (namespace, template) => {
   return res.metadata;
 }
 
-const _getDevices = (_disks) => {
+export const _getDeviceFromDisk = (disk, i) => {
+  let busObj = {};
+  if (disk?.busType) {
+    busObj.bus = disk?.busType;
+  }
+
+  let obj = {
+    bootOrder: i + 1,
+    name: disk?.diskName,
+    [disk?.diskType]: busObj,
+  };
+
+  if (disk?.cache) {
+    obj.cache = disk?.cache;
+  }
+  return obj;
+}
+
+export const _getDevices = (_disks) => {
   return _disks.map((disk, i) => {
-    let busObj = {};
-    if (disk?.busType) {
-      busObj.bus = disk?.busType;
-    }
-
-    let obj = {
-      bootOrder: i + 1,
-      name: disk?.diskName,
-      [disk?.diskType]: busObj,
-    };
-
-    if (disk?.cache) {
-      obj.cache = disk?.cache;
-    }
-    return obj;
+    return _getDeviceFromDisk(disk,  i);
   });
 }
 

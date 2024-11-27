@@ -8,6 +8,7 @@ import {
 import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 import { confirmPopup } from "primereact/confirmpopup";
+import {v4} from "uuid";
 
 export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   const { storageClassesDropdown, accessModeDropdown, disksDropdown, images } =

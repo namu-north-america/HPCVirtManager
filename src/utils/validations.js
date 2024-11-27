@@ -1,21 +1,9 @@
-import {
-  FirstletterUpperCase,
-  equal,
-  greaterThan,
-  length,
-  notEqual,
-} from "./javascript";
-import {
-  firstLetterToUppercase,
-  stringValidation,
-  emailValidation,
-  regularString,
-  urlValidation,
-} from "./regex";
+import { FirstletterUpperCase, equal, greaterThan, length, notEqual } from "./javascript";
+import { firstLetterToUppercase, stringValidation, emailValidation, regularString, urlValidation } from "./regex";
 
 const formValidation = (name, value, state, ignore = []) => {
   const formErrors = { ...state?.formErrors };
-
+  console.log("form errors__", formErrors);
   if (ignore.includes(name)) {
     if (formErrors[name]) {
       formErrors[name] = "";
@@ -64,14 +52,12 @@ const formValidation = (name, value, state, ignore = []) => {
     case "accessMode":
     case "disk":
     case "image":
-      if (equal(length(value))) {
+      if (equal(length(value)) || !value) {
         formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
       } else if (!regularString(value)) {
         formErrors[name] = `Unnecessary space or special chracter in word!`;
       } else if (greaterThan(length(value), 70)) {
-        formErrors[name] = `${firstLetterToUppercase(
-          name
-        )} exceeds character limit. Maximum allowed: 70 characters.`;
+        formErrors[name] = `${firstLetterToUppercase(name)} exceeds character limit. Maximum allowed: 70 characters.`;
       } else {
         formErrors[name] = "";
       }
@@ -94,13 +80,15 @@ const formValidation = (name, value, state, ignore = []) => {
     case "threads":
     case "memory":
     case "priorityClass":
-      if (equal(length(value))) {
+      // console.log("validation____", name, value, equal(length(value)));
+      if (equal(length(value)) || !value) {
         formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
       } else if (!stringValidation(value)) {
         formErrors[name] = `Unnecessary space or special chracter in word!`;
       } else {
         formErrors[name] = "";
       }
+      console.log("validation____", name, value);
       break;
     case "password":
       if (equal(length(value))) {
