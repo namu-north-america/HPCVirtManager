@@ -7,8 +7,9 @@ import { getImageUrl } from "../utils/commonFunctions";
 import { ReactComponent as Logo } from "../assets/images/svg/Logo.svg";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useBreadcrumb } from "../context/BreadcrumbContext";
+import classNames from "classnames";
 
-export default function Topbar({ toggleSidebar }) {
+export default function Topbar({ toggleSidebar, isCollapsed }) {
   const dispatch = useDispatch();
   const { breadcrumbItems } = useBreadcrumb();
 
@@ -40,8 +41,12 @@ export default function Topbar({ toggleSidebar }) {
   const shouldShowBreadcrumbs = breadcrumbItems?.length > 0 && window.location.hash !== "#/dashboard";
   console.log('Should show breadcrumbs:', shouldShowBreadcrumbs, window.location.hash);
   
+  const topbarClass = classNames("layout-topbar", {
+    'collapsed': isCollapsed
+  });
+
   return (
-    <div className="layout-topbar px-4">
+    <div className={topbarClass}>
       <div className="flex align-items-center w-full">
         <div className="flex align-items-center">
           <div
@@ -55,13 +60,14 @@ export default function Topbar({ toggleSidebar }) {
           </div>
         </div>
 
-        <div className="flex-grow-1 mx-4" style={{ minHeight: '24px' }}>
+        <div className="flex-grow-1 mx-3 flex align-items-center" style={{ minHeight: '24px' }}>
           {shouldShowBreadcrumbs && (
             <BreadCrumb 
               model={breadcrumbItems} 
-              className="border-none p-0"
+              className="border-none p-0 w-full"
               pt={{
-                root: { className: 'bg-transparent border-none p-0' }
+                root: { className: 'bg-transparent border-none p-0' },
+                separator: { className: 'text-[10px]' }
               }}
             />
           )}

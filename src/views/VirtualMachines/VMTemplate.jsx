@@ -14,11 +14,6 @@ import {
 } from "../../utils/commonFunctions";
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
-const breadcrumItems = [
-  { label: "Virtual Machines", url: "/#/virtual-machines/list" },
-  { label: "Templates", url: "/#/virtual-machines/templates" },
-];
-
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
 };
@@ -54,12 +49,8 @@ export default function VMTemplate() {
   const { namespacesDropdown } = useSelector((state) => state.project);
   const [search, setSearch] = useState("");
   const [templates, setTemplates] = useState([]); // This will be populated from your API
-  const { updateBreadcrumb } = useBreadcrumb();
+  const { breadcrumb } = useBreadcrumb();
   
-  useEffect(() => {
-    updateBreadcrumb(breadcrumItems);
-  }, []);
-
   // Filter templates based on search
   const filteredTemplates = useMemo(
     () =>
@@ -111,7 +102,7 @@ export default function VMTemplate() {
       }}
       onAdd={onAdd}
       addText="New VM Template"
-      breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
+      breadcrumb={<CustomBreadcrum items={breadcrumb} />}
     >
       <DataTable value={filteredTemplates} tableStyle={{ minWidth: "50rem" }}>
         <Column field="os" header="OS" body={osTemplate}></Column>

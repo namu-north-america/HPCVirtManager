@@ -25,13 +25,20 @@ $text-color-secondary: #4B5563;
 $link-color: #2563EB;
 
 $border-radius: 10px;
-$transitionDuration: 0.5s;
+$transition-duration: 0.3s;  // Consistent transition duration
+$transitionDuration: $transition-duration;  // Keep for backward compatibility
 $gutter: 5px;
 $sidebar-width: 250px;
+$sidebar-collapsed-width: 70px;  // Width of sidebar when collapsed
 $topbar-height: 3rem;
 
 $menu-item-hover: rgba(255, 255, 255, 0.1);
 $menu-item-secondary: #959ba4;
+
+//icon sizes
+$icon-size-sm: 0.75rem;
+$icon-size-base: 1rem;
+$icon-size-lg: 1.25rem;
 
 // Status Colors
 $status-ready: #22C55E;

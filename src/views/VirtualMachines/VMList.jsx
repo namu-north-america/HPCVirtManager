@@ -25,6 +25,8 @@ import {
 } from "../../utils/commonFunctions";
 import { getImagesAction } from "../../store/actions/imageActions";
 import { Tooltip } from "primereact/tooltip";
+import { VncScreen } from 'react-vnc';
+import { Dialog } from 'primereact/dialog';
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
@@ -51,7 +53,20 @@ const statusTemplate = (item) => {
     }
   };
 
-  return <span className={getStatusClass(item.status)}>{item.status}</span>;
+  return (
+    <span className={getStatusClass(item.status)}>
+      <i style={{ 
+        display: 'inline-block',
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        backgroundColor: 'currentColor',
+        marginRight: '6px',
+        verticalAlign: 'middle'
+      }}></i>
+      {item.status}
+    </span>
+  );
 };
 
 const osTemplate = (item) => {
@@ -99,6 +114,8 @@ export default function VMList() {
   const [migrateVisible, setMigrateVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showVncDialog, setShowVncDialog] = useState(false);
+  const [selectedVM, setSelectedVM] = useState(null);
 
   useEffect(() => {
     dispatch(getVMsAction());
@@ -126,97 +143,126 @@ export default function VMList() {
 
   const actionTemplate = (item) => {
     return (
-      <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
-        <div>
-          <div className="font-semibold mb-2">Actions</div>
+      <div className="flex align-items-center gap-2">
+        {item?.status === "Running" && (
+          <button 
+            className="p-link inline-flex align-items-center justify-content-center"
+            onClick={() => onOpenConsole(item)}
+            style={{ 
+              width: '1.75rem',
+              height: '1.75rem',
+              borderRadius: '50%',
+              transition: 'all 0.2s ease',
+              padding: 0
+            }}
+          >
+            <i 
+              className="pi pi-code"
+              style={{ 
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+                margin: 0,
+                lineHeight: 0
+              }}
+            />
+          </button>
+        )}
+        <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
+          <div>
+            <div className="font-semibold mb-2">Actions</div>
 
-          {item?.status === "Running" && (
-            <>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onPauseUnpause(item, "pause")}
-              >
-                Pause
-              </div>
-              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                Stop
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onRestart(item)}
-              >
-                Restart
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onMigrate(item)}
-              >
-                Migrate
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onOpenConsole(item)}
-              >
-                Open Console
-              </div>
-            </>
-          )}
-          {item?.status === "Paused" && (
-            <>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onPauseUnpause(item, "unpause")}
-              >
-                Unpause
-              </div>
-              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                Stop
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onRestart(item)}
-              >
-                Restart
-              </div>
-            </>
-          )}
-          {(item?.status === "Stopped" || item?.status === "Stopping") && (
-            <>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onStart(item)}
-              >
-                Start
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onMigrate(item)}
-              >
-                Migrate
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onEdit(item)}
-              >
-                Edit VM
-              </div>
-              <div className="cursor-pointer" onClick={() => onDelete(item)}>
-                Delete VM
-              </div>
-            </>
-          )}
+            {item?.status === "Running" && (
+              <>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onPauseUnpause(item, "pause")}
+                >
+                  Pause
+                </div>
+                <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+                  Stop
+                </div>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onRestart(item)}
+                >
+                  Restart
+                </div>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onMigrate(item)}
+                >
+                  Migrate
+                </div>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onOpenConsole(item)}
+                >
+                  Open Console
+                </div>
+              </>
+            )}
+            {item?.status === "Paused" && (
+              <>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onPauseUnpause(item, "unpause")}
+                >
+                  Unpause
+                </div>
+                <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+                  Stop
+                </div>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onRestart(item)}
+                >
+                  Restart
+                </div>
+              </>
+            )}
+            {(item?.status === "Stopped" || item?.status === "Stopping") && (
+              <>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onStart(item)}
+                >
+                  Start
+                </div>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onMigrate(item)}
+                >
+                  Migrate
+                </div>
+                <div
+                  className="cursor-pointer mb-2"
+                  onClick={() => onEdit(item)}
+                >
+                  Edit VM
+                </div>
+                <div className="cursor-pointer" onClick={() => onDelete(item)}>
+                  Delete VM
+                </div>
+              </>
+            )}
 
-          {!["Running", "Paused", "Stopped", "Stopping"].includes(
-            item?.status
-          ) && (
-            <>
-              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                Stop
-              </div>
-            </>
-          )}
-        </div>
-      </CustomOverlay>
+            {!["Running", "Paused", "Stopped", "Stopping"].includes(
+              item?.status
+            ) && (
+              <>
+                <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+                  Stop
+                </div>
+              </>
+            )}
+          </div>
+        </CustomOverlay>
+      </div>
     );
   };
 
@@ -309,17 +355,22 @@ export default function VMList() {
       checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
       profile?.role === "admin"
     ) {
-      navigate("/virtual-machines/migrate", { state: item });
+      setSelectedVM(item);
+      setMigrateVisible(true);
     } else {
       showError();
     }
   };
-  const onOpenConsole = ({ name, namespace }) => {
-    window.open(
-      `${constants.CONSOLE_URL}/?namespace=${namespace}&name=${name}`,
-      "_blank"
-    );
+  const onOpenConsole = (vm) => {
+    setSelectedVM(vm);
+    setShowVncDialog(true);
   };
+
+  const onCloseConsole = () => {
+    setShowVncDialog(false);
+    setSelectedVM(null);
+  };
+
   const onEdit = (item) => {
     setEditVisible(item);
   };
@@ -360,28 +411,72 @@ export default function VMList() {
   };
 
   return (
-    <Page
-      title="Virtual Machines"
-      onSearch={setSearch}
-      onRefresh={() => {
-        dispatch(getVMsAction());
-      }}
-      onAdd={onAdd}
-      breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
-      addText="Add Virtual Machine"
-    >
-      <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
-        <Column field="status" header="Status" body={statusTemplate}></Column>
-        <Column field="name" header="Name" body={vmname}></Column>
-        <Column field="guestOS" header="OS" body={osTemplate}></Column>
-        <Column field="time" header="Created" body={timeTemplate}></Column>
-        <Column field="node" header="Node"></Column>
-        <Column field="namespace" header="Namespace"></Column>
-        <Column field="cluster" header="Cluster"></Column>
-        <Column body={actionTemplate}></Column>
-      </DataTable>
-      <MigrateModal visible={migrateVisible} setVisible={setMigrateVisible} />
-      <EditVmModal visible={editVisible} setVisible={setEditVisible} />
-    </Page>
+    <>
+      <Page
+        title="Virtual Machines"
+        onSearch={setSearch}
+        onRefresh={() => {
+          dispatch(getVMsAction());
+        }}
+        onAdd={onAdd}
+        breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
+        addText="New VM"
+      >
+        <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
+          <Column field="status" header="Status" body={statusTemplate}></Column>
+          <Column field="name" header="Name" body={vmname}></Column>
+          <Column field="guestOS" header="OS" body={osTemplate}></Column>
+          <Column field="time" header="Created" body={timeTemplate}></Column>
+          <Column field="node" header="Node"></Column>
+          <Column field="namespace" header="Namespace"></Column>
+          <Column field="cluster" header="Cluster"></Column>
+          <Column body={actionTemplate}></Column>
+        </DataTable>
+        {migrateVisible && (
+          <MigrateModal
+            visible={migrateVisible}
+            onHide={() => {
+              setMigrateVisible(false);
+              setSelectedVM(null);
+            }}
+            vm={selectedVM}
+          />
+        )}
+        <EditVmModal visible={editVisible} setVisible={setEditVisible} />
+      </Page>
+      <Dialog
+        header={`Console: ${selectedVM?.name}`}
+        visible={showVncDialog}
+        style={{ width: '80vw' }}
+        modal
+        onHide={onCloseConsole}
+        maximizable
+      >
+        {selectedVM && (
+          <div style={{ height: '70vh', width: '100%' }}>
+            <VncScreen
+              url={`ws://${constants.baseUrl.replace(/^https?:\/\//, '')}/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${selectedVM.namespace}/virtualmachineinstances/${selectedVM.name}/vnc`}
+              scaleViewport
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#000'
+              }}
+              onConnect={() => console.log('VNC Connected')}
+              onDisconnect={() => console.log('VNC Disconnected')}
+              onError={(error) => {
+                console.error('VNC Error:', error);
+                dispatch(showToastAction({
+                  type: 'error',
+                  title: 'Console Error',
+                  message: 'Failed to connect to VM console'
+                }));
+              }}
+              wsProtocols={['binary']}
+            />
+          </div>
+        )}
+      </Dialog>
+    </>
   );
 }
