@@ -109,22 +109,36 @@ export default function StorageDisks() {
   });
 
   const handleChange = ({ name, value }) => {
-    const formErrors = formValidation(name, value, disk);
-    if (name === "type" && value === "blank") {
-      setDisk((prev) => ({ ...prev, [name]: value, url: "", formErrors }));
+    let ignore = [];
+    if (disk.type === "blank") {
+      ignore = ["url", "image"];
+    } else if (disk.type === "image") {
+      ignore = ["url"];
+    } else if (["http", "registry", "gcs", "s3"].includes(disk.type)) {
+      ignore = ["image"];
+    }
+    const formErrors = formValidation(name, value, disk, ignore);
+    if (name === "type") {
+      if (value === "blank") {
+        setDisk((prev) => ({ ...prev, [name]: value, url: "", image: "", formErrors }));
+      } else if (value === "image") {
+        setDisk((prev) => ({ ...prev, [name]: value, url: "", formErrors }));
+      } else if (["http", "registry", "gcs", "s3"].includes(value)) {
+        setDisk((prev) => ({ ...prev, [name]: value, image: "", formErrors }));
+      }
     } else {
       setDisk((prev) => ({ ...prev, [name]: value, formErrors }));
     }
   };
+
   const onAddDisk = () => {
     let ignore = [];
-    if (disk?.type === "blank") {
-      ignore.push("url");
-      ignore.push("image");
-    }
-
-    if (disk?.type === "image") {
-      ignore.push("url");
+    if (disk.type === "blank") {
+      ignore = ["url", "image"];
+    } else if (disk.type === "image") {
+      ignore = ["url"];
+    } else if (["http", "registry", "gcs", "s3"].includes(disk.type)) {
+      ignore = ["image"];
     }
 
     if (showFormErrors(disk, setDisk, ignore)) {
@@ -135,6 +149,7 @@ export default function StorageDisks() {
       );
     }
   };
+
   const onOpenAddDialog = () => {
     setDisk((prev) => ({ ...prev, visible: true }));
   };
@@ -292,6 +307,7 @@ export default function StorageDisks() {
   return (
     <>
       <div ref={ref}></div>
+      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="Storage Disks"
         onSearch={setSearch}
@@ -299,8 +315,7 @@ export default function StorageDisks() {
           dispatch(getDisksAction());
         }}
         onAdd={onOpenAddDialog}
-        breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
-        addText="New Storage Disk"
+        addText="Create New Storage Disk"
       >
         <DataTable value={disks}>
           <Column
