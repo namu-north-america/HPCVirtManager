@@ -454,8 +454,11 @@ export default function VMList() {
       >
         {selectedVM && (
           <div style={{ height: '70vh', width: '100%' }}>
+            <div style={{ color: 'white', padding: '10px', backgroundColor: 'black' }}>
+              <strong>VNC URL :</strong> {`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+            </div>
             <VncScreen
-              url={`ws://${constants.baseUrl.replace(/^https?:\/\//, '')}/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${selectedVM.namespace}/virtualmachineinstances/${selectedVM.name}/vnc`}
+              url={`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${selectedVM.namespace}/virtualmachineinstances/${selectedVM.name}/vnc`}
               scaleViewport
               style={{
                 width: '100%',

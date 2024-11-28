@@ -545,8 +545,11 @@ export default function ViewVM() {
         maximizable
       >
         <div style={{ height: '70vh', width: '100%' }}>
+          <div style={{ color: 'white', padding: '10px', backgroundColor: 'black' }}>
+            <strong>VNC URL :</strong> {`/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+          </div>
           <VncScreen
-            url={`ws://${constants.baseUrl.replace(/^https?:\/\//, '')}/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+            url={`/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
             scaleViewport
             style={{
               width: '100%',
