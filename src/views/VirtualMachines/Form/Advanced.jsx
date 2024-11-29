@@ -30,6 +30,14 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
     setYamlObject(yamlDataObject);
   }, []);
 
+  const getMemoryParts = (memoryString) => {
+    const match = (memoryString || "").match(/(\d+)(\D+)/);
+    if (match) {
+      return { size: match[1], unit: match[2] };
+    }
+    return { size: null, unit: null };
+  };
+
   useEffect(() => {
     return () => {
       if (handleChange && yamlDataObject) {
@@ -41,14 +49,42 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
           advanced: yamlDataObject,
         };
+
         const memory = yamlDataObject.spec?.template?.spec?.domain?.resources?.requests?.memory;
-        const match = (memory || "").match(/(\d+)(\D+)/);
-        if (match) {
-          data.memory = match[1];
-          data.memoryType = match[2];
-        }
+        const memoryParts = getMemoryParts(memory);
+
+        data.memory = memoryParts.size;
+        data.memoryType = memoryParts.unit;
+
         handleChange({ ...data, ...newData });
+
         if (setDisks && yamlDataObject) {
+          const dataVolumeTemplates = yamlDataObject.spec.dataVolumeTemplates;
+
+          if (dataVolumeTemplates.length) {
+            const newOrImageDisks = dataVolumeTemplates.map((template, i) => {
+              const storageClass = template.spec.pvc.storageClassName;
+              const storage = template.spec.pvc.resources.requests.storage;
+
+              const storageParts = getMemoryParts(storage);
+              return {
+                createType: "new",
+                diskType: "disk",
+                busType: "",
+                memoryType: storageParts.unit,
+                size: storageParts.size,
+                storageClass: storageClass[0],
+                accessMode: "",
+                image: "",
+                disk: "",
+                type: "blank",
+                url: "",
+                cache: "",
+              };
+            });
+
+            setDisks(newOrImageDisks);
+          }
         }
       }
     };
@@ -58,7 +94,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
   useEffect(() => {
     if (updatedYamlString) {
       const objectData = jsYaml.load(updatedYamlString);
-      console.log("object data_____", objectData, updatedYamlString);
+
       if (data.cores) objectData.spec.template.spec.domain.cpu.cores = parseInt(data.cores);
       if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
       if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
@@ -73,6 +109,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
       if (data.node) {
         objectData.spec.template.spec.nodeSelector["kubernetes.io/hostname"] = data.node;
       }
+
       if (disks.length) {
         if (disks.length > 1) {
           if (objectData.spec.template?.spec?.domain?.devices?.disks) {
