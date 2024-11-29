@@ -61,6 +61,6 @@
   "devDependencies": {
     "@craco/craco": "^7.1.0",
     "cross-env": "^7.0.3",
-    "yaml-loader": "^0.8.1"
+    "raw-loader": "^4.0.2"
   }
 }

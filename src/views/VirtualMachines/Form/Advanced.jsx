@@ -219,6 +219,15 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         if (data.sshKey) {
           objectData.spec.template.spec.accessCredentials = _getAccessCredentials(data.sshKey);
         }
+
+        if (data.bindingMode) {
+          // const interface = objectData.spec.template?.spec.domain.devices.interfaces[0];
+          const network = objectData.spec.template?.spec.networks[0];
+          objectData.spec.template.spec.domain.devices.interfaces[0] = {
+            name: network.name,
+            [data.bindingMode]: {},
+          };
+        }
       }
       const yamlString = jsYaml.dump(objectData, {
         noArrayIndent: true,
