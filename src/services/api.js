@@ -2,13 +2,7 @@ import axios from "axios";
 import { isAuthenticated, logout } from "./auth";
 import endPoints from "./endPoints";
 
-const api = async (
-  method,
-  urlEndPoint,
-  data = {},
-  params = {},
-  extraHeaders = {}
-) => {
+const api = async (method, urlEndPoint, data = {}, params = {}, extraHeaders = {}) => {
   try {
     let headers = {
       "Content-Type": "application/json",
@@ -39,7 +33,7 @@ const api = async (
     }
 
     console.log("qwertyuio==>", error);
-    
+
     let res = error?.response ? error.response.data : error.toString();
     return res;
   }

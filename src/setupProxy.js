@@ -10,6 +10,7 @@ module.exports = function (app) {
       pathRewrite: {
         "^/server": "", // remove /server prefix
       },
+      timeout: 3000,
     })
   );
   app.use(
@@ -21,6 +22,7 @@ module.exports = function (app) {
       pathRewrite: {
         "^/server1": "", // remove /server prefix
       },
+      timeout: 3000,
     })
   );
 };

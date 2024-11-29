@@ -1,56 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
+import template from "./vm-template.yaml";
 import FedoraLogo from "../../assets/images/svg/fedora-logo.svg";
 import UbuntuLogo from "../../assets/images/svg/ubuntu-logo.svg";
 import WindowsLogo from "../../assets/images/svg/windows-logo.svg";
 import RedHatLogo from "../../assets/images/svg/redhat-logo.svg";
 
-export const yamlTemplate = `
-apiVersion: kubevirt.io/v1alpha3
-kind: VirtualMachine
-metadata:
-  name: vm-fedora
-  namespace: default
-spec:
-  dataVolumeTemplates:
-  - metadata:
-     name: datavolume-iso
-    spec:
-      pvc:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 10Gi
-        storageClassName: nfs-client
-      source:
-        http:
-          url: https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
-  running: false
-  template:
-    metadata:
-      labels:
-        kubevirt.io/vm: vm-fedora
-    spec:
-      domain:
-        cpu:
-          cores: 2
-        devices:
-          disks:
-          - disk:
-              bus: virtio
-            name: datavolume-iso
-        machine:
-          type:
-        resources:
-          requests:
-            memory: 4G
-      volumes:
-      - dataVolume:
-          name: datavolume-iso
-        name: datavolume-iso
-      nodeSelector:
-        kubernetes.io/hostname:
-`.replace(/:$/m, ": ");
+export const yamlTemplate = template.replace(/:$/m, ": ");
 
 const prebuiltTemplates = [
   { id: 1, name: "Fedora", logo: FedoraLogo, subtitle: "Linux Distribution", template: yamlTemplate },
@@ -62,7 +17,7 @@ const prebuiltTemplates = [
 const initialState = {
   templates: prebuiltTemplates,
   selectedTemplate: {},
-  updatedYamlString: "",
+  updatedYamlString: yamlTemplate,
 };
 
 const vmSlice = createSlice({
@@ -76,13 +31,13 @@ const vmSlice = createSlice({
       state.selectedTemplate = action.payload;
       state.updatedYamlString = action.payload.template;
     },
-    setYamlString: (state, action) => {
+    setUpdatedYamlString: (state, action) => {
       state.updatedYamlString = action.payload;
     },
   },
 });
 
-export const { setTemplates, setSelectedTemplate, setYamlString } = vmSlice.actions;
+export const { setTemplates, setSelectedTemplate, setUpdatedYamlString } = vmSlice.actions;
 
 export const selectTemplates = (state) => state.vm.templates;
 export const selectSelectedTemplate = (state) => state.vm.selectedTemplate;

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
-import {v4} from "uuid";
+import { v4 } from "uuid";
 import { Button } from "primereact/button";
+import { Divider } from "primereact/divider";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
 import Grid, { Col } from "../../../shared/Grid";
@@ -275,16 +276,19 @@ export default function AddVirtualMachineForm({ onClose }) {
         return (
           <>
             {disks.map((disk, i) => (
-              <Storage
-                key={i}
-                disk={disk}
-                setDisk={setDisks}
-                index={i}
-                disks={disks}
-                onRemoveDisk={onRemoveDisk}
-                onMoveDisk={onMoveDisk}
-                data={data}
-              />
+              <>
+                {disks.length > 1 && <Divider className="text-primary">Storage {i + 1}</Divider>}
+                <Storage
+                  key={i}
+                  disk={disk}
+                  setDisk={setDisks}
+                  index={i}
+                  disks={disks}
+                  onRemoveDisk={onRemoveDisk}
+                  onMoveDisk={onMoveDisk}
+                  data={data}
+                />
+              </>
             ))}
             <button className="add-disk-button" onClick={onAddMoreDisk}>
               <i className="pi pi-plus-circle"></i>
@@ -319,7 +323,14 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 4:
         return (
           <>
-            <Advanced data={data} disks={disks} handleChange={setData} template={selectedTemplate} onValidate={setTemplateErrors} setDisks={setDisks} />
+            <Advanced
+              data={data}
+              disks={disks}
+              handleChange={setData}
+              template={selectedTemplate}
+              onValidate={setTemplateErrors}
+              setDisks={setDisks}
+            />
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(3)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(5)} />

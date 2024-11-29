@@ -69,7 +69,7 @@ const addDiskByYamlTemplate = async (namespace, template) => {
 export const _getDeviceFromDisk = (disk, i) => {
   let busObj = {};
   if (disk?.busType) {
-    busObj.bus = disk?.busType;
+    busObj.bus = disk?.busType || 'virtio';
   }
 
   let obj = {
@@ -90,14 +90,63 @@ export const _getDevices = (_disks) => {
   });
 }
 
-const _getVolumes = (_disks) => _disks.map((disk, i) => {
+export const _getVolumeFromDisk = (disk) => {
   return {
     name: disk?.diskName,
     dataVolume: {
       name: disk?.volumeName,
     },
   };
+}
+
+export const _getVolumes = (_disks) => _disks.map((disk, i) => {
+  return _getVolumeFromDisk(disk);
 });
+
+export const _setUserDataAndNetworkDisks = (_devices, _volumes, {name, username, password}) => {
+  const deviceData = {
+    bootOrder: _devices.length + 1,
+    name: `disk${_devices.length + 1}`,
+    disk: {
+      bus: "virtio",
+    },
+  }
+  if(_devices instanceof Array) {
+    _devices.push(deviceData);
+  }
+  const volumeData = {
+    name: `disk${_volumes.length + 1}`,
+    cloudInitNoCloud: {
+      userData: `#cloud-config\nmanage_etc_hosts: true\nhostname: ${name}\nuser: ${username}\npassword: ${password}\n`,
+      networkData:
+        "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
+    },
+  } 
+  if(_volumes instanceof Array) {
+    _volumes.push(volumeData);
+  }
+
+  return {_volumes, _devices, deviceData, volumeData}
+}
+
+export const _getAccessCredentials = (sshKey) => {
+  let _accessCredentials = [];
+  if (sshKey) {
+    _accessCredentials.push({
+      sshPublicKey: {
+        source: {
+          secret: {
+            secretName: sshKey
+          }
+        },
+        propagationMethod: {
+          noCloud: {}
+        }
+      }
+    });
+  }
+  return _accessCredentials;
+}
 
 const onAddVMAction =
   (data, disks, images, setLoading, next) => async (dispatch, getState) => {
@@ -117,6 +166,16 @@ const onAddVMAction =
       } else {
         name = data.name;
         namespace = data.namespace;
+      }
+
+      if(advanced) {
+        console.log('advanced', advanced);
+        let url = endPoints.ADD_VM({
+          namespace: data.namespace,
+          name: data.name,
+        });
+        await addVMRequest(advanced, url, dispatch, next);
+        return;
       }
       
       if (vms?.length && name) {
@@ -194,7 +253,7 @@ const onAddVMAction =
               images,
               dispatch
             );
-
+            console.log('disk data_____', diskData);
             let _obj = {
               cache: disk?.cache,
               diskType: disk?.diskType,
@@ -223,9 +282,9 @@ const onAddVMAction =
           }
         })
       );
-
+      console.log("disks____", disks)
       let _deviceDisk = _getDevices(_disks);
-
+      console.log("devices____", _deviceDisk)
       let _accessCredentials = [];
       if (data.sshKey) {
         _accessCredentials.push({
@@ -245,6 +304,7 @@ const onAddVMAction =
       let _volumes = _getVolumes(_disks);
 
       //add one disk and volume obj for username and password
+      _setUserDataAndNetworkDisks(_deviceDisk, _volumes, {name: data.name, username: data.userName, password: data.password})
       _deviceDisk.push({
         bootOrder: _deviceDisk.length + 1,
         name: `disk${_deviceDisk.length + 1}`,

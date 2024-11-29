@@ -1,0 +1,84 @@
+apiVersion: kubevirt.io/v1alpha3
+kind: VirtualMachine
+metadata:
+  name: vm-fedora
+  namespace: default
+  labels:
+    "kubevirt.io/domain": vm-fedora
+    "kubevirt-manager.io/managed": "true"
+    "cloud-init.kubevirt-manager.io/username":
+spec:
+  dataVolumeTemplates:
+    - apiVersion: "cdi.kubevirt.io/v1beta1"
+      metadata:
+        name: datavolume-iso
+      spec:
+        pvc:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: nfs-client
+        source:
+          http:
+            url: https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
+  running: false
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-fedora
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+            - disk:
+                bus: virtio
+              name: datavolume-iso
+          interfaces:
+            - name: net1
+              bridge:
+          networkInterfaceMultiqueue: true
+        machine:
+          type:
+        resources:
+          requests:
+            memory: 4G
+      networks:
+        - name: "net1"
+          pod:
+      volumes:
+        - dataVolume:
+            name: datavolume-iso
+          name: datavolume-iso
+        - name: disk1
+          cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              manage_etc_hosts: true
+              hostname: vm-fedora
+              user: admin
+              password: 1234
+
+            networkData: |
+              version: 1
+              config:
+              - type: physical
+                name: enp1s0
+                subnets:
+                - type: dhcp
+              - type: nameserver
+                address:
+                - 8.8.8.8
+                - 8.8.4.4
+      accessCredentials:
+        - sshPublicKey:
+            source:
+              secret:
+                secretName:
+            propagationMethod:
+              noCloud:
+      nodeSelector:
+        kubernetes.io/hostname:
