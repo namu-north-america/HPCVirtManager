@@ -25,7 +25,7 @@ window.MonacoEnvironment = {
 
 let current;
 
-function YamlEditor({ defaultValue, onChange, onValidate, value }) {
+function YamlEditor({ defaultValue, onChange, onValidate, value, options = {} }) {
   const monacoRef = useRef(null);
   const [yamlDataObject, setYamlDataObject] = useState({});
   const [yaml, setYaml] = useState(defaultValue);
@@ -45,7 +45,7 @@ function YamlEditor({ defaultValue, onChange, onValidate, value }) {
 
   const validate = (errors) => {
     setErrors(errors);
-    onValidate(errors);
+    onValidate && onValidate(errors);
   };
 
   const parseYamlToObject = useCallback((yamlString) => {
@@ -53,7 +53,9 @@ function YamlEditor({ defaultValue, onChange, onValidate, value }) {
       const jsonObject = jsYaml.load(yamlString, "utf8");
       setYamlDataObject(jsonObject);
       setYaml(yamlString);
-      onChange(yamlString, jsonObject);
+      if (onChange) {
+        onChange(yamlString, jsonObject);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -64,7 +66,10 @@ function YamlEditor({ defaultValue, onChange, onValidate, value }) {
   }, [yaml]);
 
   useEffect(() => {
-    setYaml(value);
+    if (typeof value === "object") {
+      const yaml = jsYaml.dump(value);
+      setYaml(yaml);
+    } else setYaml(value);
   }, [value]);
 
   return (
@@ -75,7 +80,7 @@ function YamlEditor({ defaultValue, onChange, onValidate, value }) {
         language="yaml"
         theme="vs-dark"
         value={yaml}
-        options={{ tabSize: 2 }}
+        options={{ tabSize: 2, fontSize: 14, ...options }}
         onValidate={(value) => {
           validate(value);
         }}
