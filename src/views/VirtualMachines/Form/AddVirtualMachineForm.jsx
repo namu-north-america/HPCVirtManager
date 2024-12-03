@@ -21,6 +21,7 @@ import { getDisksAction, getStorageClassesAction } from "../../../store/actions/
 import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
 import Advanced from "./Advanced";
+import { getImagesAction } from "../../../store/actions/imageActions";
 
 export default function AddVirtualMachineForm({ onClose }) {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     dispatch(getStorageClassesAction());
     dispatch(getPriorityClassAction());
     dispatch(getDisksAction());
+    dispatch(getImagesAction())
   }, [dispatch]);
 
   useEffect(() => {

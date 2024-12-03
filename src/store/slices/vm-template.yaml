@@ -22,7 +22,10 @@ spec:
           storageClassName: nfs-client
         source:
           http:
-            url: https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
+            url: >-
+              https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
+
+            #http://fedoraimages.com
   running: false
   template:
     metadata:
@@ -48,7 +51,7 @@ spec:
             memory: 4G
       networks:
         - name: "net1"
-          pod:
+          pod: {}
       volumes:
         - dataVolume:
             name: datavolume-iso
@@ -79,6 +82,6 @@ spec:
               secret:
                 secretName:
             propagationMethod:
-              noCloud:
+              noCloud: {}
       nodeSelector:
         kubernetes.io/hostname:

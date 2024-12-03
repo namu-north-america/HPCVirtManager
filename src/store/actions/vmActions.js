@@ -687,5 +687,5 @@ export {
   onRestartVMAction,
   onPauseVMAction,
   onMigrateVMAction,
-  getLiveMigrationsAction,
+  getLiveMigrationsAction
 };

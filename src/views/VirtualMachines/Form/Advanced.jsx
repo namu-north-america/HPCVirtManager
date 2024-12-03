@@ -17,7 +17,8 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
   const dispatch = useDispatch();
   const { updatedYamlString } = useSelector((state) => state.vm);
   const project = useSelector((state) => state.project);
-  const [yamlDataObject, setYamlObject] = useState();
+  const yamlDataObjectRef = useRef();
+  const [errors, setErrors] = useState([]);
   const initChange = useRef(true);
 
   const onChange = useCallback((value, yamlDataObject) => {
@@ -26,8 +27,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
     } else {
       dispatch(setUpdatedYamlString(value));
     }
-    console.log("yaml data object___", yamlDataObject);
-    setYamlObject(yamlDataObject);
+    yamlDataObjectRef.current = yamlDataObject;
   }, []);
 
   const getMemoryParts = (memoryString) => {
@@ -40,10 +40,15 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
 
   useEffect(() => {
     return () => {
+      const yamlDataObject = yamlDataObjectRef.current;
+
       if (handleChange && yamlDataObject) {
+        const name = yamlDataObject.metadata?.name || data.name;
+        const namespace = yamlDataObject.metadata?.namespace || data.namespace;
+
         const newData = {
-          name: yamlDataObject.metadata?.name || data.name,
-          namespace: yamlDataObject.metadata?.namespace || data.namespace,
+          name,
+          namespace,
           cores: yamlDataObject.spec?.template?.spec?.domain?.cpu?.cores || data.cores,
           sockets: yamlDataObject.spec?.template?.spec?.domain?.cpu?.sockets || data.sockets,
           threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
@@ -56,29 +61,63 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         data.memory = memoryParts.size;
         data.memoryType = memoryParts.unit;
 
+        const userDataAndNetwork = yamlDataObject.spec?.template?.spec?.volumes.at(-1).cloudInitNoCloud;
+        const userData = jsYaml.load(userDataAndNetwork.userData);
+
+        if (userData) {
+          data.userName = userData.user;
+          data.password = userData.password;
+        }
+
         handleChange({ ...data, ...newData });
 
         if (setDisks && yamlDataObject) {
           const dataVolumeTemplates = yamlDataObject.spec.dataVolumeTemplates;
 
           if (dataVolumeTemplates.length) {
-            const newOrImageDisks = dataVolumeTemplates.map((template, i) => {
-              const storageClass = template.spec.pvc.storageClassName;
-              const storage = template.spec.pvc.resources.requests.storage;
+            const deviceDisks = yamlDataObject.spec.template.spec.domain.devices.disks;
+            const volumes = yamlDataObject.spec.template.spec.volumes;
 
-              const storageParts = getMemoryParts(storage);
+            const newOrImageDisks = dataVolumeTemplates.map((template, i) => {
+              const templateName = template.metadata.name;
+              const storage = template.spec.pvc;
+              const storageClass = storage.storageClassName;
+              const storageSize = storage.resources?.requests?.storage;
+              const accessMode = storage.accessModes[0];
+              const source = template.spec.source;
+              const storageParts = getMemoryParts(storageSize);
+
+              /*
+               * Based on this documentation about Disks and Volumes
+               * We should find a device from this path
+               *  "template" -> "volumes" => "devices.disks"
+               *
+               * https://kubevirt.io/user-guide/storage/disks_and_volumes/
+               */
+              const volume = volumes.find((vol) => vol.dataVolume?.name == templateName);
+              const deviceDisk = deviceDisks.find((disk) => volume?.name === disk.name);
+
+              /**
+               * We should find the createType based on images' state
+               * if an image exists with this url and type then this disk is
+               * using an image
+               */
+              let image = project.images.find((item) => {
+                return item.namespace === namespace && source[item?.type] && source[item.type].url === item.url;
+              });
+
               return {
-                createType: "new",
+                createType: image ? "image" : "new",
                 diskType: "disk",
-                busType: "",
+                busType: deviceDisk?.disk?.bus,
                 memoryType: storageParts.unit,
                 size: storageParts.size,
                 storageClass: storageClass[0],
-                accessMode: "",
-                image: "",
+                accessMode: accessMode,
+                image: image ? image.name : "",
                 disk: "",
                 type: "blank",
-                url: "",
+                url: image ? image.url : "",
                 cache: "",
               };
             });
@@ -88,7 +127,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         }
       }
     };
-  }, [yamlDataObject]);
+  }, [setDisks, handleChange]);
 
   // Here we fill the Yaml template with values from `data` and `disks`
   useEffect(() => {
@@ -165,7 +204,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                   },
                   source: {
                     [diskType]: {
-                      url: disk.url || item?.spec?.source[diskType].url,
+                      url: disk.url || item?.spec?.source[diskType]?.url,
                     },
                   },
                 },
@@ -174,6 +213,14 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
               //   device.disk.bus = currentDevice.disk.bus;
               // }
             } else {
+              const image = project.images.find((item) => item.name === disk.image);
+              console.log("Image name is _____", disk, image);
+              const source = {};
+              if (image) {
+                source[image.type] = image.url;
+              } else {
+                source[disk.type] = disk.url;
+              }
               yamlDataVolumeTemplates.push({
                 metadata: {
                   name: diskName,
@@ -188,11 +235,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                       },
                     },
                   },
-                  source: {
-                    [disk.type]: {
-                      url: disk.url,
-                    },
-                  },
+                  source,
                 },
               });
             }
@@ -210,7 +253,15 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
               (item) => item.name === diskName && item.namespace === diskNamespace
             );
             if (diskNameCheck) {
-              throw new Error(`Disk ${diskName} with name/namespace combination already exists!`);
+              // throw new Error(`Disk ${diskName} with name/namespace combination already exists!`);
+              // setErrors((prev) => [
+              //   ...prev,
+              //   ,
+              // ]);
+              setErrors([
+                ...errors,
+                { message: `Disk ${diskName} with name/namespace combination already exists!`, startLineNumber: 14 },
+              ]);
             }
 
             let _obj = {
@@ -259,7 +310,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
 
         if (data.bindingMode) {
           // const interface = objectData.spec.template?.spec.domain.devices.interfaces[0];
-          const network = objectData.spec.template?.spec.networks[0];
+          const network = objectData.spec?.template?.spec?.networks[0];
           objectData.spec.template.spec.domain.devices.interfaces[0] = {
             name: network.name,
             [data.bindingMode]: {},
@@ -282,9 +333,11 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         name="advanced"
         defaultValue={updatedYamlString}
         value={updatedYamlString}
-        objectValue={yamlDataObject}
+        objectValue={yamlDataObjectRef.current}
         onValidate={onValidate}
+        customErrors={errors}
       />
+      {/* <div style={{ padding: 10 }}>somet</div> */}
     </CustomForm>
   );
 }

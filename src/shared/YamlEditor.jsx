@@ -25,7 +25,7 @@ window.MonacoEnvironment = {
 
 let current;
 
-function YamlEditor({ defaultValue, onChange, onValidate, value, options = {} }) {
+function YamlEditor({ defaultValue, onChange, onValidate, value, options = {}, customErrors = [] }) {
   const monacoRef = useRef(null);
   const [yamlDataObject, setYamlDataObject] = useState({});
   const [yaml, setYaml] = useState(defaultValue);
@@ -45,6 +45,7 @@ function YamlEditor({ defaultValue, onChange, onValidate, value, options = {} })
 
   const validate = (errors) => {
     setErrors(errors);
+    console.log("errors___", errors);
     onValidate && onValidate(errors);
   };
 
@@ -72,6 +73,18 @@ function YamlEditor({ defaultValue, onChange, onValidate, value, options = {} })
     } else setYaml(value);
   }, [value]);
 
+  useEffect(() => {
+    setErrors((prev) => [...prev, ...customErrors]);
+  }, [...customErrors]);
+  const errorsView = errors.map((error) => {
+    return (
+      <li className=" w-full">
+        {error.startLineNumber}:{error.startColumn}
+        {" > "}
+        <span className="p-error">{error.message}</span>
+      </li>
+    );
+  });
   return (
     <div className="editor">
       <Editor
@@ -86,8 +99,9 @@ function YamlEditor({ defaultValue, onChange, onValidate, value, options = {} })
         }}
         onChange={parseYamlToObject}
       />
-      <div>{errors.length ? <small className="p-error">Fix errors of the Yaml template and go on!!</small> : null}</div>
+      <ul className="flex flex-column gap-0">{errors.length ? errorsView : null}</ul>
     </div>
+    // <small className="p-error">Fix errors of the Yaml template and go on!!</small>
   );
 }
 
