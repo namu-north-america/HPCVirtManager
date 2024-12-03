@@ -15,6 +15,7 @@ export default function AddVirtualMachine() {
   const { setBreadcrumbItems } = useBreadcrumb();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const { formsFocusEvent } = useSelector((state) => state.common);
+  const { useVmTemplate } = useSelector((state) => state.vm);
   // const [selectedTemplate, setSelectedTemplate] = useState();
 
   const handleClose = () => {
@@ -60,7 +61,7 @@ export default function AddVirtualMachine() {
               icon="pi pi-file-import"
               onClick={() => setIsTemplateModalOpen(true)}
               className="template-cta"
-              disabled={formsFocusEvent.addVirtualMachine}
+              disabled={formsFocusEvent.addVirtualMachine && !useVmTemplate}
             />
             <CustomButtonOutlined
               label="Import YAML"
