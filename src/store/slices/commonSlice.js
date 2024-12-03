@@ -2,6 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   loader: false,
   toastInfo: {},
+  formsFocusEvent: {
+    addVirtualMachine: false,
+  },
 };
 
 export const commonSlice = createSlice({
@@ -17,8 +20,10 @@ export const commonSlice = createSlice({
     showToastAction: (state, action) => {
       state.toastInfo = action.payload;
     },
+    setFormFocusEvent: (state, action) => {
+      state.formsFocusEvent[action.payload.form] = action.payload.focus;
+    },
   },
 });
-export const { showLoaderAction, hideLoaderAction, showToastAction } =
-  commonSlice.actions;
+export const { showLoaderAction, hideLoaderAction, showToastAction, setFormFocusEvent } = commonSlice.actions;
 export default commonSlice.reducer;

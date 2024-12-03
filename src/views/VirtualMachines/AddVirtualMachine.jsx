@@ -7,13 +7,14 @@ import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import { CustomButtonOutlined } from "../../shared/CustomButton";
 import TemplateSelectionModal from "./Form/TemplateSelectionModal";
 import { setSelectedTemplate } from "../../store/slices/vmSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function AddVirtualMachine() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { setBreadcrumbItems } = useBreadcrumb();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const { formsFocusEvent } = useSelector((state) => state.common);
   // const [selectedTemplate, setSelectedTemplate] = useState();
 
   const handleClose = () => {
@@ -59,6 +60,7 @@ export default function AddVirtualMachine() {
               icon="pi pi-file-import"
               onClick={() => setIsTemplateModalOpen(true)}
               className="template-cta"
+              disabled={formsFocusEvent.addVirtualMachine}
             />
             <CustomButtonOutlined
               label="Import YAML"

@@ -419,9 +419,9 @@ export const CustomSearch = ({ value = "", onChange, placeholder = "Search" }) =
   );
 };
 
-export const CustomForm = ({ children, title }) => {
+export const CustomForm = ({ children, title, ...rest }) => {
   return (
-    <form className="grid m-0 p-0">
+    <form className="grid m-0 p-0" {...rest}>
       {title ? <div className="col-12 title my-auto">{title}</div> : null}
       {children}
     </form>

@@ -8,8 +8,8 @@ import {
 
 import { filterNamespacesByCrudVMS } from "../../../utils/commonFunctions";
 import {  useSelector } from "react-redux";
-export default function BasicDetails({ data, handleChange }) {
-
+export default function BasicDetails({ data, handleChange, ...rest }) {
+  
   const [namespace,setNamespace]= useState([])
   const { namespacesDropdown, priorityClassesDropdown, nodesDropdown } =
     useSelector((state) => state.project);
@@ -30,7 +30,7 @@ export default function BasicDetails({ data, handleChange }) {
     }, [hasAccess]);
     
   return (
-    <CustomForm>
+    <CustomForm {...rest}>
       <CustomDropDown
         data={data}
         onChange={handleChange}
