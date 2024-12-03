@@ -13,7 +13,8 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
   user-select: none;
   top: 0;
   left: 0;
-  transition: all $transition-duration ease;  // Smooth transition for all properties
+  transition: transform $transition-duration cubic-bezier(0.4, 0, 0.2, 1),
+              width $transition-duration cubic-bezier(0.4, 0, 0.2, 1);
   background-color: $bg-color-dark;
   border-right: 1px solid $border-color;
   color: $text-color-primary;

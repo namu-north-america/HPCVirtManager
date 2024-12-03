@@ -33,6 +33,7 @@ import { Dialog } from 'primereact/dialog';
 import { showToastAction } from '../../store/slices/commonSlice';
 import YamlEditor from "../../shared/YamlEditor";
 import { yamlTemplate } from "./Form/TemplateSelectionModal";
+import { Tooltip } from 'primereact/tooltip';
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -361,6 +362,7 @@ export default function ViewVM() {
 
   return (
     <>
+      <Tooltip target=".vm-status-icon" />
       <EditVmModal visible={editInfo} setVisible={setEditInfo} />
       <MigrateModal visible={onOpenMigrate} setVisible={setOpenMigrate} />
       <CustomBreadcrum items={breadcrumItems} />

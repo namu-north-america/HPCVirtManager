@@ -27,6 +27,15 @@ import { getImagesAction } from "../../store/actions/imageActions";
 import { Tooltip } from "primereact/tooltip";
 import { VncScreen } from 'react-vnc';
 import { Dialog } from 'primereact/dialog';
+import { FaDesktop } from 'react-icons/fa';
+
+const iconTemplate = () => {
+  return (
+    <div className="flex justify-center">
+      <FaDesktop className="text-gray-600 text-xl" />
+    </div>
+  );
+};
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
@@ -423,8 +432,9 @@ export default function VMList() {
         addText="New VM"
       >
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
-          <Column field="status" header="Status" body={statusTemplate}></Column>
+          <Column body={iconTemplate} style={{ width: '3rem' }}></Column>
           <Column field="name" header="Name" body={vmname}></Column>
+          <Column field="status" header="Status" body={statusTemplate}></Column>
           <Column field="guestOS" header="OS" body={osTemplate}></Column>
           <Column field="time" header="Created" body={timeTemplate}></Column>
           <Column field="node" header="Node"></Column>
