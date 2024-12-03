@@ -130,7 +130,7 @@ export default function AddVirtualMachineForm({ onClose }) {
   };
 
   useEffect(() => {
-    if (Object.keys(selectedTemplate).length) {
+    if (isTemplateMode) {
       setActiveIndex(4);
       setCompletedSteps((prev) => [...new Set([0, 1, 2, 3, 4])]);
     }
