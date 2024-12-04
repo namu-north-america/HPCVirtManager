@@ -15,6 +15,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("");
   const dispatch = useDispatch();
+
   const openFilesWindow = () => {
     fileInputRef.current.click();
   };
@@ -33,7 +34,9 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
     setIsDragOver(false);
   };
 
-  const onImport = () => {};
+  const onImport = () => {
+    dispatch();
+  };
 
   useEffect(() => {
     let timeout;
