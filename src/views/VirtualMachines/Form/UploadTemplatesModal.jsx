@@ -9,6 +9,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
   const fileInputRef = useRef();
   const [file, setFile] = useState();
   const [showUploadProgress, setShowUploadProgress] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const openFilesWindow = () => {
     fileInputRef.current.click();
@@ -25,6 +26,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
     handleFileChange(e);
+    setIsDragOver(false);
   };
 
   useEffect(() => {
@@ -63,10 +65,11 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
     >
       <div className="content">
         <div
-          className="uploader"
+          className={`uploader ${isDragOver ? "drag-over" : ""}`}
           onDrop={onDrop}
           onDragOver={(e) => {
             e.dataTransfer.dropEffect = "copy";
+            setIsDragOver(true);
             e.stopPropagation();
             e.preventDefault();
           }}
@@ -77,6 +80,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
           }}
           onDragLeave={(e) => {
             e.dataTransfer.dropEffect = "copy";
+            setIsDragOver(false);
           }}
         >
           {showUploadProgress ? (

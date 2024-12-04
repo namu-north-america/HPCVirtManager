@@ -20,6 +20,10 @@
       width: 3rem;
     }
 
+    &.drag-over {
+      background-color: #eff6ff;
+    }
+
     .size {
       font-weight: 500;
       font-size: $font-medium;
