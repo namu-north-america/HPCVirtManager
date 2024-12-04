@@ -413,7 +413,7 @@ spec:
       containers:
         - name: hpcvirtmanager
           image: puru2024/namutech:1.0.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
           ports:
             - name: http
