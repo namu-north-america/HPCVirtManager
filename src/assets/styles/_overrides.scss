@@ -32,12 +32,14 @@
   }
 }
 .p-button {
-  border-radius: 6px;
   font-weight: 500;
   &.p-button-sm {
     font-size: 0.875rem;
     padding: 0.5rem 0.75rem;
   }
+}
+.p-button:not(.p-button-rounded) {
+  border-radius: 6px;
 }
 .p-button.p-button-primary:not(.p-button-outlined):not(.p-button-text),
 .p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-info):not(.p-button-success):not(.p-button-warning):not(.p-button-help):not(.p-button-danger) {

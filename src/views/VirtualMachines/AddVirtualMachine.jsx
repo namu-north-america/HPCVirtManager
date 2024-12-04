@@ -8,12 +8,14 @@ import { CustomButtonOutlined } from "../../shared/CustomButton";
 import TemplateSelectionModal from "./Form/TemplateSelectionModal";
 import { setSelectedTemplate } from "../../store/slices/vmSlice";
 import { useDispatch } from "react-redux";
+import UploadTemplatesModal from "./Form/UploadTemplatesModal";
 
 export default function AddVirtualMachine() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { setBreadcrumbItems } = useBreadcrumb();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [isUploadTemplatesOpen, setIsUploadTemplatesOpen] = useState(false);
   // const [selectedTemplate, setSelectedTemplate] = useState();
 
   const handleClose = () => {
@@ -27,7 +29,7 @@ export default function AddVirtualMachine() {
   };
 
   const handleImportYAML = () => {
-    // TODO: Implement YAML import functionality
+    setIsUploadTemplatesOpen(true);
   };
 
   const breadcrumbItems = [
@@ -49,6 +51,7 @@ export default function AddVirtualMachine() {
         onClose={() => setIsTemplateModalOpen(false)}
         onSelect={handleTemplateSelect}
       />
+      <UploadTemplatesModal isOpen={isUploadTemplatesOpen} onClose={() => setIsUploadTemplatesOpen(false)} />
       <Page
         title="Add Virtual Machine"
         breadcrumb={<BreadCrumb model={breadcrumbItems} />}

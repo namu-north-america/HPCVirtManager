@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Modal from "../../../shared/Modal/Modal";
 import { TabView, TabPanel } from "primereact/tabview";
 import "./TemplateSelectionModal.scss";
-import { setSelectedTemplate, setTemplates } from "../../../store/slices/vmSlice";
+import { setSelectedTemplate } from "../../../store/slices/vmSlice";
 
 const TemplateCard = ({ template, onSelect }) => (
   <div className="template-card" onClick={() => onSelect(template)}>

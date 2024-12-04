@@ -219,7 +219,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
               // }
             } else {
               const image = project.images.find((item) => item.name === disk.image);
-              console.log("Image name is _____", disk, image);
+
               const source = {};
               if (image) {
                 source[image.type] = image.url;

@@ -1,0 +1,43 @@
+@import "../../../assets/styles/variables";
+
+.content {
+  display: flex;
+  justify-content: center;
+
+  .uploader {
+    border: 2px dashed;
+    width: 363px;
+    height: 226px;
+    border-color: $border-color;
+    border-radius: $border-radius;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: $gutter;
+
+    .upload-button {
+      width: 3rem;
+    }
+
+    .size {
+      font-weight: 500;
+      font-size: $font-medium;
+      color: #9ca3af;
+    }
+
+    .file-input {
+      display: none;
+    }
+  }
+}
+
+.upload-modal {
+  .modal-title,
+  .modal-subtitle {
+    text-align: center;
+  }
+  .modal-subtitle {
+    padding: 0 4rem;
+  }
+}

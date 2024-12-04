@@ -17,12 +17,12 @@ $white-color: #ffffff;
 $border-color: #e5e7eb;
 $bg-color-primary: #ffffff;
 $bg-color-secondary: #f4f6f9;
-$bg-color-dark: #09214B;
+$bg-color-dark: #09214b;
 
-$text-color-primary: #1F2937;
+$text-color-primary: #1f2937;
 $text-label-color: #4e5b76;
-$text-color-secondary: #4B5563;
-$link-color: #2563EB;
+$text-color-secondary: #4b5563;
+$link-color: #2563eb;
 
 $border-radius: 10px;
 $transitionDuration: 0.5s;
@@ -34,15 +34,18 @@ $menu-item-hover: rgba(255, 255, 255, 0.1);
 $menu-item-secondary: #959ba4;
 
 // Status Colors
-$status-ready: #22C55E;
-$status-ready-bg: #F0FDF4;
-$status-running: #06B6D4;
-$status-running-bg: #ECFEFF;
-$status-stopping: #F87171;
-$status-stopping-bg: #FEF2F2;
-$status-stopped: #EF4444;
-$status-stopped-bg: #FEF2F2;
-$status-starting: #EC4899;
-$status-starting-bg: #FDF2F8;
-$status-paused: #EAB308;
-$status-paused-bg: #FEFCE8;
+$status-ready: #22c55e;
+$status-ready-bg: #f0fdf4;
+$status-running: #06b6d4;
+$status-running-bg: #ecfeff;
+$status-stopping: #f87171;
+$status-stopping-bg: #fef2f2;
+$status-stopped: #ef4444;
+$status-stopped-bg: #fef2f2;
+$status-starting: #ec4899;
+$status-starting-bg: #fdf2f8;
+$status-paused: #eab308;
+$status-paused-bg: #fefce8;
+
+// Font sizes
+$font-medium: 0.875rem;
