@@ -10,14 +10,21 @@
     height: 226px;
     border-color: $border-color;
     border-radius: $border-radius;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     gap: $gutter;
+
+    .button {
+      margin-top: 10px;
+    }
 
     .upload-button {
       width: 3rem;
+    }
+
+    .pi-check {
+      background-color: #ccfbf1;
+      padding: 15px;
+      //   border-radius: "50%";
+      color: #1e40af;
     }
 
     &.drag-over {
@@ -32,6 +39,28 @@
 
     .file-input {
       display: none;
+    }
+
+    .upload-view,
+    .success-view,
+    .progress-view {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: $gutter;
+
+      .file-name {
+        color: #14b8a6;
+        font-weight: 500;
+      }
+    }
+    .success-view {
+      h4 {
+        margin-top: 10px;
+      }
     }
 
     .progress-spinner-circle {
