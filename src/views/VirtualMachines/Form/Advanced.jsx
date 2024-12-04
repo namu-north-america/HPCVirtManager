@@ -15,7 +15,7 @@ import {
 
 export default function Advanced({ data, setDisks, disks, handleChange, onValidate }) {
   const dispatch = useDispatch();
-  const { updatedYamlString } = useSelector((state) => state.vm);
+  const { updatedYamlString, useVmTemplate } = useSelector((state) => state.vm);
   const project = useSelector((state) => state.project);
   const yamlDataObjectRef = useRef();
   const [errors, setErrors] = useState([]);
@@ -62,7 +62,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         data.memoryType = memoryParts.unit;
 
         const userDataAndNetwork = yamlDataObject.spec?.template?.spec?.volumes.at(-1).cloudInitNoCloud;
-        const userData = jsYaml.load(userDataAndNetwork.userData);
+        const userData = jsYaml.load(userDataAndNetwork?.userData);
 
         if (userData) {
           data.userName = userData.user;
@@ -83,10 +83,9 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
               const storage = template.spec.pvc;
               const storageClass = storage.storageClassName;
               const storageSize = storage.resources?.requests?.storage;
-              const accessMode = storage.accessModes[0];
+              const accessModes = storage.accessModes ? storage.accessModes[0] : "";
               const source = template.spec.source;
               const storageParts = getMemoryParts(storageSize);
-
               /*
                * Based on this documentation about Disks and Volumes
                * We should find a device from this path
@@ -112,13 +111,13 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 busType: deviceDisk?.disk?.bus,
                 memoryType: storageParts.unit,
                 size: storageParts.size,
-                storageClass: storageClass[0],
-                accessMode: accessMode,
+                storageClass: storageClass,
+                accessMode: accessModes || "",
                 image: image ? image.name : "",
                 disk: "",
                 type: "blank",
                 url: image ? image.url : "",
-                cache: "",
+                cache: deviceDisk.cache,
               };
             });
 
@@ -139,9 +138,9 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
       if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
       if (data.name) {
         objectData.metadata.name = data.name;
-        objectData.metadata.labels["kubevirt.io/domain"] = data.name;
       }
-      if (data.userName) objectData.metadata.labels["cloud-init.kubevirt-manager.io/username"] = data.userName;
+      if (data.userName && objectData.metadata?.labels?.["cloud-init.kubevirt-manager.io/username"])
+        objectData.metadata.labels["cloud-init.kubevirt-manager.io/username"] = data.userName;
       if (data.namespace) objectData.metadata.namespace = data.namespace;
       if (data.memory)
         objectData.spec.template.spec.domain.resources.requests.memory = parseInt(data.memory) + data.memoryType;
@@ -161,6 +160,11 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
             objectData.spec.dataVolumeTemplates = [];
           }
         }
+
+        if (!useVmTemplate) {
+          objectData.spec.dataVolumeTemplates = [];
+        }
+
         let yamlDataVolumeTemplates = objectData.spec.dataVolumeTemplates;
 
         if (!yamlDataVolumeTemplates) {
@@ -178,7 +182,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
             if (i == 0 && disks.length === 1) {
               const item = yamlDataVolumeTemplates[i] ? yamlDataVolumeTemplates[i] : [];
               const currentDevice = objectData.spec?.template?.spec?.domain?.devices?.disks[0];
-              const diskType = disk.type === "blank" ? "http" : disk.type;
+              const diskType = disk.type;
               const accessMode = disk.accessMode ? [disk.accessMode] : item.spec?.pvc?.accessModes;
               const storageClass = disk.storageClass ? disk.storageClass : item.spec?.pvc?.storageClassName;
               const storage = disk.size
@@ -193,14 +197,15 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                   ...item.spec,
                   pvc: {
                     ...item?.spec?.pvc,
-                    storageClassName: storageClass,
-                    accessModes: accessMode,
+
                     resources: {
                       ...item.spec?.pvc?.resources,
                       requests: {
-                        storage: storage,
+                        storage: storage || null,
                       },
                     },
+                    storageClassName: storageClass || null,
+                    accessModes: accessMode || null,
                   },
                   source: {
                     [diskType]: {
@@ -253,11 +258,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
               (item) => item.name === diskName && item.namespace === diskNamespace
             );
             if (diskNameCheck) {
-              // throw new Error(`Disk ${diskName} with name/namespace combination already exists!`);
-              // setErrors((prev) => [
-              //   ...prev,
-              //   ,
-              // ]);
               setErrors([
                 ...errors,
                 { message: `Disk ${diskName} with name/namespace combination already exists!`, startLineNumber: 14 },

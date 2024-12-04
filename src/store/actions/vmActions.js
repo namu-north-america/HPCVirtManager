@@ -154,6 +154,11 @@ const onAddVMAction =
       const { sshKeys } = getState().sshKeys;
       const selectedKey = sshKeys.find(key => key.name === data.sshKey);
       const sshKeyValue = selectedKey ? selectedKey.sshPublicKey : '';
+      
+      // TODO: later we can remove this if 
+      // we don't want send vm template directly to
+      // api
+      const sendDataVolumesInVm = true;
 
       let { project } = getState();
       let { vms } = project;
@@ -168,16 +173,6 @@ const onAddVMAction =
         namespace = data.namespace;
       }
 
-      if(advanced) {
-        console.log('advanced', advanced);
-        let url = endPoints.ADD_VM({
-          namespace: data.namespace,
-          name: data.name,
-        });
-        await addVMRequest(advanced, url, dispatch, next);
-        return;
-      }
-      
       if (vms?.length && name) {
         let vmNameCheck = vms.find(
           (item) => item.name === name && item.namespace === namespace
@@ -194,7 +189,18 @@ const onAddVMAction =
         }
       }
 
-      setLoading(true);
+      // With the last changes on Yaml Editor in advanced step 
+      // We have the advanced value already all the time 
+      // TODO: we can remove 
+      if(advanced && sendDataVolumesInVm) {
+        let url = endPoints.ADD_VM({
+          namespace: data.namespace,
+          name: data.name,
+        });
+        setLoading(true);
+        await addVMRequest(advanced, url, dispatch, next);
+        return;
+      }
 
       if(advanced) {
         let _disks = await Promise.all(
@@ -282,9 +288,9 @@ const onAddVMAction =
           }
         })
       );
-      console.log("disks____", disks)
+
       let _deviceDisk = _getDevices(_disks);
-      console.log("devices____", _deviceDisk)
+
       let _accessCredentials = [];
       if (data.sshKey) {
         _accessCredentials.push({
@@ -305,21 +311,6 @@ const onAddVMAction =
 
       //add one disk and volume obj for username and password
       _setUserDataAndNetworkDisks(_deviceDisk, _volumes, {name: data.name, username: data.userName, password: data.password})
-      _deviceDisk.push({
-        bootOrder: _deviceDisk.length + 1,
-        name: `disk${_deviceDisk.length + 1}`,
-        disk: {
-          bus: "virtio",
-        },
-      });
-      _volumes.push({
-        name: `disk${_volumes.length + 1}`,
-        cloudInitNoCloud: {
-          userData: `#cloud-config\nmanage_etc_hosts: true\nhostname: ${data.name}\nuser: ${data.userName}\npassword: ${data.password}\n`,
-          networkData:
-            "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
-        },
-      });
 
       let url = endPoints.ADD_VM({
         namespace: data.namespace,

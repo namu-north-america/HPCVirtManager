@@ -3,10 +3,6 @@ kind: VirtualMachine
 metadata:
   name: vm-fedora
   namespace: default
-  labels:
-    "kubevirt.io/domain": vm-fedora
-    "kubevirt-manager.io/managed": "true"
-    "cloud-init.kubevirt-manager.io/username":
 spec:
   dataVolumeTemplates:
     - apiVersion: "cdi.kubevirt.io/v1beta1"
