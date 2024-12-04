@@ -1,18 +1,13 @@
 import React, { useMemo } from "react";
-import {
-  CustomDropDown,
-  CustomForm,
-  CustomInput,
-  CustomMemoryInput,
-} from "../../../shared/AllInputs";
+import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../../../shared/AllInputs";
 import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 import { confirmPopup } from "primereact/confirmpopup";
-import {v4} from "uuid";
+import { v4 } from "uuid";
 
 export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
-  const { storageClassesDropdown, accessModeDropdown, disksDropdown, images } =
-    useSelector((state) => state.project);
+  const { storageClassesDropdown, accessModeDropdown, disksDropdown, images } = useSelector((state) => state.project);
+  const { useVmTemplate } = useSelector((state) => state.vm);
 
   const handleChangeDisk = ({ name, value }) => {
     let formErrors = formValidation(name, value, disk);
@@ -58,7 +53,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   const cacheOptions = [
     {
       name: "Automatic",
-      value: false,
+      value: "automatic",
     },
     {
       name: "None",
@@ -75,18 +70,12 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   ];
 
   const filteredDiskes = useMemo(
-    () =>
-      disksDropdown
-        .filter((item) => item.namespace === data?.namespace)
-        .map((item) => item?.name),
+    () => disksDropdown.filter((item) => item.namespace === data?.namespace).map((item) => item?.name),
     [disksDropdown, data]
   );
 
   const imagesDropdown = useMemo(
-    () =>
-      images
-        .filter((item) => item.namespace === data?.namespace)
-        .map((item) => item?.name),
+    () => images.filter((item) => item.namespace === data?.namespace).map((item) => item?.name),
     [images]
   );
 
@@ -104,6 +93,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
             { name: "Attach an image", value: "image" },
           ]}
           required
+          disabled={useVmTemplate}
           col={12}
         />
         <CustomDropDown
@@ -114,12 +104,15 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
             { name: "Disk", value: "disk" },
             { name: "CDROM", value: "cdrom" },
           ]}
+          disabled={useVmTemplate}
           required
         />
         <CustomDropDown
           onChange={handleChangeDisk}
           data={disk}
           name="busType"
+          value={useVmTemplate ? "virtio" : ""}
+          disabled={useVmTemplate}
           options={[
             { name: "virtio", value: "virtio" },
             { name: "sata", value: "sata" },
@@ -161,6 +154,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
             name="type"
             options={typesDropdown}
             required
+            disabled={useVmTemplate}
             col={12}
           />
 
@@ -232,8 +226,10 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
         onChange={handleChangeDisk}
         data={disk}
         name="cache"
+        value={useVmTemplate ? "automatic" : ""}
         options={cacheOptions}
         col={12}
+        disabled={useVmTemplate}
       />
       {index ? (
         <div className="flex justify-content-end">

@@ -5,32 +5,33 @@ import {
   CustomInput,
   CustomMemoryInput,
 } from "../../../shared/AllInputs";
-
 import { filterNamespacesByCrudVMS } from "../../../utils/commonFunctions";
 import {  useSelector } from "react-redux";
-export default function BasicDetails({ data, handleChange }) {
 
+export default function BasicDetails({ data, handleChange, ...rest }) {
+  
   const [namespace,setNamespace]= useState([])
   const { namespacesDropdown, priorityClassesDropdown, nodesDropdown } =
     useSelector((state) => state.project);
-    const { profile,userNamespace } = useSelector((state) => state.user);
+  const { profile,userNamespace } = useSelector((state) => state.user);
+  const { useVmTemplate } = useSelector(state => state.vm);
 
-    const hasAccess = useCallback(() => {
-      if (profile?.role === "admin") {
-        setNamespace(namespacesDropdown);
-      } else {
-        const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
-        const namespaceArray = filteredNamespaces.map(item => item.namespace);
-        setNamespace(namespaceArray);
-      }
-    }, [profile, namespacesDropdown, userNamespace]);
+  const hasAccess = useCallback(() => {
+    if (profile?.role === "admin") {
+      setNamespace(namespacesDropdown);
+    } else {
+      const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
+      const namespaceArray = filteredNamespaces.map(item => item.namespace);
+      setNamespace(namespaceArray);
+    }
+  }, [profile, namespacesDropdown, userNamespace]);
     // create hasAccess dispatch
-    useEffect(() => {
-      hasAccess()
-    }, [hasAccess]);
+  useEffect(() => {
+    hasAccess()
+  }, [hasAccess]);
     
   return (
-    <CustomForm>
+    <CustomForm {...rest}>
       <CustomDropDown
         data={data}
         onChange={handleChange}
@@ -58,6 +59,7 @@ export default function BasicDetails({ data, handleChange }) {
         onChange={handleChange}
         name="sockets"
         keyfilter="pint"
+        disabled={useVmTemplate}
         required
       />
       <CustomInput
@@ -73,6 +75,7 @@ export default function BasicDetails({ data, handleChange }) {
         name="threads"
         keyfilter="pint"
         required
+        disabled={useVmTemplate}
       />
       <CustomMemoryInput
         data={data}
@@ -92,6 +95,7 @@ export default function BasicDetails({ data, handleChange }) {
         options={priorityClassesDropdown}
         col={12}
         required
+        disabled={useVmTemplate}
       />
     </CustomForm>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
@@ -22,6 +22,8 @@ import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
 import Advanced from "./Advanced";
 import { getImagesAction } from "../../../store/actions/imageActions";
+import { setFormFocusEvent } from "../../../store/slices/commonSlice";
+import _throttle from "lodash/throttle";
 
 export default function AddVirtualMachineForm({ onClose }) {
   const dispatch = useDispatch();
@@ -43,7 +45,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     dispatch(getStorageClassesAction());
     dispatch(getPriorityClassAction());
     dispatch(getDisksAction());
-    dispatch(getImagesAction())
+    dispatch(getImagesAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -128,11 +130,18 @@ export default function AddVirtualMachineForm({ onClose }) {
   };
 
   useEffect(() => {
-    if (Object.keys(selectedTemplate).length) {
+    if (isTemplateMode) {
       setActiveIndex(4);
       setCompletedSteps((prev) => [...new Set([0, 1, 2, 3, 4])]);
     }
   }, [selectedTemplate]);
+
+  const onBasicDetailsFocus = useCallback(
+    _throttle(() => {
+      dispatch(setFormFocusEvent({ form: "addVirtualMachine", focus: true }));
+    }, 20000),
+    []
+  );
 
   const validateStep = (index) => {
     switch (index) {
@@ -268,7 +277,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 0:
         return (
           <>
-            <BasicDetails data={data} handleChange={handleChange} />
+            <BasicDetails data={data} handleChange={handleChange} onFocus={onBasicDetailsFocus} />
             <Buttonlayout>
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(1)} />
             </Buttonlayout>

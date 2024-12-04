@@ -17,6 +17,7 @@ const prebuiltTemplates = [
 const initialState = {
   templates: prebuiltTemplates,
   selectedTemplate: {},
+  useVmTemplate: false,
   updatedYamlString: yamlTemplate,
 };
 
@@ -30,6 +31,7 @@ const vmSlice = createSlice({
     setSelectedTemplate: (state, action) => {
       state.selectedTemplate = action.payload;
       state.updatedYamlString = action.payload.template;
+      state.useVmTemplate = action.payload.template ? true : false;
     },
     setUpdatedYamlString: (state, action) => {
       state.updatedYamlString = action.payload;
