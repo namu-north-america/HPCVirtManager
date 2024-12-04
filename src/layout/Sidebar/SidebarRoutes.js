@@ -14,6 +14,10 @@ export const sidebarItems = [
         link: "/list",
       },
       {
+        title: "VM Pools",
+        link: "/pools",
+      },
+      {
         title: "Templates",
         link: "/templates",
       },

@@ -15,6 +15,7 @@ import SSHKeys from '../views/SSHKeys';
 import AddVirtualMachine from "../views/VirtualMachines/AddVirtualMachine";
 import VMTemplate from "../views/VirtualMachines/VMTemplate";
 import AddVMTemplate from "../views/VirtualMachines/AddVMTemplate";
+import VMPools from "../views/VirtualMachines/VMPools";
 
 export const PrivateRoutes = [
   {
@@ -51,6 +52,12 @@ export const PrivateRoutes = [
     path: "/virtual-machines/templates",
     name: "VM Templates",
     element: <VMTemplate />,
+    role: "shared",
+  },
+  {
+    path: "/virtual-machines/pools",
+    name: "VM Pools",
+    element: <VMPools />,
     role: "shared",
   },
   {

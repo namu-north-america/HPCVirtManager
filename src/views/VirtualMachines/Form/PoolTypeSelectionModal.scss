@@ -1,0 +1,140 @@
+@import "../../../assets/styles/variables";
+
+.pool-type-selection-modal {
+  .pool-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+
+  .pool-type-card {
+    background: $bg-color-primary;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+
+    &:hover {
+      border-color: $link-color;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    &.large {
+      grid-column: span 2;
+      grid-row: span 2;
+      padding: 2rem;
+
+      .pool-type-icon {
+        height: 64px;
+        width: 64px;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+
+        i {
+          font-size: 1.75rem;
+        }
+      }
+
+      .pool-type-info {
+        .pool-type-name {
+          font-size: 1.5rem;
+          margin-bottom: 1rem;
+        }
+
+        .pool-type-description {
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+      }
+    }
+
+    &.small {
+      .pool-type-icon {
+        height: 48px;
+        width: 48px;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+
+        i {
+          font-size: 1.25rem;
+        }
+      }
+
+      .pool-type-info {
+        width: 100%;
+      }
+    }
+
+    .pool-type-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $text-color-primary;
+      background: rgba($link-color, 0.1);
+      border-radius: 50%;
+    }
+
+    .pool-type-info {
+      .pool-type-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+        color: $text-color-primary;
+      }
+
+      .pool-type-description {
+        font-size: 0.9rem;
+        color: $text-color-secondary;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media screen and (max-width: 1200px) {
+  .pool-type-selection-modal {
+    .pool-type-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .pool-type-card.large {
+      grid-column: 1 / -1;
+      grid-row: span 1;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .pool-type-selection-modal {
+    .pool-type-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pool-type-card.large {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .pool-type-selection-modal {
+    .pool-type-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pool-type-card {
+      &.large, &.small {
+        grid-column: 1;
+      }
+    }
+  }
+}
