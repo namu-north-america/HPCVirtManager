@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import "./UploadTemplatesModal.scss";
 import Modal from "../../../shared/Modal/Modal";
 import { Button } from "primereact/button";
+import { ProgressSpinner } from "primereact/progressspinner";
 import Yaml from "js-yaml";
 
 export default function UploadTemplatesModal({ isOpen, onClose }) {
   const fileInputRef = useRef();
   const [file, setFile] = useState();
+  const [showUploadProgress, setShowUploadProgress] = useState(false);
 
   const openFilesWindow = () => {
     fileInputRef.current.click();
@@ -26,7 +28,12 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
   };
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowUploadProgress(false);
+    }, 1000);
+
     if (file) {
+      setShowUploadProgress(true);
       const reader = new FileReader();
       reader.onload = () => {
         try {
@@ -38,6 +45,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
       };
       reader.readAsText(file);
     }
+    return () => clearTimeout(timeout);
   }, [file]);
 
   return (
@@ -71,18 +79,31 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
             e.dataTransfer.dropEffect = "copy";
           }}
         >
-          <Button icon="pi pi-upload" severity="info" rounded className="upload-button" onClick={openFilesWindow} />
-          <h3>
-            Drop your .yaml file here or <a>browse</a>
-          </h3>
-          <span className="size">Maximum size: 50MB</span>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="file-input"
-            accept=".yml,.yaml"
-            onChange={handleFileChange}
-          />
+          {showUploadProgress ? (
+            <>
+              <ProgressSpinner
+                strokeWidth={4}
+                animationDuration="3s"
+                pt={{ circle: "progress-spinner-circle ", spinner: "progress-spinner" }}
+              />
+              <h4>Uploading...</h4>
+            </>
+          ) : (
+            <>
+              <Button icon="pi pi-upload" severity="info" rounded className="upload-button" onClick={openFilesWindow} />
+              <h3>
+                Drop your .yaml file here or <a>browse</a>
+              </h3>
+              <span className="size">Maximum size: 50MB</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="file-input"
+                accept=".yml,.yaml"
+                onChange={handleFileChange}
+              />
+            </>
+          )}
         </div>
       </div>
     </Modal>
