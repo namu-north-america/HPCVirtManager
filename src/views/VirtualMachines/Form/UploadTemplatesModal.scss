@@ -19,13 +19,16 @@
     .upload-button {
       width: 3rem;
     }
+
     .pi-check,
     .pi-times {
       padding: 15px;
     }
+
     .pi-times {
       background-color: #fee2e2;
     }
+
     .pi-check {
       background-color: #ccfbf1;
 
@@ -35,6 +38,15 @@
 
     &.drag-over {
       background-color: #eff6ff;
+    }
+
+    &.in-progress,
+    &.drag-over {
+      border-color: #2563eb;
+    }
+
+    &.error {
+      border-color: #ef4444;
     }
 
     .size {
@@ -67,6 +79,7 @@
         }
       }
     }
+
     .success-view {
       h4 {
         margin-top: 10px;
@@ -116,6 +129,7 @@
   .modal-subtitle {
     text-align: center;
   }
+
   .modal-subtitle {
     padding: 0 4rem;
   }

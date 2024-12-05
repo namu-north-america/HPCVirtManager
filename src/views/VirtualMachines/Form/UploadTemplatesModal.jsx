@@ -7,6 +7,7 @@ import { useLocalStorage } from "primereact/hooks";
 import Yaml from "js-yaml";
 import { useDispatch } from "react-redux";
 import { setSelectedTemplate } from "../../../store/slices/vmSlice";
+import classnames from "classnames";
 
 export default function UploadTemplatesModal({ isOpen, onClose }) {
   const [store, setStore] = useLocalStorage("", "yaml-file");
@@ -16,6 +17,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [status, setStatus] = useState("");
   const [progressText, setProgressText] = useState("");
+  const [error, setError] = useState("");
   const timeoutRef = useRef();
   const dispatch = useDispatch();
 
@@ -29,6 +31,14 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
     setFile(selectedFiles[0]);
   };
 
+  const createProgressTimeout = (nextStatus, next) => {
+    timeoutRef.current = setTimeout(() => {
+      setShowProgress(false);
+      setStatus(nextStatus);
+      next && next();
+    }, 1600);
+  };
+
   const onDrop = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -37,14 +47,29 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
     setIsDragOver(false);
   };
 
+  const onDragOver = (e) => {
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragOver(true);
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const onDragEnter = (e) => {
+    e.dataTransfer.dropEffect = "copy";
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const onDragLeave = (e) => {
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragOver(false);
+  };
+
   const onImport = () => {
     setShowProgress(true);
     setProgressText("Importing in progress...");
     dispatch(setSelectedTemplate({ template: store }));
-    timeoutRef.current = setTimeout(() => {
-      setShowProgress(false);
-      setStatus("import-success");
-    }, 1600);
+    createProgressTimeout("import-success");
   };
 
   useEffect(() => {
@@ -52,20 +77,22 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
       setShowProgress(true);
       setProgressText("Uploading...");
 
+      if (file.size > 50 * 1024 * 1024) {
+        createProgressTimeout("upload-failed", () => setError("File size exceeded (max 50BM)"));
+
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const yamlContent = Yaml.load(reader.result);
           console.log("Parsed YAML content:", yamlContent);
           setStore(reader.result);
-          timeoutRef.current = setTimeout(() => {
-            setShowProgress(false);
-            setStatus("upload-success");
-          }, 1600);
+          createProgressTimeout("upload-success");
         } catch (err) {
           console.error("Invalid YAML file:", err.message);
-          setShowProgress(false);
-          setStatus("upload-failed");
+          createProgressTimeout("upload-failed", () => setError(`Invalid file format (${file.name})`));
         }
       };
 
@@ -113,10 +140,13 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
       <div className="failed-view">
         <i className="pi pi-times border-circle"></i>
         <h4>Failed to upload the file</h4>
-        <span style={{}} className="status-sub error-text">
-          Invalid file format ({file.name})
-        </span>
-        <Button label="Try Again" icon="pi pi-sync" pt={{ root: { className: "button" } }} onClick={onImport} />
+        <span className="status-sub error-text">{error}</span>
+        <Button
+          label="Try Again"
+          icon="pi pi-sync"
+          pt={{ root: { className: "button" } }}
+          onClick={() => setStatus("")}
+        />
       </div>
     );
   } else {
@@ -132,6 +162,18 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
     );
   }
 
+  const uploaderProps = {
+    className: classnames("uploader", {
+      "drag-over": isDragOver,
+      "in-progress": showProgress,
+      error: status == "upload-failed",
+    }),
+    onDrop: onDrop,
+    onDragOver: onDragOver,
+    onDragEnter: onDragEnter,
+    onDragLeave: onDragLeave,
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -146,27 +188,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
       }
     >
       <div className="content">
-        <div
-          className={`uploader ${isDragOver ? "drag-over" : ""}`}
-          onDrop={onDrop}
-          onDragOver={(e) => {
-            e.dataTransfer.dropEffect = "copy";
-            setIsDragOver(true);
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-          onDragEnter={(e) => {
-            e.dataTransfer.dropEffect = "copy";
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-          onDragLeave={(e) => {
-            e.dataTransfer.dropEffect = "copy";
-            setIsDragOver(false);
-          }}
-        >
-          {uploaderContent}
-        </div>
+        <div {...uploaderProps}>{uploaderContent}</div>
       </div>
     </Modal>
   );
