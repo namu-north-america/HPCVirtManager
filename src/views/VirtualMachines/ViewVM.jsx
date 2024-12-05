@@ -21,19 +21,21 @@ import moment from "moment";
 import constants from "../../constants";
 import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
+import HotPlugModal from "./Form/HotPlugModal";
 import { findByLabelText } from "@testing-library/react";
 import { getVmCpuStats, getVmMemoryStats, getVmStorageStats } from "../../store/actions/reportingActions";
 import { VncScreen } from "react-vnc";
 import { Dialog } from "primereact/dialog";
 import { showToastAction } from "../../store/slices/commonSlice";
 import YamlEditor from "../../shared/YamlEditor";
+import { Button } from "primereact/button";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
   let { name, namespace } = useParams();
 
   const [showVncDialog, setShowVncDialog] = useState(false);
-
+  const [isOpenAddNewStorageModal, setIsOpenAddNewStorageModal] = useState(false);
   const onOpenConsole = () => {
     setShowVncDialog(true);
   };
@@ -432,9 +434,23 @@ export default function ViewVM() {
           </TabPanel>
           <TabPanel header="Disk">
             <Grid>
+              <Col size={12} extraClassNames="text-right">
+                <HotPlugModal
+                  title="Add New Storage Disk"
+                  isOpen={isOpenAddNewStorageModal}
+                  setVisible={setIsOpenAddNewStorageModal}
+                />
+                <Col size={6} extraClassNames="p-2">
+                  <Button
+                    label="Add New Storage Disk"
+                    icon="pi pi-plus"
+                    onClick={() => setIsOpenAddNewStorageModal(true)}
+                  />
+                </Col>
+              </Col>
               {volumes &&
-                volumes?.map((item) => (
-                  <Col size={6}>
+                volumes?.map((item, i) => (
+                  <Col size={6} key={i}>
                     <CustomCard title={item.name}>
                       <CustomCardField title="Name" value={item?.metadata?.name} />
                       <CustomCardField title="Type" value={item?.kind} />
