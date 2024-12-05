@@ -62,6 +62,28 @@ const endPoints = {
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",
+
+  // cluster-api resource APIs
+
+  // required to create cluster
+  CREATE_CLUSTER: ({ namespace, name }) =>
+    `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
+  CREATE_KUBEVIRT_CLUSTER: ({ namespace, name }) =>
+    `/apis/infrastructure.cluster.x-k8s.io/v1alpha1/namespaces/${namespace}/kubevirtclusters/${name}`,
+  CREATE_KUBEVIRT_MACHINE_TEMPLATE: ({ namespace, name }) =>
+    `/apis/infrastructure.cluster.x-k8s.io/v1alpha1/namespaces/${namespace}/kubevirtmachinetemplates/${name}`,
+  CREATE_KUBEADM_CONTROL_PLANE: ({ namespace, name }) =>
+    `/apis/controlplane.cluster.x-k8s.io/v1beta1/namespaces/${namespace}/kubeadmcontrolplanes/${name}`,
+  CREATE_KUBEADM_CONFIG_TEMPLATE: ({ namespace, name }) =>
+    `/apis/bootstrap.cluster.x-k8s.io/v1beta1/namespaces/${namespace}/kubeadmconfigtemplates/${name}`,
+  CREATE_MACHINE_DEPLOYMENT: ({ namespace, name }) =>
+    `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/machinedeployments/${name}`,
+
+  // required to update cluster
+  UPDATE_CLUSTER: ({ namespace, name }) =>
+    `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
+  GET_CLUSTER: ({ namespace, name }) =>
+    `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
 };
 
 export default endPoints;
