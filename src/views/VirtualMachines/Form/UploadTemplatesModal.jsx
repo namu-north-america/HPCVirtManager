@@ -6,14 +6,17 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useLocalStorage } from "primereact/hooks";
 import Yaml from "js-yaml";
 import { useDispatch } from "react-redux";
+import { setSelectedTemplate } from "../../../store/slices/vmSlice";
 
 export default function UploadTemplatesModal({ isOpen, onClose }) {
   const [store, setStore] = useLocalStorage("", "yaml-file");
   const fileInputRef = useRef();
   const [file, setFile] = useState();
-  const [showUploadProgress, setShowUploadProgress] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState("");
+  const [status, setStatus] = useState("");
+  const [progressText, setProgressText] = useState("");
+  const timeoutRef = useRef();
   const dispatch = useDispatch();
 
   const openFilesWindow = () => {
@@ -22,7 +25,7 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
 
   const handleFileChange = (event) => {
     let selectedFiles = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-    console.log("onFilechange______", selectedFiles);
+
     setFile(selectedFiles[0]);
   };
 
@@ -35,35 +38,50 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
   };
 
   const onImport = () => {
-    dispatch();
+    setShowProgress(true);
+    setProgressText("Importing in progress...");
+    dispatch(setSelectedTemplate({ template: store }));
+    timeoutRef.current = setTimeout(() => {
+      setShowProgress(false);
+      setStatus("import-success");
+    }, 1600);
   };
 
   useEffect(() => {
-    let timeout;
-
     if (file) {
-      setShowUploadProgress(true);
+      setShowProgress(true);
+      setProgressText("Uploading...");
+
       const reader = new FileReader();
       reader.onload = () => {
         try {
           const yamlContent = Yaml.load(reader.result);
           console.log("Parsed YAML content:", yamlContent);
           setStore(reader.result);
-          timeout = setTimeout(() => {
-            setShowUploadProgress(false);
-            setUploadStatus("success");
-          }, 1000);
+          timeoutRef.current = setTimeout(() => {
+            setShowProgress(false);
+            setStatus("upload-success");
+          }, 1600);
         } catch (err) {
           console.error("Invalid YAML file:", err.message);
+          setShowProgress(false);
+          setStatus("upload-failed");
         }
       };
+
       reader.readAsText(file);
     }
-    return () => clearTimeout(timeout);
   }, [file]);
 
+  useEffect(() => {
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   let uploaderContent;
-  if (showUploadProgress) {
+
+  if (showProgress) {
     uploaderContent = (
       <div className="progress-view">
         <ProgressSpinner
@@ -71,18 +89,34 @@ export default function UploadTemplatesModal({ isOpen, onClose }) {
           animationDuration="3s"
           pt={{ circle: "progress-spinner-circle ", spinner: "progress-spinner" }}
         />
-        <h4>Uploading...</h4>
+        <h4>{progressText}</h4>
       </div>
     );
-  } else if (uploadStatus === "success") {
+  } else if (status === "upload-success" || status === "import-success") {
     uploaderContent = (
       <div className="success-view">
         <i className="pi pi-check border-circle"></i>
-        <h4>File uploaded successfully!</h4>
-        <span style={{}} className="file-name">
-          {file.name}
+        <h4>{status === "upload-success" ? "File uploaded successfully!" : "File imported successfully!"}</h4>
+        <span className="status-sub">{file.name}</span>
+        {status == "upload-success" && (
+          <Button
+            label="Import Now"
+            icon="pi pi-file-import"
+            pt={{ root: { className: "button" } }}
+            onClick={onImport}
+          />
+        )}
+      </div>
+    );
+  } else if (status === "upload-failed") {
+    uploaderContent = (
+      <div className="failed-view">
+        <i className="pi pi-times border-circle"></i>
+        <h4>Failed to upload the file</h4>
+        <span style={{}} className="status-sub error-text">
+          Invalid file format ({file.name})
         </span>
-        <Button label="Import Now" icon="pi pi-file-import" pt={{ root: { className: "button" } }} onClick={() => {}} />
+        <Button label="Try Again" icon="pi pi-sync" pt={{ root: { className: "button" } }} onClick={onImport} />
       </div>
     );
   } else {

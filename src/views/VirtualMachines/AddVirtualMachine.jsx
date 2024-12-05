@@ -9,6 +9,7 @@ import TemplateSelectionModal from "./Form/TemplateSelectionModal";
 import { setSelectedTemplate } from "../../store/slices/vmSlice";
 import UploadTemplatesModal from "./Form/UploadTemplatesModal";
 import { useDispatch, useSelector } from "react-redux";
+import { CSSTransition } from "primereact/csstransition";
 
 export default function AddVirtualMachine() {
   const navigate = useNavigate();
@@ -53,7 +54,9 @@ export default function AddVirtualMachine() {
         onClose={() => setIsTemplateModalOpen(false)}
         onSelect={handleTemplateSelect}
       />
-      <UploadTemplatesModal isOpen={isUploadTemplatesOpen} onClose={() => setIsUploadTemplatesOpen(false)} />
+      <CSSTransition unmountOnExit in={isUploadTemplatesOpen} timeout={500}>
+        <UploadTemplatesModal isOpen={isUploadTemplatesOpen} onClose={() => setIsUploadTemplatesOpen(false)} />
+      </CSSTransition>
       <Page
         title="Add Virtual Machine"
         breadcrumb={<BreadCrumb model={breadcrumbItems} />}
