@@ -4,7 +4,6 @@ import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations } from "../slices/projectSlice";
 import { getVMsAction } from "./projectActions";
 
-
 // spec:
 //   dataVolumeTemplates:
 //   - metadata:
@@ -21,7 +20,6 @@ import { getVMsAction } from "./projectActions";
 //         http:
 //           url: >-
 //             https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
-
 
 const addVMRequest = async (payload, url, dispatch, next) => {
   const res = await api("post", url, payload);
@@ -46,17 +44,16 @@ const addVMRequest = async (payload, url, dispatch, next) => {
     );
     if (next) next(true);
   }
-}
+};
 
 const addDiskByYamlTemplate = async (namespace, template) => {
-  
   let url = endPoints.ADD_STORAGE_DISK({
     namespace: namespace,
     name: template.metadata.name,
   });
-  
+
   template.apiVersion = "cdi.kubevirt.io/v1beta1";
-  template.kind= "DataVolume";
+  template.kind = "DataVolume";
 
   const res = await api("post", url, template);
   if (res?.status === "Failure") {
@@ -64,12 +61,12 @@ const addDiskByYamlTemplate = async (namespace, template) => {
   }
 
   return res.metadata;
-}
+};
 
 export const _getDeviceFromDisk = (disk, i) => {
   let busObj = {};
   if (disk?.busType) {
-    busObj.bus = disk?.busType || 'virtio';
+    busObj.bus = disk?.busType || "virtio";
   }
 
   let obj = {
@@ -82,13 +79,13 @@ export const _getDeviceFromDisk = (disk, i) => {
     obj.cache = disk?.cache;
   }
   return obj;
-}
+};
 
 export const _getDevices = (_disks) => {
   return _disks.map((disk, i) => {
-    return _getDeviceFromDisk(disk,  i);
+    return _getDeviceFromDisk(disk, i);
   });
-}
+};
 
 export const _getVolumeFromDisk = (disk) => {
   return {
@@ -97,21 +94,22 @@ export const _getVolumeFromDisk = (disk) => {
       name: disk?.volumeName,
     },
   };
-}
+};
 
-export const _getVolumes = (_disks) => _disks.map((disk, i) => {
-  return _getVolumeFromDisk(disk);
-});
+export const _getVolumes = (_disks) =>
+  _disks.map((disk, i) => {
+    return _getVolumeFromDisk(disk);
+  });
 
-export const _setUserDataAndNetworkDisks = (_devices, _volumes, {name, username, password}) => {
+export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username, password }) => {
   const deviceData = {
     bootOrder: _devices.length + 1,
     name: `disk${_devices.length + 1}`,
     disk: {
       bus: "virtio",
     },
-  }
-  if(_devices instanceof Array) {
+  };
+  if (_devices instanceof Array) {
     _devices.push(deviceData);
   }
   const volumeData = {
@@ -121,13 +119,13 @@ export const _setUserDataAndNetworkDisks = (_devices, _volumes, {name, username,
       networkData:
         "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
     },
-  } 
-  if(_volumes instanceof Array) {
+  };
+  if (_volumes instanceof Array) {
     _volumes.push(volumeData);
   }
 
-  return {_volumes, _devices, deviceData, volumeData}
-}
+  return { _volumes, _devices, deviceData, volumeData };
+};
 
 export const _getAccessCredentials = (sshKey) => {
   let _accessCredentials = [];
@@ -136,254 +134,250 @@ export const _getAccessCredentials = (sshKey) => {
       sshPublicKey: {
         source: {
           secret: {
-            secretName: sshKey
-          }
+            secretName: sshKey,
+          },
         },
         propagationMethod: {
-          noCloud: {}
-        }
-      }
+          noCloud: {},
+        },
+      },
     });
   }
   return _accessCredentials;
-}
+};
 
-const onAddVMAction =
-  (data, disks, images, setLoading, next) => async (dispatch, getState) => {
-    try {
-      const { sshKeys } = getState().sshKeys;
-      const selectedKey = sshKeys.find(key => key.name === data.sshKey);
-      const sshKeyValue = selectedKey ? selectedKey.sshPublicKey : '';
-      
-      // TODO: later we can remove this if 
-      // we don't want send vm template directly to
-      // api
-      const sendDataVolumesInVm = true;
+const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch, getState) => {
+  try {
+    const { sshKeys } = getState().sshKeys;
+    const selectedKey = sshKeys.find((key) => key.name === data.sshKey);
+    const sshKeyValue = selectedKey ? selectedKey.sshPublicKey : "";
 
-      let { project } = getState();
-      let { vms } = project;
-      let name, namespace;
-      let { advanced } = data;
+    // TODO: later we can remove this if
+    // we don't want send vm template directly to
+    // api
+    const sendDataVolumesInVm = false;
 
-      if (advanced) {
-        namespace = advanced.metadata.namespace;
-        name = advanced.metadata.name;
-      } else {
-        name = data.name;
-        namespace = data.namespace;
-      }
-
-      if (vms?.length && name) {
-        let vmNameCheck = vms.find(
-          (item) => item.name === name && item.namespace === namespace
-        );
-        if (vmNameCheck) {
-          dispatch(
-            showToastAction({
-              type: "error",
-              title: "VM with name/namespace combination already exists!",
-            })
-          );
-          setLoading(false);
-          return;
-        }
-      }
-
-      // With the last changes on Yaml Editor in advanced step 
-      // We have the advanced value already all the time 
-      // TODO: we can remove 
-      if(advanced && sendDataVolumesInVm) {
-        let url = endPoints.ADD_VM({
-          namespace: data.namespace,
-          name: data.name,
-        });
-        setLoading(true);
-        await addVMRequest(advanced, url, dispatch, next);
-        return;
-      }
-
-      if(advanced) {
-        let _disks = await Promise.all(
-          advanced.spec.dataVolumeTemplates.map(async (disk, i) => {
-            const metadata = await addDiskByYamlTemplate(namespace, disk);
-            return {
-              diskName: `disk${i + 1}`,
-              volumeName: metadata?.name
-            }
+    let { project } = getState();
+    let { vms } = project;
+    let name, namespace;
+    let { advanced } = data;
+    name = data.name;
+    namespace = data.namespace;
+    if (advanced) {
+      // namespace = advanced.metadata.namespace;
+      // name = advanced.metadata.name;
+    } else {
+      name = data.name;
+      namespace = data.namespace;
+    }
+    
+    if (vms?.length && name) {
+      let vmNameCheck = vms.find((item) => item.name === name && item.namespace === namespace);
+      if (vmNameCheck) {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: "VM with name/namespace combination already exists!",
           })
         );
-
-        let url = endPoints.ADD_VM({
-          namespace: data.namespace,
-          name: data.name,
-        });
-        
-        next(false);
-
-        const _deviceDisk = _getDevices(_disks);
-        const _volumes = _getVolumes(_disks);
-        
-        advanced.spec.template.spec.domain.devices.disks = _deviceDisk;
-        advanced.spec.template.spec.volumes = _volumes;
-
-        await addVMRequest(advanced, url, dispatch, next);
-        
         setLoading(false);
         return;
       }
-      
-      let _disks = await Promise.all(
-        disks.map(async (disk, i) => {
-          if (disk?.createType === "new" || disk?.createType === "image") {
-            const diskName = `${name.trim()}-disk${i + 1}`;
-            const diskNamespace = namespace;
+    }
 
-            let existingDisks = project.disks;
-
-            let diskNameCheck = existingDisks.find(
-              (item) =>
-                item.name === diskName && item.namespace === diskNamespace
-            );
-            if (diskNameCheck) {
-              throw new Error(
-                `Disk ${diskName} with name/namespace combination already exists!`
-              );
-            }
-
-            let diskData = await adddisk(
-              {
-                ...disk,
-                namespace: diskNamespace,
-                name: diskName,
-              },
-              images,
-              dispatch
-            );
-            console.log('disk data_____', diskData);
-            let _obj = {
-              cache: disk?.cache,
-              diskType: disk?.diskType,
-              busType: disk?.busType,
-              diskName: `disk${i + 1}`,
-              volumeName: diskData?.name,
-            };
-
-            if (disk?.cache) {
-              _obj.cache = disk?.cache;
-            }
-
-            return _obj;
-          } else {
-            let _obj = {
-              diskType: disk?.diskType,
-              busType: disk?.busType,
-              diskName: `disk${i + 1}`,
-              volumeName: disk?.disk,
-            };
-            if (disk?.cache) {
-              _obj.cache = disk?.cache;
-            }
-
-            return _obj;
-          }
-        })
-      );
-
-      let _deviceDisk = _getDevices(_disks);
-
-      let _accessCredentials = [];
-      if (data.sshKey) {
-        _accessCredentials.push({
-          sshPublicKey: {
-            source: {
-              secret: {
-                secretName: data.sshKey
-              }
-            },
-            propagationMethod: {
-              noCloud: {}
-            }
-          }
-        });
-      }
-
-      let _volumes = _getVolumes(_disks);
-
-      //add one disk and volume obj for username and password
-      _setUserDataAndNetworkDisks(_deviceDisk, _volumes, {name: data.name, username: data.userName, password: data.password})
-
+    // With the last changes on Yaml Editor in advanced step
+    // We have the advanced value already all the time
+    // TODO: we can remove
+    if (advanced && sendDataVolumesInVm) {
       let url = endPoints.ADD_VM({
         namespace: data.namespace,
         name: data.name,
       });
-      let payload = {
-        apiVersion: "kubevirt.io/v1alpha3",
-        kind: "VirtualMachine",
-        metadata: {
-          name: data.name,
-          namespace: data.namespace,
-          labels: {
-            "kubevirt.io/domain": data.name,
-            "kubevirt-manager.io/managed": "true",
-            "cloud-init.kubevirt-manager.io/username": data.userName,
+      setLoading(true);
+      await addVMRequest(advanced, url, dispatch, next);
+      return;
+    }
+
+    // if (advanced) {
+    //   let _disks = await Promise.all(
+    //     advanced.spec.dataVolumeTemplates.map(async (disk, i) => {
+    //       const metadata = await addDiskByYamlTemplate(namespace, disk);
+    //       return {
+    //         diskName: `disk${i + 1}`,
+    //         volumeName: metadata?.name,
+    //       };
+    //     })
+    //   );
+
+    //   let url = endPoints.ADD_VM({
+    //     namespace: data.namespace,
+    //     name: data.name,
+    //   });
+
+    //   next(false);
+
+    //   const _deviceDisk = _getDevices(_disks);
+    //   const _volumes = _getVolumes(_disks);
+
+    //   advanced.spec.template.spec.domain.devices.disks = _deviceDisk;
+    //   advanced.spec.template.spec.volumes = _volumes;
+
+    //   await addVMRequest(advanced, url, dispatch, next);
+
+    //   setLoading(false);
+    //   return;
+    // }
+
+    let _disks = await Promise.all(
+      disks.map(async (disk, i) => {
+        if (disk?.createType === "new" || disk?.createType === "image") {
+          const diskName = `${name.trim()}-disk${i + 1}`;
+          const diskNamespace = namespace;
+
+          let existingDisks = project.disks;
+
+          let diskNameCheck = existingDisks.find((item) => item.name === diskName && item.namespace === diskNamespace);
+          if (diskNameCheck) {
+            throw new Error(`Disk ${diskName} with name/namespace combination already exists!`);
+          }
+
+          let diskData = await adddisk(
+            {
+              ...disk,
+              namespace: diskNamespace,
+              name: diskName,
+            },
+            images,
+            dispatch
+          );
+          console.log("disk data_____", diskData);
+          let _obj = {
+            cache: disk?.cache,
+            diskType: disk?.diskType,
+            busType: disk?.busType,
+            diskName: `disk${i + 1}`,
+            volumeName: diskData?.name,
+          };
+
+          if (disk?.cache) {
+            _obj.cache = disk?.cache;
+          }
+
+          return _obj;
+        } else {
+          let _obj = {
+            diskType: disk?.diskType,
+            busType: disk?.busType,
+            diskName: `disk${i + 1}`,
+            volumeName: disk?.disk,
+          };
+          if (disk?.cache) {
+            _obj.cache = disk?.cache;
+          }
+
+          return _obj;
+        }
+      })
+    );
+
+    let _deviceDisk = _getDevices(_disks);
+
+    let _accessCredentials = [];
+    if (data.sshKey) {
+      _accessCredentials.push({
+        sshPublicKey: {
+          source: {
+            secret: {
+              secretName: data.sshKey,
+            },
+          },
+          propagationMethod: {
+            noCloud: {},
           },
         },
-        spec: {
-          running: false,
-          template: {
-            metadata: {},
-            spec: {
-              domain: {
-                devices: {
-                  disks: _deviceDisk,
-                  interfaces: [
-                    {
-                      name: "net1",
-                      [data.bindingMode]: {},
-                    },
-                  ],
-                  networkInterfaceMultiqueue: true,
-                },
-                cpu: {
-                  cores: parseInt(data.cores),
-                  threads: parseInt(data.threads),
-                  sockets: parseInt(data.sockets),
-                },
-                resources: {
-                  requests: {
-                    memory: `${data.memory}${data.memoryType}`,
+      });
+    }
+
+    let _volumes = _getVolumes(_disks);
+
+    //add one disk and volume obj for username and password
+    _setUserDataAndNetworkDisks(_deviceDisk, _volumes, {
+      name: data.name,
+      username: data.userName,
+      password: data.password,
+    });
+
+    let url = endPoints.ADD_VM({
+      namespace: data.namespace,
+      name: data.name,
+    });
+    let payload = {
+      apiVersion: "kubevirt.io/v1alpha3",
+      kind: "VirtualMachine",
+      metadata: {
+        name: data.name,
+        namespace: data.namespace,
+        labels: {
+          "kubevirt.io/domain": data.name,
+          "kubevirt-manager.io/managed": "true",
+          "cloud-init.kubevirt-manager.io/username": data.userName,
+        },
+      },
+      spec: {
+        running: false,
+        template: {
+          metadata: {},
+          spec: {
+            domain: {
+              devices: {
+                disks: _deviceDisk,
+                interfaces: [
+                  {
+                    name: "net1",
+                    [data.bindingMode]: {},
                   },
+                ],
+                networkInterfaceMultiqueue: true,
+              },
+              cpu: {
+                cores: parseInt(data.cores),
+                threads: parseInt(data.threads),
+                sockets: parseInt(data.sockets),
+              },
+              resources: {
+                requests: {
+                  memory: `${data.memory}${data.memoryType}`,
                 },
               },
-              networks: [
-                {
-                  name: "net1",
-                  pod: {},
-                },
-              ],
-              accessCredentials: _accessCredentials,
-              volumes: _volumes,
-              nodeSelector: {
-                "kubernetes.io/hostname": data.node,
+            },
+            networks: [
+              {
+                name: "net1",
+                pod: {},
               },
+            ],
+            accessCredentials: _accessCredentials,
+            volumes: _volumes,
+            nodeSelector: {
+              "kubernetes.io/hostname": data.node,
             },
           },
         },
-      };
-      console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
-      await addVMRequest(payload, url, dispatch, next);
-      setLoading(false);
-
-    } catch (error) {
-      setLoading(false);
-      dispatch(
-        showToastAction({
-          type: "error",
-          title: error.message,
-        })
-      );
-    }
-  };
+      },
+    };
+    console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
+    await addVMRequest(payload, url, dispatch, next);
+    setLoading(false);
+  } catch (error) {
+    setLoading(false);
+    dispatch(
+      showToastAction({
+        type: "error",
+        title: error.message,
+      })
+    );
+  }
+};
 
 const onEditVMAction = (data, setLoading, next) => async (dispatch) => {
   setLoading(true);
@@ -636,6 +630,49 @@ const onMigrateVMAction = (data, next) => async (dispatch) => {
   }
 };
 
+const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) => {
+  let url = endPoints.HOT_PLUG_VOLUME({ namespace, name });
+  console.log("vm hotplog action___", url, namespace, data);
+
+  const payload = {
+    name: data.volume,
+    disk: {
+      name: data.volume,
+      serial: "test",
+      cache: data.cache,
+      disk: {
+        readonly: data.isReadOnly,
+        bus: "scsi",
+      },
+    },
+    volumeSource: {
+      dataVolume: {
+        name: data.volume,
+        hotpluggable: true,
+      },
+    },
+  };
+
+  const res = await api("put", url, payload);
+  if (res?.status === "Failure") {
+    if (res?.details?.causes) {
+      res?.details?.causes?.forEach((element) => {
+        dispatch(
+          showToastAction({
+            type: "error",
+            title: element?.message,
+          })
+        );
+      });
+    }
+  } else if (res?.kind) {
+    // dispatch(getVMsAction());
+  }
+  if (next) {
+    next();
+  }
+};
+
 const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
   let items = await Promise.all(
     namespaces.map(async (namespace, i) => {
@@ -678,5 +715,6 @@ export {
   onRestartVMAction,
   onPauseVMAction,
   onMigrateVMAction,
-  getLiveMigrationsAction
+  getLiveMigrationsAction,
+  onAddHotPlugVmAction,
 };

@@ -18,7 +18,7 @@ const initialState = {
   templates: prebuiltTemplates,
   selectedTemplate: {},
   useVmTemplate: false,
-  updatedYamlString: yamlTemplate,
+  updatedYamlString: "",
 };
 
 const vmSlice = createSlice({

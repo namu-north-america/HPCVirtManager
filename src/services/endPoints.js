@@ -59,6 +59,8 @@ const endPoints = {
     `/apis/subresources.kubevirt.io/v1/namespaces/${namespace}/virtualmachineinstances/${name}/${type}`,
   GET_VOLUME: ({ namespace, name }) =>
     `/apis/cdi.kubevirt.io/v1beta1/namespaces/${namespace}/datavolumes/${name}`,
+  HOT_PLUG_VOLUME: ({ namespace, name }) =>
+    `/apis/subresources.kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}/addvolume`,
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",

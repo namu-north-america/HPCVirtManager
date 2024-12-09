@@ -439,6 +439,9 @@ export default function ViewVM() {
                   title="Add New Storage Disk"
                   isOpen={isOpenAddNewStorageModal}
                   setVisible={setIsOpenAddNewStorageModal}
+                  volumes={volumes}
+                  name={name}
+                  namespace={namespace}
                 />
                 <Col size={6} extraClassNames="p-2">
                   <Button

@@ -53,6 +53,7 @@ const getVMsAction = () => async (dispatch) => {
         cores: item?.spec?.template?.spec?.domain?.cpu?.cores,
         threads: item?.spec?.template?.spec?.domain?.cpu?.threads,
         memory: item?.spec?.template?.spec?.domain?.resources?.requests?.memory,
+        volumes: item?.spec?.template?.spec?.volumes
       };
     })
   );

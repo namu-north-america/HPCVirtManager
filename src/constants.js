@@ -2,6 +2,25 @@
 const baseUrl = "http://52.156.107.111:32048";
 const endPointUrl = baseUrl;
 
-const constants = { baseUrl, endPointUrl };
+export const cacheOptions = [
+  {
+    name: "Automatic",
+    value: "automatic",
+  },
+  {
+    name: "None",
+    value: "none",
+  },
+  {
+    name: "WriteThrough",
+    value: "writethrough",
+  },
+  {
+    name: "WriteBack",
+    value: "writeback",
+  },
+];
+
+const constants = { baseUrl, endPointUrl, cacheOptions };
 
 export default constants;

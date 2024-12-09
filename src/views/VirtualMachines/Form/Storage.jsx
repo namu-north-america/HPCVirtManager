@@ -3,7 +3,7 @@ import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../.
 import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 import { confirmPopup } from "primereact/confirmpopup";
-import { v4 } from "uuid";
+import {cacheOptions} from "../../../constants";
 
 export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   const { storageClassesDropdown, accessModeDropdown, disksDropdown, images } = useSelector((state) => state.project);
@@ -50,24 +50,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
     { name: "S3", value: "s3" },
   ];
 
-  const cacheOptions = [
-    {
-      name: "Automatic",
-      value: "automatic",
-    },
-    {
-      name: "None",
-      value: "none",
-    },
-    {
-      name: "WriteThrough",
-      value: "writethrough",
-    },
-    {
-      name: "WriteBack",
-      value: "writeback",
-    },
-  ];
+  
 
   const filteredDiskes = useMemo(
     () => disksDropdown.filter((item) => item.namespace === data?.namespace).map((item) => item?.name),
