@@ -35,8 +35,6 @@ export default function HotPlugModal({ name, namespace, isOpen, setVisible, volu
         });
       });
 
-      console.log("is match___", isMatch);
-
       if (!isMatch) return { name: disk.name, value: disk.name };
     })
     .filter((option) => option !== undefined);
