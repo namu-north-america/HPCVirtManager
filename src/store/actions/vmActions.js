@@ -113,7 +113,7 @@ export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username
   if (_devices instanceof Array) {
     _devices.push(deviceData);
   }
-  
+
   const volumeData = {
     name: `disk${_volumes.length + 1}`,
     cloudInitNoCloud: {
@@ -122,7 +122,7 @@ export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username
         "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
     },
   };
-  
+
   if (_volumes instanceof Array) {
     _volumes.push(volumeData);
   }
@@ -173,7 +173,7 @@ const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch
       name = data.name;
       namespace = data.namespace;
     }
-    
+
     if (vms?.length && name) {
       let vmNameCheck = vms.find((item) => item.name === name && item.namespace === namespace);
       if (vmNameCheck) {
@@ -187,8 +187,6 @@ const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch
         return;
       }
     }
-    console.log('data___change data____', data)
-    console.log('disks____', disks)
     // With the last changes on Yaml Editor in advanced step
     // We have the advanced value already all the time
     // TODO: we can remove
@@ -626,7 +624,7 @@ const onMigrateVMAction = (data, next) => async (dispatch) => {
         );
       });
     }
-  } else if (res?.kind) {
+  } else {
     dispatch(getVMsAction());
   }
   if (next) {
@@ -659,7 +657,7 @@ const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) =
 
   const res = await api("put", url, payload);
   if (res?.status === "Failure") {
-    if (res?.reason == 'BadRequest') {
+    if (res?.reason == "BadRequest") {
       dispatch(
         showToastAction({
           type: "error",

@@ -20,8 +20,6 @@ spec:
           http:
             url: >-
               https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
-
-            #http://fedoraimages.com
   running: false
   template:
     metadata:
@@ -31,6 +29,8 @@ spec:
       domain:
         cpu:
           cores: 2
+          sockets: 1
+          threads: 1
         devices:
           disks:
             - disk:
@@ -38,7 +38,7 @@ spec:
               name: datavolume-iso
           interfaces:
             - name: net1
-              bridge:
+              bridge: {}
           networkInterfaceMultiqueue: true
         machine:
           type:
@@ -80,4 +80,4 @@ spec:
             propagationMethod:
               noCloud: {}
       nodeSelector:
-        kubernetes.io/hostname:
+        kubernetes.io/hostname: worker

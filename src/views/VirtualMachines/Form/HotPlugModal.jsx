@@ -3,12 +3,17 @@ import CustomModal from "../../../shared/CustomModal";
 import { CustomDropDown, CustomForm, CustomInput } from "../../../shared/AllInputs";
 import { useDispatch, useSelector } from "react-redux";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
-import { cacheOptions } from "../../../constants";
+import { cacheOptions as cache } from "../../../constants";
 import { onAddHotPlugVmAction } from "../../../store/actions/vmActions";
 
 export default function HotPlugModal({ name, namespace, isOpen, setVisible, volumes, ...rest }) {
   const { disks } = useSelector((state) => state.project);
   const { vms } = useSelector((state) => state.project);
+  const [cacheOptions] = useState(() => {
+    const copiedCache = [...cache];
+    copiedCache.shift();
+    return copiedCache;
+  });
   const [data, setData] = useState({
     volume: "",
     type: "",
@@ -36,7 +41,6 @@ export default function HotPlugModal({ name, namespace, isOpen, setVisible, volu
     })
     .filter((option) => option !== undefined);
 
-  console.log("name namespace___", name, disks, volumeOptions, vms);
   const typesDropdown = [
     { name: "DISK", value: "disk" },
     { name: "LUN", value: "lun" },
@@ -58,7 +62,19 @@ export default function HotPlugModal({ name, namespace, isOpen, setVisible, volu
   };
 
   return (
-    <CustomModal visible={isOpen} setVisible={setVisible} {...rest}>
+    <CustomModal
+      visible={isOpen}
+      setVisible={setVisible}
+      onHide={() => {
+        setData({
+          volume: "",
+          type: "",
+          cache: "",
+          isReadOnly: false,
+        });
+      }}
+      {...rest}
+    >
       <CustomForm>
         <CustomDropDown
           label="Volumes"

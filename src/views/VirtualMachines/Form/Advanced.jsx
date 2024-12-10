@@ -52,6 +52,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           cores: yamlDataObject.spec?.template?.spec?.domain?.cpu?.cores || data.cores,
           sockets: yamlDataObject.spec?.template?.spec?.domain?.cpu?.sockets || data.sockets,
           threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
+          node: yamlDataObject.spec.template.spec.nodeSelector["kubernetes.io/hostname"],
           advanced: yamlDataObject,
         };
 
@@ -105,6 +106,16 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 return item.namespace === namespace && source[item?.type] && source[item.type].url === item.url;
               });
 
+              let sourceType;
+              let url;
+              if (image) {
+                sourceType = "http";
+                url = image.url;
+              } else {
+                sourceType = Object.keys(source)[0];
+                url = source[sourceType];
+              }
+
               return {
                 createType: image ? "image" : "new",
                 diskType: "disk",
@@ -115,9 +126,9 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 accessMode: accessModes || "",
                 image: image ? image.name : "",
                 disk: "",
-                type: "blank",
-                url: image ? image.url : "",
-                cache: deviceDisk.cache,
+                type: sourceType,
+                url: url,
+                cache: deviceDisk?.cache,
               };
             });
 
@@ -139,7 +150,9 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
     }
 
     const objectData = jsYaml.load(yaml);
-
+    if (useVmTemplate) {
+      return;
+    }
     if (data.cores) objectData.spec.template.spec.domain.cpu.cores = parseInt(data.cores);
     if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
     if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
@@ -186,7 +199,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         if (disk.createType == "new" || disk.createType === "image") {
           let diskName = `${name.trim()}-disk${i + 1}`;
 
-          if (i == 0 && disks.length === 1) {
+          if (i == 0 && disks.length === 1 && useVmTemplate) {
             const item = yamlDataVolumeTemplates[i] ? yamlDataVolumeTemplates[i] : [];
             const currentDevice = objectData.spec?.template?.spec?.domain?.devices?.disks[0];
             const diskType = disk.type;

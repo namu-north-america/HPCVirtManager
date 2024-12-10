@@ -45,7 +45,6 @@ function YamlEditor({ defaultValue, onChange, onValidate, value, options = {}, c
 
   const validate = (errors) => {
     setErrors(errors);
-    console.log("errors___", errors);
     onValidate && onValidate(errors);
   };
 
