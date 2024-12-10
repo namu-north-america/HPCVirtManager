@@ -4,20 +4,17 @@ import { CustomDropDown, CustomForm, CustomInput } from "../../../shared/AllInpu
 import { useDispatch, useSelector } from "react-redux";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
 import { cacheOptions } from "../../../constants";
-import { onAddDiskAction } from "../../../store/actions/storageActions";
 import { onAddHotPlugVmAction } from "../../../store/actions/vmActions";
 
 export default function HotPlugModal({ name, namespace, isOpen, setVisible, volumes, ...rest }) {
   const { disks } = useSelector((state) => state.project);
   const { vms } = useSelector((state) => state.project);
-
   const [data, setData] = useState({
     volume: "",
     type: "",
     cache: "",
     isReadOnly: false,
   });
-
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -32,7 +29,9 @@ export default function HotPlugModal({ name, namespace, isOpen, setVisible, volu
           return disk.name === volume?.dataVolume?.name;
         });
       });
+
       console.log("is match___", isMatch);
+
       if (!isMatch) return { name: disk.name, value: disk.name };
     })
     .filter((option) => option !== undefined);
@@ -49,7 +48,13 @@ export default function HotPlugModal({ name, namespace, isOpen, setVisible, volu
   ];
 
   const onAddAction = () => {
-    dispatch(onAddHotPlugVmAction(namespace, name, data, () => {}));
+    setLoading(true);
+    dispatch(
+      onAddHotPlugVmAction(namespace, name, data, (res) => {
+        setLoading(false);
+        setVisible(false);
+      })
+    );
   };
 
   return (

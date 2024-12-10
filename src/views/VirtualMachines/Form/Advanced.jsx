@@ -138,7 +138,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
       yaml = updatedYamlString;
     }
 
-    const objectData = jsYaml.load(updatedYamlString);
+    const objectData = jsYaml.load(yaml);
 
     if (data.cores) objectData.spec.template.spec.domain.cpu.cores = parseInt(data.cores);
     if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);

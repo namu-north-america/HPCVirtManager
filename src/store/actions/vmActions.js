@@ -109,9 +109,11 @@ export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username
       bus: "virtio",
     },
   };
+
   if (_devices instanceof Array) {
     _devices.push(deviceData);
   }
+  
   const volumeData = {
     name: `disk${_volumes.length + 1}`,
     cloudInitNoCloud: {
@@ -120,6 +122,7 @@ export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username
         "version: 1\nconfig:\n    - type: physical\n      name: enp1s0\n      subnets:\n      - type: dhcp\n    - type: nameserver\n      address:\n      - '8.8.8.8'\n      - '8.8.4.4'\n",
     },
   };
+  
   if (_volumes instanceof Array) {
     _volumes.push(volumeData);
   }
@@ -184,7 +187,8 @@ const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch
         return;
       }
     }
-
+    console.log('data___change data____', data)
+    console.log('disks____', disks)
     // With the last changes on Yaml Editor in advanced step
     // We have the advanced value already all the time
     // TODO: we can remove
@@ -655,15 +659,13 @@ const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) =
 
   const res = await api("put", url, payload);
   if (res?.status === "Failure") {
-    if (res?.details?.causes) {
-      res?.details?.causes?.forEach((element) => {
-        dispatch(
-          showToastAction({
-            type: "error",
-            title: element?.message,
-          })
-        );
-      });
+    if (res?.reason == 'BadRequest') {
+      dispatch(
+        showToastAction({
+          type: "error",
+          title: res?.message,
+        })
+      );
     }
   } else if (res?.kind) {
     // dispatch(getVMsAction());
