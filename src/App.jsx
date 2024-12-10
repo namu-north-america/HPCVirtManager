@@ -1,15 +1,16 @@
+import React from 'react';
 import { BreadcrumbProvider } from './contexts/BreadcrumbContext';
+import { HashRouter } from 'react-router-dom';
+import { ProtectedRoutes } from './routes/ProtectedRoutes';
 
 function App() {
   return (
     <BreadcrumbProvider>
-      <Layout>
-        <Router>
-          <Routes>
-            {/* Your routes */}
-          </Routes>
-        </Router>
-      </Layout>
+      <HashRouter>
+        <ProtectedRoutes />
+      </HashRouter>
     </BreadcrumbProvider>
   );
 } 
+
+export default App;

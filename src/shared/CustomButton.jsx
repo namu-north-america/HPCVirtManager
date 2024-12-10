@@ -9,7 +9,7 @@ export default function CustomButton({
 }) {
   return (
     <Button
-      className={`primary-button align-center mx-2 ${extraClassNames}`}
+      className={`primary-button align-center ${extraClassNames}`}
       label={label}
       style={{ alignSelf: "center" }}
       size="small"
@@ -22,7 +22,7 @@ export function CustomButtonOutlined({ label = "Submit", ...props }) {
   const isRefreshButton = label === "Refresh";
   return (
     <Button
-      className={`align-center mx-2 ${isRefreshButton ? 'refresh-button' : ''}`}
+      className={`align-center ${isRefreshButton ? 'refresh-button' : ''}`}
       label={label}
       style={{ alignSelf: "center" }}
       outlined={!isRefreshButton}
@@ -35,7 +35,7 @@ export function CustomButtonOutlined({ label = "Submit", ...props }) {
 export function CustomSplitButton({ label = "Submit", ...props }) {
   return (
     <SplitButton
-      className="align-center mx-2"
+      className="align-center"
       label={label}
       outlined
       size="small"
