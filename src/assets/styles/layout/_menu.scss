@@ -209,7 +209,7 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
       font-size: 1em;
       font-weight: 600;
       line-height: 24px;
-      margin-left: 0.5rem;
+      margin-left: 0rem;
     }
 
     .open-icon {
@@ -218,9 +218,9 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
     }
 
     svg {
-      height: 25px;
-      width: 25px;
-      color: $white-color;
+      height: 1rem;
+      width: 1rem;
+      color: #959ba4;
     }
     
     &.active {

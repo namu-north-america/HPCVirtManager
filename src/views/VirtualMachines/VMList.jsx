@@ -432,7 +432,7 @@ export default function VMList() {
         addText="New VM"
       >
         <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
-          <Column body={iconTemplate} style={{ width: '3rem' }}></Column>
+          <Column body={iconTemplate} style={{ width: '2rem' }}></Column>
           <Column field="name" header="Name" body={vmname}></Column>
           <Column field="status" header="Status" body={statusTemplate}></Column>
           <Column field="guestOS" header="OS" body={osTemplate}></Column>
