@@ -1,3 +1,5 @@
+import { FaDesktop, FaCompactDisc, FaServer } from 'react-icons/fa';
+
 export const sidebarItems = [
   {
     title: "Dashboard",
@@ -7,7 +9,7 @@ export const sidebarItems = [
   {
     title: "Virtual Machines",
     link: "/virtual-machines",
-    icon: "pi pi-server",
+    icon: <FaDesktop size={14} />,
     items: [
       {
         title: "All VMs",
@@ -45,7 +47,7 @@ export const sidebarItems = [
   {
     title: "Images",
     link: "/images",
-    icon: "pi pi-save",
+    icon: <FaCompactDisc size={14} />,
   },
   // {
   //   title: "Clusters",
@@ -55,7 +57,7 @@ export const sidebarItems = [
   {
     title: "Nodes",
     link: "/nodes",
-    icon: "pi pi-circle",
+    icon: <FaServer size={14} />,
   },
   {
     title: "Users (RBAC)",

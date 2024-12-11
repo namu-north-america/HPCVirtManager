@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import PoolTypeSelectionModal from "./Form/PoolTypeSelectionModal";
+import CreateK8sCluster from "../VMPools/Form/CreateK8sCluster";
+import Modal from "../../shared/Modal/Modal";
 
 export default function VMPools() {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ export default function VMPools() {
   const [pools, setPools] = useState([]); // This will be populated from your API
   const { breadcrumb } = useBreadcrumb();
   const [isPoolTypeModalOpen, setIsPoolTypeModalOpen] = useState(false);
+  const [isK8sFormOpen, setIsK8sFormOpen] = useState(false);
 
   // Filter pools based on search
   const filteredPools = pools.filter((item) =>
@@ -66,7 +69,16 @@ export default function VMPools() {
 
   const handlePoolTypeSelect = (poolType) => {
     setIsPoolTypeModalOpen(false);
-    navigate("/virtual-machines/pools/add", { state: { poolType } });
+    if (poolType.id === 'kubernetes') {
+      navigate('/virtual-machines/pools/add-k8s');
+    } else {
+      navigate('/virtual-machines/pools/add');
+    }
+  };
+
+  const handleK8sFormClose = () => {
+    setIsK8sFormOpen(false);
+    navigate('/virtual-machines/pools');
   };
 
   const onEdit = (item) => {
@@ -82,32 +94,75 @@ export default function VMPools() {
   };
 
   return (
-    <>
+    <Page
+      title="VM Pools"
+      onSearch={setSearch}
+      onRefresh={() => {
+        // Refresh pools data
+      }}
+      onAdd={onAdd}
+      addText="New VM Pool"
+      breadcrumb={<BreadCrumb model={breadcrumb} />}
+    >
+      <DataTable
+        value={filteredPools}
+        paginator
+        rows={10}
+        totalRecords={filteredPools.length}
+        className="p-datatable-striped"
+      >
+        <Column
+          field="name"
+          header="Name"
+          body={nameTemplate}
+          sortable
+          filter
+          filterPlaceholder="Search by name"
+        />
+        <Column field="type" header="Type" sortable filter />
+        <Column field="size" header="Size" sortable />
+        <Column
+          field="resources"
+          header="Resources"
+          body={resourcesTemplate}
+          sortable
+        />
+        <Column
+          field="status"
+          header="Status"
+          body={statusTemplate}
+          sortable
+          filter
+        />
+        <Column
+          field="created"
+          header="Created"
+          body={timeTemplate}
+          sortable
+        />
+        <Column
+          body={actionTemplate}
+          style={{ width: "4rem" }}
+          bodyStyle={{ textAlign: "center" }}
+        />
+      </DataTable>
+
       <PoolTypeSelectionModal
         isOpen={isPoolTypeModalOpen}
         onClose={() => setIsPoolTypeModalOpen(false)}
         onSelect={handlePoolTypeSelect}
       />
-      <Page
-        title="VM Pools"
-        onSearch={setSearch}
-        onRefresh={() => {
-          // Refresh pools data
-        }}
-        onAdd={onAdd}
-        addText="New VM Pool"
-        breadcrumb={<BreadCrumb model={breadcrumb} />}
-      >
-        <DataTable value={filteredPools} tableStyle={{ minWidth: "50rem" }}>
-          <Column field="name" header="Name" body={nameTemplate}></Column>
-          <Column field="vmCount" header="# of VMs"></Column>
-          <Column field="status" header="Status" body={statusTemplate}></Column>
-          <Column field="type" header="Type"></Column>
-          <Column field="resources" header="Resources" body={resourcesTemplate}></Column>
-          <Column field="created" header="Created" body={timeTemplate}></Column>
-          <Column body={actionTemplate}></Column>
-        </DataTable>
-      </Page>
-    </>
+
+      {isK8sFormOpen && (
+        <Modal
+          isOpen={isK8sFormOpen}
+          onClose={handleK8sFormClose}
+          title="Create Kubernetes Cluster"
+          size="large"
+        >
+          <CreateK8sCluster onClose={handleK8sFormClose} />
+        </Modal>
+      )}
+    </Page>
   );
 }

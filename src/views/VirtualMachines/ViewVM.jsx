@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import Page from "../../shared/Page";
-import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { Link, useParams } from "react-router-dom";
 import { TabView, TabPanel } from "primereact/tabview";
 import {
@@ -34,6 +33,7 @@ import { showToastAction } from '../../store/slices/commonSlice';
 import YamlEditor from "../../shared/YamlEditor";
 import { yamlTemplate } from "./Form/TemplateSelectionModal";
 import { Tooltip } from 'primereact/tooltip';
+import SemiCircleGauge from "../../shared/SemiCircle";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -293,39 +293,48 @@ export default function ViewVM() {
   ];
   const renderButtons = () => (
     <>
-      <CustomButtonOutlined
-        label="Start"
-        severity="success"
-        icon="pi pi-play"
-        onClick={data.status === "Stopped" ? () => onStart() : null}
-        // disabled={data.status !== "Stopped"}
-      />
-      <CustomSplitButton
-        label="Shutdown"
-        icon="pi pi-power-off"
-        model={actions}
-        severity="danger"
-        onClick={data.status === "Running" ? () => onStop() : null}
-        // disabled={data.status !== "Running"}
-      />
-      <CustomButtonOutlined
-        label="Refresh"
-        severity="secondary"
-        icon="pi pi-sync"
-        onClick={onInitialLoad}
-      />
-      <CustomButtonOutlined
-        label="Console"
-        severity="secondary"
-        icon="pi pi-code"
-        onClick={() => setShowVncDialog(true)}  // Call local function directly
-        // disabled={data.status !== "Running"}
-      />
-      <CustomSplitButton
-        label="More Actions"
-        model={moreActions}
-        severity="secondary"
-      />
+      <div className="flex justify-between items-center mb-4 w-full">
+        <div className="flex items-center gap-2 w-full">
+          <CustomButtonOutlined
+            label="Start"
+            severity="success"
+            icon="pi pi-play"
+            className="refresh-button"
+            onClick={data.status === "Stopped" ? () => onStart() : null}
+          />
+          <CustomButtonOutlined
+            label="Shutdown"
+            icon="pi pi-power-off"
+            model={actions}
+            className="refresh-button"
+            severity="danger"
+            onClick={data.status === "Running" ? () => onStop() : null}
+          />
+        </div>
+        
+        <div className="flex items-right gap-2">
+          <CustomButtonOutlined
+            label="Refresh"
+            severity="secondary"
+            icon="pi pi-refresh"
+            className="refresh-button"
+            onClick={() => onInitialLoad()}
+          />
+          <CustomButtonOutlined
+            label="Console"
+            severity="secondary"
+            className="refresh-button"
+            icon="pi pi-code"
+            onClick={() => setShowVncDialog(true)}
+          />
+          <CustomSplitButton
+            label="More Actions"
+            model={moreActions}
+            className="refresh-button"
+            severity="secondary"
+          />
+        </div>
+      </div>
     </>
   );
 
@@ -365,15 +374,20 @@ export default function ViewVM() {
       <Tooltip target=".vm-status-icon" />
       <EditVmModal visible={editInfo} setVisible={setEditInfo} />
       <MigrateModal visible={onOpenMigrate} setVisible={setOpenMigrate} />
-      <CustomBreadcrum items={breadcrumItems} />
       <Page title={name}>
-        <div className="flex align-items-center gap-2 mb-3">
-          {renderButtons()}
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold">{name}</h1>
+            <span className="ml-2">{statusTemplate({ status: data.status })}</span>
+          </div>
         </div>
+        
+        {renderButtons()}
+        
         <TabView>
           <TabPanel header="Overview">
             <Grid>
-              <Col size={5}>
+              <Col size={4}>
                 <CustomCard title="Status">
                   <CustomCardField title="Name" value={name} />
                   <CustomCardField
@@ -396,46 +410,85 @@ export default function ViewVM() {
                       moment(data?.conditions?.lastTransitionTime).fromNow()
                     }
                   />
-                  
                 </CustomCard>
-                <CustomCard title="VM Metrics">
+                <CustomCard title="Resource Utilization">
                   <Grid>
                     <Col size={4}>
-                      <CustomCard>
-                        <div className="text-center">
-                          <div className="text-xl font-bold text-green-500">
-                            {(vmStats?.cpu?.used || 0).toFixed(2)}%
+                      <div className="py-4 px-3">
+                        <div className="space-y-2">
+                          <div className="grid grid-col-2 justify-content-center gap-4">
+                            <SemiCircleGauge
+                              title="CPU"
+                              percentage={Number((vmStats?.cpu?.used || 0).toFixed(2))}
+                              used={(vmStats?.cpu?.used || 0).toFixed(2)}
+                              available={100}
+                            />
                           </div>
-                          <div className="text-sm text-gray-600">CPU Usage</div>
+                          <div className="grid grid-col-2 justify-content-center gap-4">
+                            <div className="">
+                              <span className="text-black font-semibold">{(vmStats?.cpu?.used || 0).toFixed(2)}%</span>
+                              <span className="text-gray-500"> used</span>
+                              <br />
+                              <span className="text-black font-semibold">100%</span>
+                              <span className="text-gray-500"> available</span>
+                            </div>
+                          </div>
                         </div>
-                      </CustomCard>
+                      </div>
                     </Col>
                     
                     <Col size={4}>
-                      <CustomCard>
-                        <div className="text-center">
-                          <div className="text-xl font-bold text-blue-500">
-                            {(vmStats?.memory?.used || 0).toFixed(2)} GB      
+                      <div className="py-4 px-3">
+                        <div className="space-y-2">
+                          <div className="grid grid-col-2 justify-content-center gap-4">
+                            <SemiCircleGauge
+                              title="Memory"
+                              percentage={Number(((vmStats?.memory?.used || 0) / (vmStats?.memory?.total || 1) * 100).toFixed(2))}
+                              used={(vmStats?.memory?.used || 0).toFixed(2)}
+                              available={(vmStats?.memory?.total || 0).toFixed(2)}
+                            />
                           </div>
-                          <div className="text-sm text-gray-600">Memory Usage</div>
+                          <div className="grid grid-col-2 justify-content-center gap-4">
+                            <div className="">
+                              <span className="text-black font-semibold">{(vmStats?.memory?.used || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> used</span>
+                              <br />
+                              <span className="text-black font-semibold">{(vmStats?.memory?.total || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> available</span>
+                            </div>
+                          </div>
                         </div>
-                      </CustomCard>
+                      </div>
                     </Col>
                     
                     <Col size={4}>
-                      <CustomCard>
-                        <div className="text-center">
-                          <div className="text-xl font-bold text-purple-500">
-                            {(vmStats?.storage?.used || 0).toFixed(2)} GB
+                      <div className="py-4 px-3">
+                        <div className="space-y-2">
+                          <div className="grid grid-col-2 justify-content-center gap-4">
+                            <SemiCircleGauge
+                              title="Storage"
+                              percentage={Number(((vmStats?.storage?.used || 0) / (vmStats?.storage?.total || 1) * 100).toFixed(2))}
+                              used={(vmStats?.storage?.used || 0).toFixed(2)}
+                              available={(vmStats?.storage?.total || 0).toFixed(2)}
+                            />
                           </div>
-                          <div className="text-sm text-gray-600">Storage Usage</div>
+                          <div className="grid grid-col-2 justify-content-center gap-4">
+                            <div className="">
+                              <span className="text-black font-semibold">{(vmStats?.storage?.used || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> used</span>
+                              <br />
+                              <span className="text-black font-semibold">{(vmStats?.storage?.total || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> available</span>
+                            </div>
+                          </div>
                         </div>
-                      </CustomCard>
+                      </div>
                     </Col>
                   </Grid>
                 </CustomCard>
               </Col>
-              <Col size={5}>
+              
+              <Col size={4}>
                 <CustomCard title="Details">
                   <CustomCardField title="Namespace" value={namespace} />
                   <CustomCardField
@@ -456,7 +509,6 @@ export default function ViewVM() {
                   <CustomCardField
                     title="Storage Disks"
                     value={volumes?.length}
-                    // value={data?.storageDisks?.length}
                   />
                   <CustomCardField
                     title="Networking (NIC)"
@@ -468,7 +520,20 @@ export default function ViewVM() {
                   <CustomCardField title="Sockets" value={data?.sockets} />
                   <CustomCardField title="Threads" value={data?.threads} />
                   <CustomCardField title="Memory" value={data?.memory} />
-                  </CustomCard>
+                </CustomCard>
+              </Col>
+
+              <Col size={4}>
+                <CustomCard title="Events">
+                  <div className="p-4 text-gray-500 text-center">
+                    No events to display
+                  </div>
+                </CustomCard>
+                <CustomCard title="Notes">
+                  <div className="p-4 text-gray-500 text-center">
+                    No notes available
+                  </div>
+                </CustomCard>
               </Col>
             </Grid>
           </TabPanel>

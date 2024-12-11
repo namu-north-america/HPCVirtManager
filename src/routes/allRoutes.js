@@ -16,6 +16,7 @@ import AddVirtualMachine from "../views/VirtualMachines/AddVirtualMachine";
 import VMTemplate from "../views/VirtualMachines/VMTemplate";
 import AddVMTemplate from "../views/VirtualMachines/AddVMTemplate";
 import VMPools from "../views/VirtualMachines/VMPools";
+import CreateK8sCluster from "../views/VMPools/Form/CreateK8sCluster";
 
 export const PrivateRoutes = [
   {
@@ -58,6 +59,12 @@ export const PrivateRoutes = [
     path: "/virtual-machines/pools",
     name: "VM Pools",
     element: <VMPools />,
+    role: "shared",
+  },
+  {
+    path: "/virtual-machines/pools/add-k8s",
+    name: "Create Kubernetes Cluster",
+    element: <CreateK8sCluster />,
     role: "shared",
   },
   {

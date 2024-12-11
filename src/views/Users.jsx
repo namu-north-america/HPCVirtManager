@@ -2,15 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import Page from "../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import CustomBreadcrum from "../shared/CustomBreadcrum";
 import CustomOverlay from "../shared/CustomOverlay";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
 import AddUserModal from "./VirtualMachines/Form/AddUserModal";
 import { useDispatch, useSelector } from "react-redux";
 import { onGetUserALLAction ,onDeleteUserAction} from "../store/actions/userActions";
 import { showToastAction } from "../store/slices/commonSlice";
-
-
 import { confirmDialog } from "primereact/confirmdialog";
 
 const statusTemplate = (item) => {
@@ -25,7 +22,7 @@ const statusTemplate = (item) => {
       return <span className="text-red-500">In-active</span>;
   }
 };
-const breadcrumItems = [{ label: "Users (RBAC)", url: "/#/users" }];
+
 export default function Users() {
   const ref = useRef();
   const [visible, setVisible] = useState(false);
@@ -134,7 +131,6 @@ export default function Users() {
 
   return (
     <>
-      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="User Management (RBAC)"
         onSearch={(e) => console.log(e)}

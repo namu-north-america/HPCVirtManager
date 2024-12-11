@@ -18,12 +18,12 @@ export default function SemiCircleGauge({
         endAngle: 90,
         track: {
           background: "#e7e7e7",
-          strokeWidth: "80%",
-          margin: 5, // margin is in pixels
+          strokeWidth: "140%",
+          margin: 8, // margin is in pixels
         },
         hollow: {
           margin: 5,
-          size: "65%", // Increase size for a thicker look
+          size: "45%", // Increase size for a thicker look
         },
        
         dataLabels: {
@@ -31,8 +31,9 @@ export default function SemiCircleGauge({
             show: false,
           },
           value: {
-            offsetY: -10,
+            offsetY: -2,
             fontSize: "16px",
+            fontFamily: "DM Sans",
             fontWeight: 600,
             color: "#000",
             formatter: function (val) {
@@ -43,7 +44,7 @@ export default function SemiCircleGauge({
       },
     },
     stroke: {
-      lineCap: "round",
+      lineCap: "butt",
     },
     labels: [title],
   };
@@ -56,7 +57,7 @@ export default function SemiCircleGauge({
         options={options}
         series={series}
         type="radialBar"
-        width={250}
+        width={320}
       />
 
   );

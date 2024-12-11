@@ -285,7 +285,7 @@ export default function Images() {
         addText="New Image"
       >
         <DataTable value={images}>
-          <Column body={iconTemplate} style={{ width: '3rem' }}></Column>
+          <Column body={iconTemplate} style={{ width: '2rem' }}></Column>
           <Column field="name" header="Name" body={nameTemplate} style={{ minWidth: "200px" }} />
           <Column field="namespace" header="Namespace" />
           <Column field="type" header="Type" />

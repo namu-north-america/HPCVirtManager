@@ -52,7 +52,11 @@ export default function SidebarItem(props) {
         data-pr-tooltip={props.isCollapsed ? _title : null}
       >
         <div className="flex align-items-center">
-          {_icon && <i className={`${_icon} text-lg`} />}
+          {_icon && typeof _icon === 'string' ? (
+            <i className={`${_icon} text-lg`} />
+          ) : (
+            <span className="flex items-center justify-center w-[1.2rem]">{_icon}</span>
+          )}
           <span className="ml-2">{_title}</span>
         </div>
         {_items?.length > 0 && !props.isCollapsed && (
