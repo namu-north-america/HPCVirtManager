@@ -80,7 +80,7 @@ export default function CreateK8sCluster() {
 
   const getCreateClusterPayload = (formData) => {
     const clusterName = formData.clusterDetails.clusterName
-    const clusterNamespace = "default"
+    const clusterNamespace = formData.clusterDetails.namespace
     return {
       "apiVersion": "cluster.x-k8s.io/v1beta1",
       "kind": "Cluster",
@@ -123,7 +123,7 @@ export default function CreateK8sCluster() {
     let res = await api(
       "post",
       endPoints.CREATE_CLUSTER({
-        namespace: "default",
+        namespace: formData.clusterDetails.namespace,
         name: formData.clusterDetails.clusterName,
       }),
       getCreateClusterPayload(formData),

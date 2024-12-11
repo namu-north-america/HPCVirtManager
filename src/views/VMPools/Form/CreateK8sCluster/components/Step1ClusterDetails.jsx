@@ -64,8 +64,6 @@ export default function Step1ClusterDetails({ data, onChange }) {
               value={data.namespace}
               onChange={(e) => handleChange('namespace', e.value)}
               options={namespace}
-              optionLabel="name"
-              optionValue="name"
               className="w-full"
               required
             />
