@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import CustomButton from '../../../../shared/CustomButton';
@@ -12,8 +13,11 @@ import Step2ControlPlane from './components/Step2ControlPlane';
 import Step3WorkerNode from './components/Step3WorkerNode';
 import Step4Networking from './components/Step4Networking';
 import Step5Review from './components/Step5Review';
+import api from '../../../../services/api';
+import endPoints from "../../../../services/endPoints";
 
 export default function CreateK8sCluster() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { breadcrumb } = useBreadcrumb();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -73,6 +77,63 @@ export default function CreateK8sCluster() {
     { number: 4, label: 'Networking' },
     { number: 5, label: 'Review' },
   ];
+
+  const getCreateClusterPayload = (formData) => {
+    const clusterName = formData.clusterDetails.clusterName
+    const clusterNamespace = "default"
+    return {
+      "apiVersion": "cluster.x-k8s.io/v1beta1",
+      "kind": "Cluster",
+      "metadata": {
+          "name": clusterName,
+          "namespace": clusterNamespace,
+      },
+      "spec": {
+          "clusterNetwork": {
+              "pods": {
+                  "cidrBlocks": [
+                      formData.networking.podCIDR
+                  ]
+              },
+              "services": {
+                  "cidrBlocks": [
+                      formData.networking.serviceCIDR
+                  ]
+              }
+          },
+          "controlPlaneRef": {
+              "apiVersion": "controlplane.cluster.x-k8s.io/v1beta1",
+              "kind": "KubeadmControlPlane",
+              "name": clusterName+"-controlplane",
+              "namespace": clusterNamespace
+          },
+          "infrastructureRef": {
+              "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+              "kind": "KubevirtCluster",
+              "name": clusterName,
+              "namespace": clusterNamespace
+          }
+      }
+    }
+  }
+
+  const createClusterAction = (formData) => async () => {
+    console.log("creating cluster")
+    console.log(formData)
+    let res = await api(
+      "post",
+      endPoints.CREATE_CLUSTER({
+        namespace: "default",
+        name: formData.clusterDetails.clusterName,
+      }),
+      getCreateClusterPayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
 
   const renderStep = () => {
     switch (activeIndex) {
@@ -159,7 +220,8 @@ export default function CreateK8sCluster() {
                     icon="pi pi-check"
                     onClick={() => {
                       // Handle cluster creation
-                      navigate('/virtual-machines/pools');
+                      dispatch(createClusterAction(formData))
+                      // navigate('/virtual-machines/pools');
                     }}
                   />
                 )}

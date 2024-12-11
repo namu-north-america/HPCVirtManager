@@ -104,6 +104,21 @@ export default function Step1ClusterDetails({ data, onChange }) {
         </Col>
 
         <Col size={12}>
+          <div className="field">
+            <label htmlFor="nodeVMImage" className="block mb-2">
+              Node VM Image
+            </label>
+            <InputText
+              id="nodeVMImage"
+              value={data.nodeVMImage}
+              onChange={(e) => handleChange('nodeVMImage', e.target.value)}
+              className="w-full"
+              defaultValue="quay.io/capk/ubuntu-2004-container-disk:v1.23.10"
+            />
+          </div>
+        </Col>
+
+        <Col size={12}>
           <div className="field-checkbox">
             <Checkbox
               inputId="installDashboard"
