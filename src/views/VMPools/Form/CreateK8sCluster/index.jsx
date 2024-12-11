@@ -141,7 +141,7 @@ export default function CreateK8sCluster() {
       "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
       "kind": "KubevirtMachineTemplate",
       "metadata": {
-          "name": formData.clusterDetails.className+"-control-plane",
+          "name": formData.clusterDetails.clusterName+"-control-plane",
           "namespace": namespace
       },
       "spec": {
@@ -370,7 +370,7 @@ export default function CreateK8sCluster() {
       "post",
       endPoints.CREATE_MACHINE_DEPLOYMENT({
         namespace: formData.clusterDetails.namespace,
-        name: formData.clusterDetails.className+"-md-0",
+        name: formData.clusterDetails.clusterName+"-md-0",
       }),
       getCreateMachinePayload(formData),
       {},
@@ -387,7 +387,7 @@ export default function CreateK8sCluster() {
       "post",
       endPoints.CREATE_KUBEADM_CONFIG_TEMPLATE({
         namespace: formData.clusterDetails.namespace,
-        name: formData.clusterDetails.className+"-md-0",
+        name: formData.clusterDetails.clusterName+"-md-0",
       }),
       getCreateKubeadmConfigTempPayload(formData),
       {},
@@ -404,7 +404,7 @@ export default function CreateK8sCluster() {
       "post",
       endPoints.CREATE_KUBEVIRT_MACHINE_TEMPLATE({
         namespace: formData.clusterDetails.namespace,
-        name: formData.clusterDetails.className+"-md-0",
+        name: formData.clusterDetails.clusterName+"-md-0",
       }),
       getCreateKVWorkerNodeMachineTempPayload(formData),
       {},
@@ -421,7 +421,7 @@ export default function CreateK8sCluster() {
       "post",
       endPoints.CREATE_KUBEADM_CONTROL_PLANE({
         namespace: formData.clusterDetails.namespace,
-        name: formData.clusterDetails.className+"-control-plane",
+        name: formData.clusterDetails.clusterName+"-control-plane",
       }),
       getCreateKubeadmControlPlanePayload(formData),
       {},
@@ -438,7 +438,7 @@ export default function CreateK8sCluster() {
       "post",
       endPoints.CREATE_KUBEVIRT_MACHINE_TEMPLATE({
         namespace: formData.clusterDetails.namespace,
-        name: formData.clusterDetails.className+"-control-plane",
+        name: formData.clusterDetails.clusterName+"-control-plane",
       }),
       getCreateKVControlPlaneMachineTempPayload(formData),
       {},
