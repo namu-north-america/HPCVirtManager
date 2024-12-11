@@ -385,7 +385,7 @@ export default function CreateK8sCluster() {
     console.log("creating kubeadm config template")
     let res = await api(
       "post",
-      endPoints.CREATE_KUBEVIRT_MACHINE_TEMPLATE({
+      endPoints.CREATE_KUBEADM_CONFIG_TEMPLATE({
         namespace: formData.clusterDetails.namespace,
         name: formData.clusterDetails.className+"-md-0",
       }),
