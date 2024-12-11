@@ -7,10 +7,10 @@ import Page from '../../../../shared/Page';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { useBreadcrumb } from '../../../../context/BreadcrumbContext';
 import '../../../VirtualMachines/Form/AddVirtualMachineForm.scss';
-import Step1BasicSettings from './components/Step1BasicSettings';
-import Step2MachinePool from './components/Step2MachinePool';
-import Step3AdvancedOptions from './components/Step3AdvancedOptions';
-import Step4Addons from './components/Step4Addons';
+import Step1ClusterDetails from './components/Step1ClusterDetails';
+import Step2ControlPlane from './components/Step2ControlPlane';
+import Step3WorkerNode from './components/Step3WorkerNode';
+import Step4Networking from './components/Step4Networking';
 import Step5Review from './components/Step5Review';
 
 export default function CreateK8sCluster() {
@@ -19,32 +19,58 @@ export default function CreateK8sCluster() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [formData, setFormData] = useState({
-    basicSettings: {
+    clusterDetails: {
       clusterName: '',
+      namespace: '',
       description: '',
       k8sVersion: '',
+      installDashboard: true,
     },
-    machinePools: [{
+    controlPlane: {
       name: '',
       workerNodes: 1,
-      storage: {
-        type: 'SSD',
+      cores: 1,
+      memory: 1,
+      memoryType: 'GB',
+      disks: [{
+        createType: 'new',
         size: 100,
-      },
-      network: {
-        subnet: '',
-        ipRange: '',
-      }
-    }],
-    advancedOptions: {},
-    addons: {},
+        memoryType: 'GB',
+        storageClass: '',
+        accessMode: '',
+        type: 'http',
+        url: '',
+      }],
+    },
+    workerNode: {
+      name: '',
+      workerNodes: 1,
+      cores: 1,
+      memory: 1,
+      memoryType: 'GB',
+      disks: [{
+        createType: 'new',
+        size: 100,
+        memoryType: 'GB',
+        storageClass: '',
+        accessMode: '',
+        type: 'http',
+        url: '',
+      }],
+    },
+    networking: {
+      serviceType: 'LoadBalancer',
+      podCIDR: '',
+      serviceCIDR: '',
+      networkingPlugin: 'Flannel',
+    },
   });
 
   const steps = [
-    { number: 1, label: 'Basic Settings' },
-    { number: 2, label: 'Machine Pools' },
-    { number: 3, label: 'Advanced Options' },
-    { number: 4, label: 'Add-ons' },
+    { number: 1, label: 'Cluster Details' },
+    { number: 2, label: 'Control Plane' },
+    { number: 3, label: 'Worker Node' },
+    { number: 4, label: 'Networking' },
     { number: 5, label: 'Review' },
   ];
 
@@ -52,22 +78,32 @@ export default function CreateK8sCluster() {
     switch (activeIndex) {
       case 0:
         return (
-          <Step1BasicSettings
-            data={formData.basicSettings}
-            onChange={(data) => setFormData({ ...formData, basicSettings: data })}
+          <Step1ClusterDetails
+            data={formData.clusterDetails}
+            onChange={(data) => setFormData({ ...formData, clusterDetails: data })}
           />
         );
       case 1:
         return (
-          <Step2MachinePool
-            data={formData.machinePools}
-            onChange={(data) => setFormData({ ...formData, machinePools: data })}
+          <Step2ControlPlane
+            data={formData.controlPlane}
+            onChange={(data) => setFormData({ ...formData, controlPlane: data })}
           />
         );
       case 2:
-        return <Step3AdvancedOptions />;
+        return (
+          <Step3WorkerNode
+            data={formData.workerNode}
+            onChange={(data) => setFormData({ ...formData, workerNode: data })}
+          />
+        );
       case 3:
-        return <Step4Addons />;
+        return (
+          <Step4Networking
+            data={formData.networking}
+            onChange={(data) => setFormData({ ...formData, networking: data })}
+          />
+        );
       case 4:
         return <Step5Review data={formData} onEdit={setActiveIndex} />;
       default:
@@ -75,77 +111,62 @@ export default function CreateK8sCluster() {
     }
   };
 
-  const handleNext = () => {
-    if (activeIndex < steps.length - 1) {
-      setActiveIndex(activeIndex + 1);
-      setCompletedSteps([...completedSteps, activeIndex]);
-    }
-  };
-
-  const handleCancel = () => {
-    navigate('/virtual-machines/pools');
-  };
-
   return (
-    <Page
-      title="Create Kubernetes Cluster"
-      breadcrumb={<BreadCrumb model={breadcrumb} />}
-    >
+    <Page title="Create Kubernetes Cluster">
       <div className="add-vm-form">
-        <Card>
-          <div className="flex">
-            <div className="steps-sidebar">
-              <ul className="step-list">
-                {steps.map((step, index) => (
-                  <li
-                    key={step.number}
-                    className={`step-item ${index === activeIndex ? 'active' : ''} 
-                      ${completedSteps.includes(index) ? 'completed' : ''}`}
-                    onClick={() => setActiveIndex(index)}
-                  >
-                    <span className="step-number">{step.number}</span>
-                    <div className="step-content">
-                      <span className="step-title">{step.label}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="step-content">
-              {renderStep()}
-              
-              <div className="button-container">
-                <div className="flex justify-between mt-4">
-                  <CustomButton
-                    label="Back"
-                    onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}
-                    disabled={activeIndex === 0}
-                  />
-                  <div className="flex gap-2">
-                    <CustomButton
-                      label="Cancel"
-                      severity="secondary"
-                      onClick={handleCancel}
-                    />
-                    {activeIndex === steps.length - 1 ? (
-                      <CustomButton
-                        label="Create Cluster"
-                        severity="success"
-                        onClick={() => {/* Handle submission */}}
-                      />
-                    ) : (
-                      <CustomButton
-                        label="Next"
-                        onClick={handleNext}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="flex">
+          <div className="steps-sidebar">
+            <ul className="step-list">
+              {steps.map((step, index) => (
+                <li
+                  key={step.number}
+                  className={`step-item ${index === activeIndex ? 'active' : ''} ${
+                    completedSteps.includes(index) ? 'completed' : ''
+                  }`}
+                  onClick={() => setActiveIndex(index)}
+                >
+                  <div className="step-number">{step.number}</div>
+                  <div className="step-title">{step.label}</div>
+                </li>
+              ))}
+            </ul>
           </div>
-        </Card>
+
+          <div className="form-content flex-grow-1">
+            <Card>
+              {renderStep()}
+              <div className="flex justify-content-end gap-2 mt-4">
+                {activeIndex > 0 && (
+                  <CustomButton
+                    label="Previous"
+                    icon="pi pi-arrow-left"
+                    onClick={() => setActiveIndex(activeIndex - 1)}
+                  />
+                )}
+                {activeIndex < steps.length - 1 ? (
+                  <CustomButton
+                    label="Next"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    onClick={() => {
+                      setCompletedSteps([...completedSteps, activeIndex]);
+                      setActiveIndex(activeIndex + 1);
+                    }}
+                  />
+                ) : (
+                  <CustomButton
+                    label="Create Cluster"
+                    icon="pi pi-check"
+                    onClick={() => {
+                      // Handle cluster creation
+                      navigate('/virtual-machines/pools');
+                    }}
+                  />
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </Page>
   );
