@@ -63,6 +63,26 @@ const addDiskByYamlTemplate = async (namespace, template) => {
   return res.metadata;
 };
 
+export const _getNetworks = (networks) => {
+  let networksData = [];
+  if(networks.length) {
+    networksData.push({
+      name: networks?.[0].networkType,
+      pod: {},
+    });
+
+    if (networks.length > 1) {
+      networksData.push({
+        name: networks?.[1].networkType,
+        multus: {
+          networkName: networks?.[1].networkType,
+        },
+      });
+    }
+  }
+  return networksData;
+}
+
 export const _getDeviceFromDisk = (disk, i) => {
   let busObj = {};
   if (disk?.busType) {
@@ -149,7 +169,7 @@ export const _getAccessCredentials = (sshKey) => {
   return _accessCredentials;
 };
 
-const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch, getState) => {
+const onAddVMAction = (data, disks, images, networks, setLoading, next) => async (dispatch, getState) => {
   try {
     const { sshKeys } = getState().sshKeys;
     const selectedKey = sshKeys.find((key) => key.name === data.sshKey);
@@ -309,6 +329,14 @@ const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch
       password: data.password,
     });
 
+    const interfaces = networks.map(net => {
+      return {
+        name: net.networkType,
+        [net.bindingMode]: {},
+      }
+    })
+    const networkData = _getNetworks(networks);
+
     let url = endPoints.ADD_VM({
       namespace: data.namespace,
       name: data.name,
@@ -333,12 +361,7 @@ const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch
             domain: {
               devices: {
                 disks: _deviceDisk,
-                interfaces: [
-                  {
-                    name: "net1",
-                    [data.bindingMode]: {},
-                  },
-                ],
+                interfaces: interfaces,
                 networkInterfaceMultiqueue: true,
               },
               cpu: {
@@ -352,12 +375,13 @@ const onAddVMAction = (data, disks, images, setLoading, next) => async (dispatch
                 },
               },
             },
-            networks: [
-              {
-                name: "net1",
-                pod: {},
-              },
-            ],
+            networks: networkData,
+            // networks: [
+            //   {
+            //     name: "net1",
+            //     pod: {},
+            //   },
+            // ],
             accessCredentials: _accessCredentials,
             volumes: _volumes,
             nodeSelector: {

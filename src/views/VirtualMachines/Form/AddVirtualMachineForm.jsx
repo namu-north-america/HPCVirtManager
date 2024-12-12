@@ -122,7 +122,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       if (validateDisk() || isTemplateMode) {
         setLoading(true);
         dispatch(
-          onAddVMAction(data, disks, images, setLoading, () => {
+          onAddVMAction(data, disks, images, networks, setLoading, () => {
             setLoading(false);
             if (onClose) {
               onClose();
@@ -337,12 +337,14 @@ export default function AddVirtualMachineForm({ onClose }) {
         return (
           <>
             {networks.map((network, index) => {
-              return <Network data={network} handleChange={handleChange} index={index} onRemove={onRemoveNetwork} />;
+              return <Network data={network} setNetworks={setNetworks} index={index} onRemove={onRemoveNetwork} />;
             })}
-            <button className="add-disk-button" onClick={onAddMoreNetwork}>
-              <i className="pi pi-plus-circle"></i>
+            {networks.length < 2 && (
+              <button className="add-disk-button" onClick={onAddMoreNetwork}>
+                <i className="pi pi-plus-circle"></i>
               Add More Network
-            </button>
+              </button>
+            )}
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(1)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(3)} />
@@ -365,6 +367,8 @@ export default function AddVirtualMachineForm({ onClose }) {
             <Advanced
               data={data}
               disks={disks}
+              networks={networks}
+              setNetworks={setNetworks}
               handleChange={setData}
               template={selectedTemplate}
               onValidate={setTemplateErrors}

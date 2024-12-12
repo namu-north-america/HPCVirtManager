@@ -8,12 +8,13 @@ import {
   _getAccessCredentials,
   _getDeviceFromDisk,
   _getDevices,
+  _getNetworks,
   _getVolumeFromDisk,
   _getVolumes,
   _setUserDataAndNetworkDisks,
 } from "../../../store/actions/vmActions";
 
-export default function Advanced({ data, setDisks, disks, handleChange, onValidate }) {
+export default function Advanced({ data, setDisks, disks, handleChange, onValidate, networks, setNetworks }) {
   const dispatch = useDispatch();
   const { updatedYamlString, useVmTemplate } = useSelector((state) => state.vm);
   const project = useSelector((state) => state.project);
@@ -167,6 +168,9 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
     if (data.node) {
       objectData.spec.template.spec.nodeSelector["kubernetes.io/hostname"] = data.node;
     }
+
+    console.log("data _ objects_____", objectData);
+    objectData.spec.template.spec.networks = _getNetworks(networks);
 
     if (disks.length) {
       if (disks.length > 1) {
@@ -328,11 +332,13 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
 
       if (data.bindingMode) {
         // const interface = objectData.spec.template?.spec.domain.devices.interfaces[0];
-        const network = objectData.spec?.template?.spec?.networks?.[0];
-        objectData.spec.template.spec.domain.devices.interfaces[0] = {
-          name: network ? network?.name : "",
-          [data.bindingMode]: {},
-        };
+        const interfaces = objectData.spec?.template?.spec?.networks.map((network) => {
+          return {
+            name: network ? network?.name : "",
+            [data.bindingMode]: {},
+          };
+        });
+        objectData.spec.template.spec.domain.devices.interfaces = interfaces;
       }
     }
     const yamlString = jsYaml.dump(objectData, {
