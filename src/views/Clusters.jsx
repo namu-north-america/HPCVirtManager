@@ -1,50 +1,23 @@
-import React ,{useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import Page from "../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CapacityCard from "../shared/CapacityCard";
 import Grid, { Col } from "../shared/Grid";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
-import { onGetStorageAction,getCPUTotalCores ,getMemoryUsage} from "../store/actions/reportingActions";
-import { useDispatch,useSelector } from "react-redux";
+import {
+  onGetStorageAction,
+  getCPUTotalCores,
+  getMemoryUsage,
+} from "../store/actions/reportingActions";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-const allNodes = [
-  {
-    name: "cluster-1",
-    status: "READY",
-    nodeCount: "1/3",
-    cpu: "64  Core",
-    memory: "128 GB",
-    storage: "256 GB",
-    k8sVersion: "1.29.9",
-    time: "2024-07-28T10:14:57.665Z",
-  },
-  {
-    name: "cluster-2",
-    status: "RUNNING",
-    nodeCount: "2/3",
-    cpu: "72  Core",
-    memory: "240 GB",
-    storage: "500 GB",
-    k8sVersion: "1.27.9",
-    time: "2024-07-23T10:14:57.665Z",
-  },
-  {
-    name: "cluster-3",
-    status: "STOPPED",
-    nodeCount: "3/3",
-    cpu: "48  Core",
-    memory: "128 GB",
-    storage: "512 GB",
-    k8sVersion: "1.22.9",
-    time: "2024-07-22T10:14:57.665Z",
-  },
-];
+import api from "../services/api"; // Ensure API service is imported
+import endPoints from "../services/endPoints"; // Ensure endpoints are defined
 
 const statusTemplate = (item) => {
   switch (item.status) {
-    case "READY":
+    case "Provisioned":
       return <span className="text-green-500">Ready</span>;
     case "RUNNING":
       return <span className="text-cyan-500">Running</span>;
@@ -62,11 +35,15 @@ const iconTemplate = () => {
 export default function Clusters() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [cpuUsage, setCpuUsage] = React.useState(0);
-  const [memory, setMemory] = React.useState(0);
-  const [storage, setStorage] = React.useState(0);
+  const [clusters, setClusters] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [cpuUsage, setCpuUsage] = useState(0);
+  const [memory, setMemory] = useState(0);
+  const [storage, setStorage] = useState(0);
+
   useEffect(() => {
     onInitialLoad();
+    fetchClusters(); // Fetch clusters on page load
   }, [dispatch]);
 
   const onInitialLoad = () => {
@@ -74,26 +51,54 @@ export default function Clusters() {
     dispatch(getCPUTotalCores());
     dispatch(getMemoryUsage());
   };
-  let { clusterCpuInfo,memoryInfo,storageInfo } = useSelector(
+
+  const fetchClusters = async () => {
+    setLoading(true); // Show loading state
+    try {
+      const res = await api("get", endPoints.LIST_CLUSTERS);
+      const fetchedClusters = res.items.map((item) => ({
+        name: item?.metadata?.name || "Unknown",
+        namespace: item?.metadata?.namespace || "Unknown",
+        status: item?.status?.phase || "Unknown",
+        nodeCount: `${item?.status?.readyReplicas || 0}/${item?.spec?.replicas || 0}`,
+        cpu: `${item?.status?.capacity?.cpu || 0} Core`,
+        memory: `${item?.status?.capacity?.memory || 0} GB`,
+        storage: `${item?.status?.capacity?.storage || 0} GB`,
+        k8sVersion: item?.spec?.version || "Unknown",
+        time: item?.metadata?.creationTimestamp,
+      }));
+      setClusters(fetchedClusters);
+    } catch (error) {
+      console.error("Error fetching clusters:", error);
+    } finally {
+      setLoading(false); // Hide loading state
+    }
+  };
+
+  let { clusterCpuInfo, memoryInfo, storageInfo } = useSelector(
     (state) => state.reporting
   );
 
   useEffect(() => {
-    
-    const usage = clusterCpuInfo.cpuUsage ? parseFloat(clusterCpuInfo.cpuUsage) : null;
+    const usage = clusterCpuInfo.cpuUsage
+      ? parseFloat(clusterCpuInfo.cpuUsage)
+      : 0;
     setCpuUsage(usage);
   }, [clusterCpuInfo]);
+
   useEffect(() => {
     setMemory(memoryInfo);
   }, [memoryInfo]);
+
   useEffect(() => {
     setStorage(storageInfo);
   }, [storageInfo]);
+
   return (
     <Page
       title="Clusters"
       onSearch={(e) => console.log(e)}
-      onRefresh={(e) => console.log(e)}
+      onRefresh={fetchClusters}
       onAdd={() => navigate("/clusters/create")}
       addText="Create K8s Cluster"
     >
@@ -118,9 +123,14 @@ export default function Clusters() {
           </div>
         </Col>
       </Grid>
-      <DataTable value={allNodes} tableStyle={{ minWidth: "50rem" }}>
-        <Column body={iconTemplate} header="" style={{ width: '3rem' }}></Column>
+      <DataTable
+        value={clusters}
+        tableStyle={{ minWidth: "50rem" }}
+        loading={loading}
+      >
+        <Column body={iconTemplate} header="" style={{ width: "3rem" }}></Column>
         <Column field="name" header="Name" body={nameTemplate}></Column>
+        <Column field="namespace" header="namespace"></Column>
         <Column field="status" header="Status" body={statusTemplate}></Column>
         <Column field="nodeCount" header="Node Count"></Column>
         <Column field="cpu" header="CPU"></Column>

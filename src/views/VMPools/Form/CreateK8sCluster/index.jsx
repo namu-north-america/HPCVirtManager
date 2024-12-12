@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import CustomButton from '../../../../shared/CustomButton';
@@ -12,8 +13,11 @@ import Step2ControlPlane from './components/Step2ControlPlane';
 import Step3WorkerNode from './components/Step3WorkerNode';
 import Step4Networking from './components/Step4Networking';
 import Step5Review from './components/Step5Review';
+import api from '../../../../services/api';
+import endPoints from "../../../../services/endPoints";
 
 export default function CreateK8sCluster() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { breadcrumb } = useBreadcrumb();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -73,6 +77,412 @@ export default function CreateK8sCluster() {
     { number: 4, label: 'Networking' },
     { number: 5, label: 'Review' },
   ];
+
+  const getCreateClusterPayload = (formData) => {
+    const clusterName = formData.clusterDetails.clusterName
+    const clusterNamespace = formData.clusterDetails.namespace
+    return {
+      "apiVersion": "cluster.x-k8s.io/v1beta1",
+      "kind": "Cluster",
+      "metadata": {
+          "name": clusterName,
+          "namespace": clusterNamespace,
+      },
+      "spec": {
+          "clusterNetwork": {
+              "pods": {
+                  "cidrBlocks": [
+                      formData.networking.podCIDR
+                  ]
+              },
+              "services": {
+                  "cidrBlocks": [
+                      formData.networking.serviceCIDR
+                  ]
+              }
+          },
+          "controlPlaneRef": {
+              "apiVersion": "controlplane.cluster.x-k8s.io/v1beta1",
+              "kind": "KubeadmControlPlane",
+              "name": clusterName+"-control-plane",
+              "namespace": clusterNamespace
+          },
+          "infrastructureRef": {
+              "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+              "kind": "KubevirtCluster",
+              "name": clusterName,
+              "namespace": clusterNamespace
+          }
+      }
+    }
+  }
+
+  const getCreateKubeVirtClusterPayload = (formData) => {
+    return {
+      "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+      "kind": "KubevirtCluster",
+      "metadata": {
+          "name": formData.clusterDetails.clusterName,
+          "namespace": formData.clusterDetails.namespace
+      },
+      "spec": {
+          "controlPlaneServiceTemplate": {
+              "spec": {
+                  "type": "LoadBalancer"
+              }
+          }
+      }
+    }
+  }
+
+  const getCreateKVControlPlaneMachineTempPayload = (formData) => {
+    const namespace = formData.clusterDetails.namespace
+    return {
+      "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+      "kind": "KubevirtMachineTemplate",
+      "metadata": {
+          "name": formData.clusterDetails.clusterName+"-control-plane",
+          "namespace": namespace
+      },
+      "spec": {
+          "template": {
+              "spec": {
+                  "virtualMachineBootstrapCheck": {
+                      "checkStrategy": "ssh"
+                  },
+                  "virtualMachineTemplate": {
+                      "metadata": {
+                          "namespace": namespace
+                      },
+                      "spec": {
+                          "runStrategy": "Always",
+                          "template": {
+                              "spec": {
+                                  "domain": {
+                                      "cpu": {
+                                          "cores": 2
+                                      },
+                                      "devices": {
+                                          "disks": [
+                                              {
+                                                  "disk": {
+                                                      "bus": "virtio"
+                                                  },
+                                                  "name": "containervolume"
+                                              }
+                                          ],
+                                          "networkInterfaceMultiqueue": true
+                                      },
+                                      "memory": {
+                                          "guest": "4Gi"
+                                      }
+                                  },
+                                  "evictionStrategy": "External",
+                                  "volumes": [
+                                      {
+                                          "containerDisk": {
+                                              "image": "quay.io/capk/ubuntu-2004-container-disk:v1.23.10"
+                                          },
+                                          "name": "containervolume"
+                                      }
+                                  ]
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+    }
+  }
+
+  const getCreateKubeadmControlPlanePayload = (formData) => {
+    const name = formData.clusterDetails.clusterName
+    const namespace = formData.clusterDetails.namespace
+    return {
+      "apiVersion": "controlplane.cluster.x-k8s.io/v1beta1",
+      "kind": "KubeadmControlPlane",
+      "metadata": {
+          "name": name+"-control-plane",
+          "namespace": namespace
+      },
+      "spec": {
+          "kubeadmConfigSpec": {
+              "clusterConfiguration": {
+                  "networking": {
+                      "dnsDomain": name+".default.local",
+                      "podSubnet": formData.networking.podCIDR,
+                      "serviceSubnet": formData.networking.serviceCIDR
+                  }
+              },
+              "initConfiguration": {
+                  "nodeRegistration": {
+                      "criSocket": "/var/run/containerd/containerd.sock"
+                  }
+              },
+              "joinConfiguration": {
+                  "nodeRegistration": {
+                      "criSocket": "/var/run/containerd/containerd.sock"
+                  }
+              }
+          },
+          "machineTemplate": {
+              "infrastructureRef": {
+                  "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+                  "kind": "KubevirtMachineTemplate",
+                  "name": name+"-control-plane",
+                  "namespace": namespace
+              }
+          },
+          "replicas": 1,
+          "version": formData.clusterDetails.k8sVersion
+      }
+    }
+  }
+
+  const getCreateKVWorkerNodeMachineTempPayload = (formData) => {
+    const name = formData.clusterDetails.clusterName
+    const namespace = formData.clusterDetails.namespace
+    return {
+      "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+      "kind": "KubevirtMachineTemplate",
+      "metadata": {
+          "name": name+"-md-0",
+          "namespace": namespace
+      },
+      "spec": {
+          "template": {
+              "spec": {
+                  "virtualMachineBootstrapCheck": {
+                      "checkStrategy": "ssh"
+                  },
+                  "virtualMachineTemplate": {
+                      "metadata": {
+                          "namespace": namespace
+                      },
+                      "spec": {
+                          "runStrategy": "Always",
+                          "template": {
+                              "spec": {
+                                  "domain": {
+                                      "cpu": {
+                                          "cores": 2
+                                      },
+                                      "devices": {
+                                          "disks": [
+                                              {
+                                                  "disk": {
+                                                      "bus": "virtio"
+                                                  },
+                                                  "name": "containervolume"
+                                              }
+                                          ],
+                                          "networkInterfaceMultiqueue": true
+                                      },
+                                      "memory": {
+                                          "guest": "4Gi"
+                                      }
+                                  },
+                                  "evictionStrategy": "External",
+                                  "volumes": [
+                                      {
+                                          "containerDisk": {
+                                              "image": "quay.io/capk/ubuntu-2004-container-disk:v1.23.10"
+                                          },
+                                          "name": "containervolume"
+                                      }
+                                  ]
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+    }
+  }
+
+  const getCreateKubeadmConfigTempPayload = (formData) => {
+    return {
+      "apiVersion": "bootstrap.cluster.x-k8s.io/v1beta1",
+      "kind": "KubeadmConfigTemplate",
+      "metadata": {
+          "name": formData.clusterDetails.clusterName+"-md-0",
+          "namespace": formData.clusterDetails.namespace
+      },
+      "spec": {
+          "template": {
+              "spec": {
+                  "joinConfiguration": {
+                      "nodeRegistration": {
+                          "kubeletExtraArgs": {}
+                      }
+                  }
+              }
+          }
+      }
+    }
+  }
+
+  const getCreateMachinePayload = (formData) => {
+    const name = formData.clusterDetails.clusterName
+    const namespace = formData.clusterDetails.namespace
+    return {
+      "apiVersion": "cluster.x-k8s.io/v1beta1",
+      "kind": "MachineDeployment",
+      "metadata": {
+          "name": name+"-md-0",
+          "namespace": namespace
+      },
+      "spec": {
+          "clusterName": name,
+          "replicas": 1,
+          "selector": {
+              "matchLabels": null
+          },
+          "template": {
+              "spec": {
+                  "bootstrap": {
+                      "configRef": {
+                          "apiVersion": "bootstrap.cluster.x-k8s.io/v1beta1",
+                          "kind": "KubeadmConfigTemplate",
+                          "name": name+"-md-0",
+                          "namespace": namespace
+                      }
+                  },
+                  "clusterName": "capi-cluster",
+                  "infrastructureRef": {
+                      "apiVersion": "infrastructure.cluster.x-k8s.io/v1alpha1",
+                      "kind": "KubevirtMachineTemplate",
+                      "name": name+"-md-0",
+                      "namespace": namespace
+                  },
+                  "version": formData.clusterDetails.k8sVersion
+              }
+          }
+      }
+    }
+  }
+
+  const createMachineAction = (formData) => async () => {
+    console.log("creating machine")
+    let res = await api(
+      "post",
+      endPoints.CREATE_MACHINE_DEPLOYMENT({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName+"-md-0",
+      }),
+      getCreateMachinePayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
+
+  const createKubeadmConfigTempAction = (formData) => async () => {
+    console.log("creating kubeadm config template")
+    let res = await api(
+      "post",
+      endPoints.CREATE_KUBEADM_CONFIG_TEMPLATE({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName+"-md-0",
+      }),
+      getCreateKubeadmConfigTempPayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
+
+  const createKVWorkerNodeMachineTempAction = (formData) => async () => {
+    console.log("creating kv worker node machine template")
+    let res = await api(
+      "post",
+      endPoints.CREATE_KUBEVIRT_MACHINE_TEMPLATE({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName+"-md-0",
+      }),
+      getCreateKVWorkerNodeMachineTempPayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
+
+  const createKubeadmControlPlaneAction = (formData) => async () => {
+    console.log("creating kv cp machine template")
+    let res = await api(
+      "post",
+      endPoints.CREATE_KUBEADM_CONTROL_PLANE({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName+"-control-plane",
+      }),
+      getCreateKubeadmControlPlanePayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
+
+  const createKVControlPlaneMachineTempAction = (formData) => async () => {
+    console.log("creating kv cp machine template")
+    let res = await api(
+      "post",
+      endPoints.CREATE_KUBEVIRT_MACHINE_TEMPLATE({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName+"-control-plane",
+      }),
+      getCreateKVControlPlaneMachineTempPayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
+
+  const createKubeVirtClusterAction = (formData) => async () => {
+    console.log("creating kubevirt cluster")
+    let res = await api(
+      "post",
+      endPoints.CREATE_KUBEVIRT_CLUSTER({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName,
+      }),
+      getCreateKubeVirtClusterPayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
+
+  const createClusterAction = (formData) => async () => {
+    console.log("creating cluster")
+    console.log(formData)
+    let res = await api(
+      "post",
+      endPoints.CREATE_CLUSTER({
+        namespace: formData.clusterDetails.namespace,
+        name: formData.clusterDetails.clusterName,
+      }),
+      getCreateClusterPayload(formData),
+      {},
+      {
+        "Content-Type": "application/json",
+      },
+    );
+    console.log(res)
+  }
 
   const renderStep = () => {
     switch (activeIndex) {
@@ -158,8 +568,14 @@ export default function CreateK8sCluster() {
                     label="Create Cluster"
                     icon="pi pi-check"
                     onClick={() => {
-                      // Handle cluster creation
-                      navigate('/virtual-machines/pools');
+                      dispatch(createClusterAction(formData))
+                      dispatch(createKubeVirtClusterAction(formData))
+                      dispatch(createKVControlPlaneMachineTempAction(formData))
+                      dispatch(createKubeadmControlPlaneAction(formData))
+                      dispatch(createKVWorkerNodeMachineTempAction(formData))
+                      dispatch(createKubeadmConfigTempAction(formData))
+                      dispatch(createMachineAction(formData))
+                      navigate("/clusters")
                     }}
                   />
                 )}
