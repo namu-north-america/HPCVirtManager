@@ -17,7 +17,7 @@ import endPoints from "../services/endPoints"; // Ensure endpoints are defined
 
 const statusTemplate = (item) => {
   switch (item.status) {
-    case "READY":
+    case "Provisioned":
       return <span className="text-green-500">Ready</span>;
     case "RUNNING":
       return <span className="text-cyan-500">Running</span>;
@@ -58,6 +58,7 @@ export default function Clusters() {
       const res = await api("get", endPoints.LIST_CLUSTERS);
       const fetchedClusters = res.items.map((item) => ({
         name: item?.metadata?.name || "Unknown",
+        namespace: item?.metadata?.namespace || "Unknown",
         status: item?.status?.phase || "Unknown",
         nodeCount: `${item?.status?.readyReplicas || 0}/${item?.spec?.replicas || 0}`,
         cpu: `${item?.status?.capacity?.cpu || 0} Core`,
@@ -129,6 +130,7 @@ export default function Clusters() {
       >
         <Column body={iconTemplate} header="" style={{ width: "3rem" }}></Column>
         <Column field="name" header="Name" body={nameTemplate}></Column>
+        <Column field="namespace" header="namespace"></Column>
         <Column field="status" header="Status" body={statusTemplate}></Column>
         <Column field="nodeCount" header="Node Count"></Column>
         <Column field="cpu" header="CPU"></Column>
