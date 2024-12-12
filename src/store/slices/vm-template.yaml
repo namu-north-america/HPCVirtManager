@@ -72,12 +72,12 @@ spec:
                 address:
                 - 8.8.8.8
                 - 8.8.4.4
-      accessCredentials:
-        - sshPublicKey:
-            source:
-              secret:
-                secretName:
-            propagationMethod:
-              noCloud: {}
+      # accessCredentials:
+      #   - sshPublicKey:
+      #       source:
+      #         secret:
+      #           secretName:
+      #       propagationMethod:
+      #         noCloud: {}
       nodeSelector:
         kubernetes.io/hostname: worker
