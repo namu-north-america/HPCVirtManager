@@ -575,6 +575,7 @@ export default function CreateK8sCluster() {
                       dispatch(createKVWorkerNodeMachineTempAction(formData))
                       dispatch(createKubeadmConfigTempAction(formData))
                       dispatch(createMachineAction(formData))
+                      navigate("/clusters")
                     }}
                   />
                 )}
