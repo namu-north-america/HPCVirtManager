@@ -492,6 +492,14 @@ export default function StorageDisks() {
           <CustomDropDown
             data={disk}
             onChange={handleChange}
+            name="accessMode"
+            options={accessModeDropdown}
+            required
+            col={12}
+          />
+          <CustomDropDown
+            data={disk}
+            onChange={handleChange}
             name="type"
             options={typesDropdown}
             required
