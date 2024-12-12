@@ -137,3 +137,30 @@
   }
 }
 
+.p-splitbutton.refresh-split-button {
+  .p-button:not(.p-splitbutton-menubutton) {
+    background-color: $bg-color-primary;
+    border-color: $border-color;
+    color: $text-color-secondary;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    
+    &:enabled:hover {
+      background-color: darken($bg-color-primary, 4%);
+      border-color: $border-color;
+    }
+  }
+  
+  .p-splitbutton-menubutton {
+    background-color: $bg-color-primary;
+    border-color: $border-color;
+    color: $text-color-secondary;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    
+    &:enabled:hover {
+      background-color: darken($bg-color-primary, 4%);
+      border-color: $border-color;
+    }
+  }
+}

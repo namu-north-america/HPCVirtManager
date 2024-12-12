@@ -14,7 +14,7 @@
   flex-direction: column;
   min-height: 100vh;
   justify-content: space-between;
-  padding: calc($topbar-height + 0rem) 0rem 2rem 0rem;
+  padding: calc($topbar-height + 0rem) 1.2rem 2rem 1.2rem;
   margin-left: $sidebar-width;
   transition: margin-left $transition-duration cubic-bezier(0.4, 0, 0.2, 1);
 }
