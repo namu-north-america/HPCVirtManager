@@ -16,6 +16,7 @@ export default function Step1ClusterDetails({ data, onChange }) {
     { label: 'v1.28', value: '1.28' },
     { label: 'v1.27', value: '1.27' },
     { label: 'v1.26', value: '1.26' },
+    { label: 'v1.23.10', value: 'v1.23.10'},
   ];
 
   const hasAccess = useCallback(() => {

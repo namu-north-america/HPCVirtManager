@@ -104,7 +104,7 @@ export default function CreateK8sCluster() {
           "controlPlaneRef": {
               "apiVersion": "controlplane.cluster.x-k8s.io/v1beta1",
               "kind": "KubeadmControlPlane",
-              "name": clusterName+"-controlplane",
+              "name": clusterName+"-control-plane",
               "namespace": clusterNamespace
           },
           "infrastructureRef": {
@@ -235,7 +235,7 @@ export default function CreateK8sCluster() {
               }
           },
           "replicas": 1,
-          "version": "v1.23.10"
+          "version": formData.clusterDetails.k8sVersion
       }
     }
   }
@@ -357,7 +357,7 @@ export default function CreateK8sCluster() {
                       "name": name+"-md-0",
                       "namespace": namespace
                   },
-                  "version": "v1.23.10"
+                  "version": formData.clusterDetails.k8sVersion
               }
           }
       }
