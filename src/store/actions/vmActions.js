@@ -1,7 +1,7 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
 import { showToastAction } from "../slices/commonSlice";
-import { setLiveMigrations } from "../slices/projectSlice";
+import { setLiveMigrations, setNetworks } from "../slices/projectSlice";
 import { getVMsAction } from "./projectActions";
 
 // spec:
@@ -704,6 +704,24 @@ const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
   }));
   dispatch(setLiveMigrations(items));
 };
+
+export const getNetworksAction = (next) => async (dispatch) => {
+  let res = await api(
+    "get",
+    endPoints.GET_NETWORKS()
+  );
+  
+  if (res?.kind) {
+    const networks = res.items.map(network => {
+      return {
+        name: network.metadata.name
+      }
+    });
+    console.log('networks___', res.items)
+    dispatch(setNetworks(networks))
+    // next(res);
+  }
+}
 
 export {
   onAddVMAction,

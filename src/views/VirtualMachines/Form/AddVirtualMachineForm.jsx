@@ -14,7 +14,7 @@ import Storage from "./Storage";
 import Review from "./Review";
 import UserData from "./UserData";
 import { setSelectedTemplate } from "../../../store/slices/vmSlice";
-import { onAddVMAction } from "../../../store/actions/vmActions";
+import { onAddVMAction, getNetworksAction } from "../../../store/actions/vmActions";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import formValidation from "../../../utils/validations";
 import { getDisksAction, getStorageClassesAction } from "../../../store/actions/storageActions";
@@ -46,6 +46,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     dispatch(getPriorityClassAction());
     dispatch(getDisksAction());
     dispatch(getImagesAction());
+    dispatch(getNetworksAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -92,6 +93,13 @@ export default function AddVirtualMachineForm({ onClose }) {
       type: "blank",
       url: "",
       cache: "",
+    },
+  ]);
+
+  const [networks, setNetworks] = useState([
+    {
+      networkType: "podNetwork",
+      bindingMode: "bridge",
     },
   ]);
 
@@ -241,8 +249,22 @@ export default function AddVirtualMachineForm({ onClose }) {
     ]);
   };
 
+  const onAddMoreNetwork = () => {
+    setNetworks((prev) => [
+      ...prev,
+      {
+        networkType: "",
+        bindingMode: "",
+      },
+    ]);
+  };
+
   const onRemoveDisk = (index) => {
     setDisks((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const onRemoveNetwork = (index) => {
+    setNetworks((prev) => prev.filter((_, i) => i !== index));
   };
 
   const onMoveDisk = (index, direction) => {
@@ -314,7 +336,13 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 2:
         return (
           <>
-            <Network data={data} handleChange={handleChange} />
+            {networks.map((network, index) => {
+              return <Network data={network} handleChange={handleChange} index={index} onRemove={onRemoveNetwork} />;
+            })}
+            <button className="add-disk-button" onClick={onAddMoreNetwork}>
+              <i className="pi pi-plus-circle"></i>
+              Add More Network
+            </button>
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(1)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(3)} />
