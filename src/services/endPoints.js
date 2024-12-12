@@ -84,6 +84,9 @@ const endPoints = {
     `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
   GET_CLUSTER: ({ namespace, name }) =>
     `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
+
+  // others API
+  LIST_CLUSTERS: "/apis/cluster.x-k8s.io/v1beta1/clusters"
 };
 
 export default endPoints;
