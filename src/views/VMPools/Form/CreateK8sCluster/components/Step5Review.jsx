@@ -49,6 +49,7 @@ export default function Step5Review({ data, onEdit }) {
           <p><strong>Cluster Name:</strong> {data.clusterDetails.clusterName}</p>
           <p><strong>Namespace:</strong> {data.clusterDetails.namespace}</p>
           <p><strong>Kubernetes Version:</strong> {data.clusterDetails.k8sVersion}</p>
+          <p><strong>Node VM Image:</strong> {data.clusterDetails.nodeVMImage}</p>
           <p><strong>Description:</strong> {data.clusterDetails.description}</p>
           <p><strong>Install Dashboard:</strong> {data.clusterDetails.installDashboard ? 'Yes' : 'No'}</p>
         </div>
