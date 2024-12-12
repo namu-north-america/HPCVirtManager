@@ -114,7 +114,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 url = image.url;
               } else {
                 sourceType = Object.keys(source)[0];
-                url = source[sourceType];
+                url = source[sourceType]?.url;
               }
 
               return {
@@ -246,9 +246,13 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
 
             const source = {};
             if (image) {
-              source[image.type] = image.url;
+              source[image.type] = {
+                url: image.url,
+              };
             } else {
-              source[disk.type] = disk.url;
+              source[disk.type] = {
+                url: disk.url,
+              };
             }
             yamlDataVolumeTemplates.push({
               metadata: {

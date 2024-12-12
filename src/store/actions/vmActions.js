@@ -65,7 +65,7 @@ const addDiskByYamlTemplate = async (namespace, template) => {
 
 export const _getNetworks = (networks) => {
   let networksData = [];
-  if(networks.length) {
+  if (networks.length) {
     networksData.push({
       name: networks?.[0].networkType,
       pod: {},
@@ -81,7 +81,7 @@ export const _getNetworks = (networks) => {
     }
   }
   return networksData;
-}
+};
 
 export const _getDeviceFromDisk = (disk, i) => {
   let busObj = {};
@@ -329,12 +329,12 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
       password: data.password,
     });
 
-    const interfaces = networks.map(net => {
+    const interfaces = networks.map((net) => {
       return {
         name: net.networkType,
         [net.bindingMode]: {},
-      }
-    })
+      };
+    });
     const networkData = _getNetworks(networks);
 
     let url = endPoints.ADD_VM({
@@ -389,9 +389,9 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
             },
           },
         },
-      }
-    }
-  
+      },
+    };
+
     await addVMRequest(payload, url, dispatch, next);
     setLoading(false);
   } catch (error) {
@@ -697,6 +697,60 @@ const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) =
   }
 };
 
+export const onAddNetworkHotPlugVmAction = (namespace, name, networks, interfaces, data, next) => async (dispatch) => {
+  let url = endPoints.HOT_PLUG_NETWORK({ namespace, name });
+  console.log("vm hotplog action___", url, namespace, data);
+
+  const payload = {
+    // apiVersion: "cdi.kubevirt.io/v1beta1",
+    kind: "DataVolume",
+    spec: {
+      template: {
+        spec: {
+          networks: [
+            ...networks,
+            {
+              name: data.networkType,
+              multus: {
+                networkName: data.networkType,
+              },
+            },
+          ],
+          domain: {
+            devices: {
+              interfaces: [
+                ...interfaces,
+                {
+                  name: data?.networkType,
+                  [data?.bindingMode]: {},
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const res = await api("patch", url, payload, {}, { "Content-Type": "application/merge-patch+json" });
+  console.log("response____", res, payload);
+  if (res?.status === "Failure") {
+    if (res?.reason == "BadRequest") {
+      dispatch(
+        showToastAction({
+          type: "error",
+          title: res?.message,
+        })
+      );
+    }
+  } else if (res?.kind) {
+    // dispatch(getVMsAction());
+  }
+  if (next) {
+    next();
+  }
+};
+
 const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
   let items = await Promise.all(
     namespaces.map(async (namespace, i) => {
@@ -730,22 +784,19 @@ const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
 };
 
 export const getNetworksAction = (next) => async (dispatch) => {
-  let res = await api(
-    "get",
-    endPoints.GET_NETWORKS()
-  );
-  
+  let res = await api("get", endPoints.GET_NETWORKS());
+
   if (res?.kind) {
-    const networks = res.items.map(network => {
+    const networks = res.items.map((network) => {
       return {
-        name: network.metadata.name
-      }
+        name: network.metadata.name,
+      };
     });
-    console.log('networks___', res.items)
-    dispatch(setNetworks(networks))
+    console.log("networks___", res.items);
+    dispatch(setNetworks(networks));
     // next(res);
   }
-}
+};
 
 export {
   onAddVMAction,

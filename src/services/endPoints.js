@@ -61,6 +61,8 @@ const endPoints = {
     `/apis/cdi.kubevirt.io/v1beta1/namespaces/${namespace}/datavolumes/${name}`,
   HOT_PLUG_VOLUME: ({ namespace, name }) =>
     `/apis/subresources.kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}/addvolume`,
+  HOT_PLUG_NETWORK: ({ namespace, name }) =>
+  `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}`,
   GET_NETWORKS: () => 
     `/apis/k8s.cni.cncf.io/v1/network-attachment-definitions`,
 

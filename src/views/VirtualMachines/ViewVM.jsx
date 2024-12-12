@@ -31,6 +31,8 @@ import { Button } from "primereact/button";
 import { Tooltip } from 'primereact/tooltip';
 import SemiCircleGauge from "../../shared/SemiCircle";
 import { FaDesktop } from 'react-icons/fa';
+import NetworkHotPlugModal from "./Form/NetworkHotplugModal";
+import { getNetworksAction } from "../../store/actions/vmActions";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -389,7 +391,14 @@ export default function ViewVM() {
           {renderButtons()}
         </div>
         
-        <TabView>
+        <TabView onBeforeTabChange={(event) => {
+         
+          if(event.index === 3) {
+            dispatch(getNetworksAction());
+            console.log('index of the tab is_____', event);
+          }
+          return true
+        }}>
           <TabPanel header="Overview">
             <Grid>
               <Col size={4}>
@@ -567,6 +576,25 @@ export default function ViewVM() {
           </TabPanel>
           <TabPanel header="Network Interfaces">
             <Grid>
+              <Col size={12} extraClassNames="text-right">
+                <NetworkHotPlugModal
+                  title="Add New Network Interface"
+                  isOpen={isOpenAddNewStorageModal}
+                  setVisible={setIsOpenAddNewStorageModal}
+                  volumes={volumes}
+                  networks={data.networks}
+                  interfaces={data.interfaces}
+                  name={name}
+                  namespace={namespace}
+                />
+                <Col size={6} extraClassNames="p-2">
+                  <Button
+                    label="Add New Network Interface"
+                    icon="pi pi-plus"
+                    onClick={() => setIsOpenAddNewStorageModal(true)}
+                  />
+                </Col>
+              </Col>
               {data?.networks?.map((item) => (
                 <Col size={4}>
                   <CustomCard title={item?.name}>
