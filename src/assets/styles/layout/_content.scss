@@ -4,9 +4,14 @@
   min-height: 100vh;
   justify-content: space-between;
   padding: $topbar-height 0 0 0;
-  transition: margin-left $transitionDuration;
+  transition: all $transitionDuration ease;  // Match sidebar transition
+  margin-left: $sidebar-width;  // Start with sidebar width
   position: relative;
   z-index: 1;  // Much lower z-index
+
+  &.collapsed {
+    margin-left: $sidebar-collapsed-width;  // Adjust when sidebar is collapsed
+  }
 }
 
 .layout-main {

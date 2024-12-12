@@ -8,21 +8,28 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
   height: 100vh;
   z-index: 1100;
   overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
   user-select: none;
   top: 0;
   left: 0;
-  transition: all $transition-duration ease;  // Smooth transition for all properties
+  transition: transform $transition-duration cubic-bezier(0.4, 0, 0.2, 1),
+              width $transition-duration cubic-bezier(0.4, 0, 0.2, 1);
   background-color: $bg-color-dark;
   border-right: 1px solid $border-color;
   color: $text-color-primary;
   display: flex;
   flex-direction: column;
 
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
   &.collapsed {
     width: $sidebar-collapsed-width;
     
     .logo {
-      padding: 0 8px;
+      padding: 20px 8px;  // Increased top/bottom padding from 0 to 20px
       justify-content: center;
       
       .logomark {
@@ -56,23 +63,6 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
     }
   }
 
-  .logo {
-    height: $topbar-height;
-    min-height: $topbar-height;
-    border-bottom: 1px solid $border-color;
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 0 35px;
-    
-    svg {
-      height: calc(100% - 20px);
-      width: auto;
-      transition: transform $transition-duration;
-    }
-  }
-
   .menu-bar {
     height: 100%;
     display: flex;
@@ -87,7 +77,7 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      padding: 0 12px;
+      padding: 20px 12px;  // Increased top/bottom padding from 0 to 20px
       margin-bottom: 1rem;
       
       svg {
@@ -96,10 +86,73 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
         transition: transform $transition-duration;
       }
     }
+    
+    .menu-items {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none;  /* Internet Explorer 10+ */
+      padding: 1rem 0;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  .layout-menu-container {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .sidebar-footer {
+    margin-top: auto;  // Push to bottom
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;  // Prevent shrinking
+  }
+
+  .logo {
+    height: $topbar-height;
+    min-height: $topbar-height;
+    border-bottom: 1px solid $border-color;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px 35px;  // Increased top/bottom padding from 0 to 20px
+    gap: 12px;  // Add space between logomark and logotext
+    
+    svg {
+      height: calc((100% - 20px) * 1.2);  // Increase base height by 20%
+      width: auto;
+      transition: transform $transition-duration;
+    }
+
+    .logomark {
+      height: calc((100% - 20px) * 1.2);  // Match svg height
+      width: auto;
+    }
+
+    .logotext {
+      height: calc((100% - 20px) * 1.2);  // Match svg height
+      width: auto;
+    }
   }
 
   .sidebar-header {
     overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
   .open-icon {
     transition: $transition-duration;
@@ -121,6 +174,21 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
     justify-content: space-between;
     gap: 8px;
 
+    &.logo-menu-item {
+      padding: 20px 18px;  // Increased vertical padding for logo menu item
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);  // Matching footer border style
+      
+      .logo-icon {
+        height: calc((100% - 20px) * 1.2);
+        width: auto;
+      }
+      
+      .logo-text {
+        height: calc((100% - 20px) * 1.2);
+        width: auto;
+      }
+    }
+
     .item-content {
       display: flex;
       align-items: center;
@@ -141,7 +209,7 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
       font-size: 1em;
       font-weight: 600;
       line-height: 24px;
-      margin-left: 0.5rem;
+      margin-left: 0rem;
     }
 
     .open-icon {
@@ -150,14 +218,15 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
     }
 
     svg {
-      height: 25px;
-      width: 25px;
-      color: $white-color;
+      height: 1rem;
+      width: 1rem;
+      color: #959ba4;
     }
     
     &.active {
       background-color: $menu-item-hover;
     }
+    
   }
 
   .sidebar-item:hover {
@@ -249,8 +318,8 @@ $transition-duration: 0.3s;  // Define a consistent transition duration
   .toggle-button {
     position: fixed;
     left: calc(#{$sidebar-width} - 12px);
-    top: 70px;
-    background-color: $bg-color-secondary;
+    top: 58px;
+    background-color: $white-color;
     border: 1px solid $border-color;
     width: 24px;
     height: 24px;

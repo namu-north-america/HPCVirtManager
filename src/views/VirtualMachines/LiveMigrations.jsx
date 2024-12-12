@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import Page from "../../shared/Page";
-import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import CustomCard, { CustomCardValue } from "../../shared/CustomCard";
 import Grid, { Col } from "../../shared/Grid";
 import { DataTable } from "primereact/datatable";
@@ -92,7 +91,6 @@ export default function LiveMigrations() {
 
   return (
     <>
-      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="Live Migrations"
         onSearch={setSearch}

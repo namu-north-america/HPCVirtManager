@@ -10,7 +10,7 @@ export default function SemiCircleGauge({
   const options = {
     chart: {
       type: "radialBar",
-      offsetY: -20,
+      offsetY: -10,
     },
     plotOptions: {
       radialBar: {
@@ -18,23 +18,29 @@ export default function SemiCircleGauge({
         endAngle: 90,
         track: {
           background: "#e7e7e7",
-          strokeWidth: "80%",
-          margin: 5, // margin is in pixels
+          strokeWidth: "150%",
+          margin: 1, // margin is in pixels
         },
         hollow: {
-          margin: 5,
-          size: "65%", // Increase size for a thicker look
+          margin: 1,
+          size: "45%", // Increase size for a thicker look
         },
        
         dataLabels: {
           name: {
-            show: false,
+            show: true,
+            offsetY: -92,
+            color: "#000",
+            fontSize: "14px",
+            fontFamily: "DM Sans",
+            fontWeight: 600,
           },
           value: {
-            offsetY: -10,
+            offsetY: -17,
             fontSize: "16px",
+            fontFamily: "DM Sans",
             fontWeight: 600,
-            color: "#000",
+            color: "#2563EB",
             formatter: function (val) {
               return `${val}%`;
             },
@@ -43,7 +49,7 @@ export default function SemiCircleGauge({
       },
     },
     stroke: {
-      lineCap: "round",
+      lineCap: "butt",
     },
     labels: [title],
   };
@@ -56,7 +62,7 @@ export default function SemiCircleGauge({
         options={options}
         series={series}
         type="radialBar"
-        width={250}
+        width={320}
       />
 
   );

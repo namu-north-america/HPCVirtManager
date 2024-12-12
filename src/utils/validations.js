@@ -24,8 +24,8 @@ const formValidation = (name, value, state, ignore = []) => {
       }
       break;
     case "cache":
-      // Skip validation if value is false (Automatic)
-      if (value === false) {
+      // "false" is a valid value for cache (represents "Automatic")
+      if (value === false || value === "false") {
         formErrors[name] = "";
       } else if (equal(length(value))) {
         formErrors[name] = `${firstLetterToUppercase(name)} is required!`;

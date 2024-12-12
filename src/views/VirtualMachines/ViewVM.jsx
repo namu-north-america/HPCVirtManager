@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import Page from "../../shared/Page";
-import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { Link, useParams } from "react-router-dom";
 import { TabView, TabPanel } from "primereact/tabview";
 import { CustomButtonOutlined, CustomSplitButton } from "../../shared/CustomButton";
@@ -29,6 +28,9 @@ import { Dialog } from "primereact/dialog";
 import { showToastAction } from "../../store/slices/commonSlice";
 import YamlEditor from "../../shared/YamlEditor";
 import { Button } from "primereact/button";
+import { Tooltip } from 'primereact/tooltip';
+import SemiCircleGauge from "../../shared/SemiCircle";
+import { FaDesktop } from 'react-icons/fa';
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -71,6 +73,12 @@ export default function ViewVM() {
   };
   const moreActions = [
     {
+      label: "Open Console",
+      command: () => {
+        onOpenConsole();
+      },
+    },
+    {
       label: "Migrate",
       command: () => {
         setOpenMigrate(data);
@@ -101,11 +109,13 @@ export default function ViewVM() {
 
   useEffect(() => {
     if (name) {
+      onInitialLoad();
       dispatch(getVmCpuStats(name));
       dispatch(getVmMemoryStats(name));
       dispatch(getVmStorageStats(name));
 
       const interval = setInterval(() => {
+        onInitialLoad();
         dispatch(getVmCpuStats(name));
         dispatch(getVmMemoryStats(name));
         dispatch(getVmStorageStats(name));
@@ -179,53 +189,40 @@ export default function ViewVM() {
     } // eslint-disable-next-line
   }, [data?.storageDisks]);
 
-  useEffect(() => {
-    onInitialLoad();
-  }, []);
-
-  const statusTemplate = (item) => {
-    switch (item.status) {
+  const getStatusClass = (status) => {
+    const baseClasses = "text-sm px-2 py-0.5 rounded-lg inline-block font-medium border";
+    switch (status) {
       case "Starting":
-        return (
-          <span className="text-pink-400">
-            <i className="pi pi-play-circle text-sm mr-1"></i>Starting
-          </span>
-        );
+        return `${baseClasses} text-pink-700 bg-pink-50 border-pink-200`;
       case "Ready":
-        return (
-          <span className="text-green-500">
-            <i className="pi pi-check-circle text-sm mr-1"></i>Ready
-          </span>
-        );
+        return `${baseClasses} text-green-700 bg-green-50 border-green-200`;
       case "Running":
-        return (
-          <span className="text-cyan-500">
-            <i className="pi pi-check-circle text-sm mr-1"></i>Running
-          </span>
-        );
+        return `${baseClasses} text-green-700 bg-green-50 border-green-200`;
       case "Stopping":
-        return (
-          <span className="text-red-400">
-            {" "}
-            <i className="pi pi-ban text-sm mr-1"></i>Stopping
-          </span>
-        );
+        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
       case "Stopped":
-        return (
-          <span className="text-red-500">
-            <i className="pi pi-ban text-sm mr-1"></i>Stopped
-          </span>
-        );
+        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
       case "Paused":
-        return (
-          <span className="text-yellow-500">
-            <i className="pi pi-pause-circle text-sm mr-1"></i>Paused
-          </span>
-        );
+        return `${baseClasses} text-yellow-700 bg-yellow-50 border-yellow-200`;
       default:
-        return <span>{item.status}</span>;
+        return `${baseClasses} text-gray-700 bg-gray-50 border-gray-200`;
     }
   };
+
+  const statusTemplate = (item) => (
+    <span className={getStatusClass(item.status)}>
+      <i style={{ 
+        display: 'inline-block',
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        backgroundColor: 'currentColor',
+        marginRight: '6px',
+        verticalAlign: 'middle'
+      }}></i>
+      {item.status}
+    </span>
+  );
 
   const onStart = () => {
     dispatch(
@@ -286,34 +283,59 @@ export default function ViewVM() {
       disabled: data.status !== "Running",
     },
   ];
-  const headers = (
+  const renderButtons = () => (
     <>
-      <CustomButtonOutlined
-        label="Start"
-        severity="secondary"
-        icon="pi pi-play"
-        disabled={data?.status === "Running"}
-        onClick={onStart}
-      />
-      <CustomSplitButton
-        label="Shutdown"
-        icon="pi pi-power-off"
-        model={actions}
-        severity="danger"
-        onClick={data.status === "Running" ? () => onStop() : null}
-        // disabled={data.status !== "Running"}
-      />
-      <CustomButtonOutlined label="Refresh" severity="secondary" icon="pi pi-sync" onClick={onInitialLoad} />
-      <CustomButtonOutlined
-        label="Console"
-        severity="secondary"
-        icon="pi pi-code"
-        onClick={onOpenConsole}
-        // disabled={data.status !== "Running"}
-      />
-      <CustomSplitButton label="More Actions" model={moreActions} severity="secondary" />
+      <div className="flex justify-between items-center mb-4 w-full gap-4">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <CustomButtonOutlined
+            label="Start"
+            severity="success"
+            icon="pi pi-play"
+            className="refresh-button"
+            onClick={data.status === "Stopped" ? () => onStart() : null}
+          />
+          <CustomSplitButton
+            label="Shutdown"
+            icon="pi pi-power-off"
+            model={actions}
+            severity="danger"
+            className="refresh-split-button"
+            onClick={data.status === "Running" ? () => onStop() : null}
+          />
+        </div>
+        
+        <div className="flex items-center gap-2 flex-nowrap flex-shrink-0 ml-auto">
+          <CustomButtonOutlined
+            label="Refresh"
+            severity="secondary"
+            icon="pi pi-refresh"
+            className="refresh-button whitespace-nowrap"
+            onClick={() => onInitialLoad()}
+          />
+          <CustomButtonOutlined
+            label="Console"
+            severity="secondary"
+            className="refresh-button whitespace-nowrap"
+            icon="pi pi-code"
+            onClick={() => setShowVncDialog(true)}
+          />
+          <CustomButtonOutlined
+            label="Download YAML"
+            severity="secondary"
+            className="refresh-button whitespace-nowrap"
+            icon="pi pi-download"
+          />
+          <CustomSplitButton
+            label="More Actions"
+            model={moreActions}
+            className="refresh-split-button whitespace-nowrap"
+            severity="secondary"
+          />
+        </div>
+      </div>
     </>
   );
+
   const calculatePercentage = (used, total) => {
     if (!total || total === 0) return 0;
     const percentage = (used / total) * 100;
@@ -347,15 +369,30 @@ export default function ViewVM() {
 
   return (
     <>
+      <Tooltip target=".vm-status-icon" />
       <EditVmModal visible={editInfo} setVisible={setEditInfo} />
       <MigrateModal visible={onOpenMigrate} setVisible={setOpenMigrate} />
-      <CustomBreadcrum items={breadcrumItems} />
-      <Page title={name}>
-        <div className="flex align-items-center gap-2 mb-3">{headers}</div>
+      <Page 
+        title={
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center justify-center">
+              <FaDesktop className="text-gray-600 text-xl leading-none my-auto" style={{ verticalAlign: 'middle' }} />
+            </div>
+            <span>{name}</span>
+            <div className="self-center">
+              {statusTemplate({ status: data.status })}
+            </div>
+          </div>
+        }
+      >
+        <div className="flex justify-between items-center mb-3">
+          {renderButtons()}
+        </div>
+        
         <TabView>
           <TabPanel header="Overview">
             <Grid>
-              <Col size={5}>
+              <Col size={4}>
                 <CustomCard title="Status">
                   <CustomCardField title="Name" value={name} />
                   <CustomCardField title="Status" value={data?.status} template={statusTemplate(data)} />
@@ -368,64 +405,124 @@ export default function ViewVM() {
                     }
                   />
                 </CustomCard>
-                <CustomCard title="VM Metrics">
-                  <Grid>
-                    <Col size={4}>
-                      <CustomCard>
-                        <div className="text-center">
-                          <div className="text-xl font-bold text-green-500">
-                            {(vmStats?.cpu?.used || 0).toFixed(2)}%
-                          </div>
-                          <div className="text-sm text-gray-600">CPU Usage</div>
-                        </div>
-                      </CustomCard>
-                    </Col>
-
-                    <Col size={4}>
-                      <CustomCard>
-                        <div className="text-center">
-                          <div className="text-xl font-bold text-blue-500">
-                            {(vmStats?.memory?.used || 0).toFixed(2)} GB
-                          </div>
-                          <div className="text-sm text-gray-600">Memory Usage</div>
-                        </div>
-                      </CustomCard>
-                    </Col>
-
-                    <Col size={4}>
-                      <CustomCard>
-                        <div className="text-center">
-                          <div className="text-xl font-bold text-purple-500">
-                            {(vmStats?.storage?.used || 0).toFixed(2)} GB
-                          </div>
-                          <div className="text-sm text-gray-600">Storage Usage</div>
-                        </div>
-                      </CustomCard>
-                    </Col>
-                  </Grid>
-                </CustomCard>
-              </Col>
-              <Col size={5}>
                 <CustomCard title="Details">
                   <CustomCardField title="Namespace" value={namespace} />
                   <CustomCardField title="Node" template={<Link>{data?.node}</Link>} />
                   <CustomCardField title="Cluster" value={data?.cluster} template={<Link>{data?.cluster}</Link>} />
                   <CustomCardField title="IP Address" value={data?.ipAddress} />
                 </CustomCard>
-                <CustomCard title="Mounted Components">
-                  <CustomCardField
-                    title="Storage Disks"
-                    value={volumes?.length}
-                    // value={data?.storageDisks?.length}
-                  />
-                  <CustomCardField title="Networking (NIC)" value={data?.networks?.length} />
+              </Col>
+              
+              <Col size={8}>
+                <CustomCard>
+                  <Grid>
+                    <Col size={4}>
+                      <div className="py-4 px-3">
+                        <div className="space-y-1">
+                          <div className="grid grid-col-2 justify-content-center gap-2">
+                            <SemiCircleGauge
+                              title="CPU"
+                              percentage={Number((vmStats?.cpu?.used || 0).toFixed(2))}
+                              used={(vmStats?.cpu?.used || 0).toFixed(2)}
+                              available={100}
+                            />
+                          </div>
+                          <div className="grid grid-col-2 justify-content-center gap-2">
+                            <div className="">
+                              <span className="text-black font-semibold">{(vmStats?.cpu?.used || 0).toFixed(2)}%</span>
+                              <span className="text-gray-500"> used</span>
+                              <br />
+                              <span className="text-black font-semibold">100%</span>
+                              <span className="text-gray-500"> available</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
+                    
+                    <Col size={4}>
+                      <div className="py-4 px-3">
+                        <div className="space-y-1">
+                          <div className="grid grid-col-2 justify-content-center gap-2">
+                            <SemiCircleGauge
+                              title="Memory"
+                              percentage={Number(((vmStats?.memory?.used || 0) / (vmStats?.memory?.total || 1) * 100).toFixed(2))}
+                              used={(vmStats?.memory?.used || 0).toFixed(2)}
+                              available={(vmStats?.memory?.total || 0).toFixed(2)}
+                            />
+                          </div>
+                          <div className="grid grid-col-2 justify-content-center gap-2">
+                            <div className="">
+                              <span className="text-black font-semibold">{(vmStats?.memory?.used || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> used</span>
+                              <br />
+                              <span className="text-black font-semibold">{(vmStats?.memory?.total || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> available</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
+                    
+                    <Col size={4}>
+                      <div className="py-4 px-3">
+                        <div className="space-y-1">
+                          <div className="grid grid-col-2 justify-content-center gap-2">
+                            <SemiCircleGauge
+                              title="Storage"
+                              percentage={Number(((vmStats?.storage?.used || 0) / (vmStats?.storage?.total || 1) * 100).toFixed(2))}
+                              used={(vmStats?.storage?.used || 0).toFixed(2)}
+                              available={(vmStats?.storage?.total || 0).toFixed(2)}
+                            />
+                          </div>
+                          <div className="grid grid-col-2 justify-content-center gap-2">
+                            <div className="">
+                              <span className="text-black font-semibold">{(vmStats?.storage?.used || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> used</span>
+                              <br />
+                              <span className="text-black font-semibold">{(vmStats?.storage?.total || 0).toFixed(2)} GB</span>
+                              <span className="text-gray-500"> available</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
+                  </Grid>
                 </CustomCard>
-                <CustomCard title="Allocated Resources">
-                  <CustomCardField title="Cores" value={data?.cores} />
-                  <CustomCardField title="Sockets" value={data?.sockets} />
-                  <CustomCardField title="Threads" value={data?.threads} />
-                  <CustomCardField title="Memory" value={data?.memory} />
-                </CustomCard>
+                
+                <Grid>
+                  <Col size={6}>
+                    <CustomCard title="Allocated Resources">
+                      <CustomCardField title="Cores" value={data?.cores} />
+                      <CustomCardField title="Sockets" value={data?.sockets} />
+                      <CustomCardField title="Threads" value={data?.threads} />
+                      <CustomCardField title="Memory" value={data?.memory} />
+                    </CustomCard>
+                    <CustomCard title="Mounted Components">
+                      <CustomCardField
+                        title="Storage Disks"
+                        value={volumes?.length}
+                      />
+                      <CustomCardField
+                        title="Networking (NIC)"
+                        value={data?.networks?.length}
+                      />
+                    </CustomCard>
+                  </Col>
+                  
+                  <Col size={6}>
+                    <CustomCard title="Events">
+                      <div className="p-4 text-gray-500 text-center">
+                        No events to display
+                      </div>
+                    </CustomCard>
+                    <CustomCard title="Notes">
+                      <div className="p-4 text-gray-500 text-center">
+                        No notes available
+                      </div>
+                    </CustomCard>
+                  </Col>
+                </Grid>
               </Col>
             </Grid>
           </TabPanel>
@@ -496,12 +593,12 @@ export default function ViewVM() {
         onHide={onCloseConsole}
         maximizable
       >
-        <div style={{ height: "70vh", width: "100%" }}>
+        <div style={{ height: '70vh', width: '100%' }}>
+          <div style={{ color: 'white', padding: '10px', backgroundColor: 'black' }}>
+            <strong>VNC URL :</strong> {`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+          </div>
           <VncScreen
-            url={`ws://${constants.baseUrl.replace(
-              /^https?:\/\//,
-              ""
-            )}/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+            url={`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
             scaleViewport
             style={{
               width: "100%",

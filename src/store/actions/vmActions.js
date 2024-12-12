@@ -389,9 +389,9 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
             },
           },
         },
-      },
-    };
-    console.log("onAddVMAction : url - [ ", url, " ] payload - [ ", payload, " ]");
+      }
+    }
+  
     await addVMRequest(payload, url, dispatch, next);
     setLoading(false);
   } catch (error) {

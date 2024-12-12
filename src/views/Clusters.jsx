@@ -7,6 +7,7 @@ import Grid, { Col } from "../shared/Grid";
 import { nameTemplate, timeTemplate } from "../shared/TableHelpers";
 import { onGetStorageAction,getCPUTotalCores ,getMemoryUsage} from "../store/actions/reportingActions";
 import { useDispatch,useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const allNodes = [
   {
@@ -54,8 +55,13 @@ const statusTemplate = (item) => {
   }
 };
 
+const iconTemplate = () => {
+  return <i className="pi pi-sitemap text-xl"></i>;
+};
+
 export default function Clusters() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [cpuUsage, setCpuUsage] = React.useState(0);
   const [memory, setMemory] = React.useState(0);
   const [storage, setStorage] = React.useState(0);
@@ -88,8 +94,8 @@ export default function Clusters() {
       title="Clusters"
       onSearch={(e) => console.log(e)}
       onRefresh={(e) => console.log(e)}
-      onAdd={(e) => console.log(e)}
-      addText="Register New Cluster"
+      onAdd={() => navigate("/clusters/create")}
+      addText="Create K8s Cluster"
     >
       <Grid className="mb-2">
         <Col size={12}>
@@ -113,6 +119,7 @@ export default function Clusters() {
         </Col>
       </Grid>
       <DataTable value={allNodes} tableStyle={{ minWidth: "50rem" }}>
+        <Column body={iconTemplate} header="" style={{ width: '3rem' }}></Column>
         <Column field="name" header="Name" body={nameTemplate}></Column>
         <Column field="status" header="Status" body={statusTemplate}></Column>
         <Column field="nodeCount" header="Node Count"></Column>

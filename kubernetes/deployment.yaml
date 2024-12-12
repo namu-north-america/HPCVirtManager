@@ -22,8 +22,8 @@ spec:
     spec:
       containers:
         - name: hpcvirtmanager
-          image: puru2024/namu:1.0.0
-          imagePullPolicy: IfNotPresent
+          image: puru2024/namutech:1.0.0
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080

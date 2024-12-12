@@ -50,15 +50,10 @@ export default function AddVirtualMachineForm({ onClose }) {
   }, [dispatch]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTemplateModalOpen(true);
-    }, 500);
-
     return () => {
-      clearTimeout(timer);
       dispatch(setSelectedTemplate({}));
     };
-  }, []);
+  }, [dispatch]);
 
   const [data, setData] = useState({
     node: "",
@@ -194,7 +189,12 @@ export default function AddVirtualMachineForm({ onClose }) {
       }
 
       // Always validate busType and cache
-      const requiredFields = ["diskType", "createType", "busType", "cache"];
+      const requiredFields = ["diskType", "createType", "busType"];
+      // Only validate cache if it's not "Automatic" (false)
+      if (disk.cache !== false && disk.cache !== "false") {
+        requiredFields.push("cache");
+      }
+      
       const missingRequired = requiredFields.filter((field) => !disk[field] && !ignore.includes(field));
 
       if (missingRequired.length > 0) {

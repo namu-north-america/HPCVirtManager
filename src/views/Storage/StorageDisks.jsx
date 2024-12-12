@@ -9,7 +9,6 @@ import Page from "../../shared/Page";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CustomOverlay from "../../shared/CustomOverlay";
-import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -44,11 +43,66 @@ import {
 import { confirmDialog } from "primereact/confirmdialog";
 import { getStorageClassesAction } from "../../store/actions/storageActions";
 import { getImagesAction } from "../../store/actions/imageActions";
+import { FaDatabase } from "react-icons/fa";
+import { Tooltip } from "primereact/tooltip";
 
-const breadcrumItems = [
-  { label: "Storage", url: "/#/storage/disk" },
-  { label: "Disk", url: "/#/storage/disk" },
-];
+const iconTemplate = () => {
+  return (
+    <div className="flex justify-center">
+      <FaDatabase className="text-gray-600 text-xl" />
+    </div>
+  );
+};
+
+const statusTemplate = (rowData) => {
+  const getStatusClass = (status) => {
+    const baseClasses = "text-sm px-2 py-0.5 rounded-lg inline-block font-medium border";
+    switch (status) {
+      case "Succeeded":
+        return `${baseClasses} text-green-700 bg-green-50 border-green-200`;
+      case "Pending":
+        return `${baseClasses} text-yellow-700 bg-yellow-50 border-yellow-200`;
+      case "Running":
+        return `${baseClasses} text-cyan-700 bg-cyan-50 border-cyan-200`;
+      case "Failed":
+        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
+      default:
+        return `${baseClasses} text-gray-700 bg-gray-50 border-gray-200`;
+    }
+  };
+
+  return (
+    <div className="tooltip-target" data-pr-tooltip={`Status: ${rowData.status}`}>
+      <span className={getStatusClass(rowData.status)}>
+        <i style={{ 
+          display: 'inline-block',
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: 'currentColor',
+          marginRight: '6px',
+          verticalAlign: 'middle'
+        }}></i>
+        {rowData.status || "Unknown"}
+      </span>
+      <Tooltip target=".tooltip-target" />
+    </div>
+  );
+};
+
+const conditionsTemplate = (rowData) => {
+  const message = rowData.conditions || "No conditions reported";
+  return (
+    <div 
+      className="tooltip-conditions cursor-help truncate max-w-xs" 
+      data-pr-tooltip={message}
+    >
+      <span className="text-sm">{message}</span>
+      <Tooltip target=".tooltip-conditions" />
+    </div>
+  );
+};
+
 export default function StorageDisks() {
   const dispatch = useDispatch();
   const [namespace, setNamespace] = useState([]);
@@ -109,22 +163,36 @@ export default function StorageDisks() {
   });
 
   const handleChange = ({ name, value }) => {
-    const formErrors = formValidation(name, value, disk);
-    if (name === "type" && value === "blank") {
-      setDisk((prev) => ({ ...prev, [name]: value, url: "", formErrors }));
+    let ignore = [];
+    if (disk.type === "blank") {
+      ignore = ["url", "image"];
+    } else if (disk.type === "image") {
+      ignore = ["url"];
+    } else if (["http", "registry", "gcs", "s3"].includes(disk.type)) {
+      ignore = ["image"];
+    }
+    const formErrors = formValidation(name, value, disk, ignore);
+    if (name === "type") {
+      if (value === "blank") {
+        setDisk((prev) => ({ ...prev, [name]: value, url: "", image: "", formErrors }));
+      } else if (value === "image") {
+        setDisk((prev) => ({ ...prev, [name]: value, url: "", formErrors }));
+      } else if (["http", "registry", "gcs", "s3"].includes(value)) {
+        setDisk((prev) => ({ ...prev, [name]: value, image: "", formErrors }));
+      }
     } else {
       setDisk((prev) => ({ ...prev, [name]: value, formErrors }));
     }
   };
+
   const onAddDisk = () => {
     let ignore = [];
-    if (disk?.type === "blank") {
-      ignore.push("url");
-      ignore.push("image");
-    }
-
-    if (disk?.type === "image") {
-      ignore.push("url");
+    if (disk.type === "blank") {
+      ignore = ["url", "image"];
+    } else if (disk.type === "image") {
+      ignore = ["url"];
+    } else if (["http", "registry", "gcs", "s3"].includes(disk.type)) {
+      ignore = ["image"];
     }
 
     if (showFormErrors(disk, setDisk, ignore)) {
@@ -135,6 +203,7 @@ export default function StorageDisks() {
       );
     }
   };
+
   const onOpenAddDialog = () => {
     setDisk((prev) => ({ ...prev, visible: true }));
   };
@@ -292,7 +361,6 @@ export default function StorageDisks() {
   return (
     <>
       <div ref={ref}></div>
-      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="Storage Disks"
         onSearch={setSearch}
@@ -304,32 +372,37 @@ export default function StorageDisks() {
       >
         <DataTable value={disks}>
           <Column
+            body={iconTemplate}
+            style={{ width: "2rem" }}
+            className="text-center"
+          />
+          <Column
             field="name"
             header="Name"
             body={nameTemplate}
             style={{ minWidth: "200px" }}
-          ></Column>
-          <Column field="size" header="Size"></Column>
-          <Column field="namespace" header="Namespace"></Column>
-          <Column field="status" header="Status"></Column>
+          />
+          <Column field="size" header="Size" />
+          <Column field="namespace" header="Namespace" />
+          <Column 
+            field="status" 
+            header="Status"
+            body={statusTemplate}
+            style={{ minWidth: "120px" }}
+          />
           <Column
             field="conditions"
             header="Conditions"
+            body={conditionsTemplate}
             style={{ minWidth: "160px" }}
-          ></Column>
+          />
           <Column field="storageClass" header="Storage Class"></Column>
           <Column
             field="OSImageURL"
             header="OS image URL "
             body={(item) => longOverlayText(item, "OSImageURL")}
-          ></Column>
-          <Column field="accessMode" header="Access Mode"></Column>
-          <Column
-            field="time"
-            header="Created"
-            body={timeTemplate}
-            style={{ minWidth: "160px" }}
-          ></Column>
+          />
+          <Column field="time" header="Created" body={timeTemplate} style={{ minWidth: "160px" }}></Column>
           <Column body={actionTemplate}></Column>
         </DataTable>
       </Page>
@@ -413,14 +486,6 @@ export default function StorageDisks() {
             onChange={handleChange}
             name="storageClass"
             options={storageClassesDropdown}
-            required
-            col={12}
-          />
-          <CustomDropDown
-            data={disk}
-            onChange={handleChange}
-            name="accessMode"
-            options={accessModeDropdown}
             required
             col={12}
           />

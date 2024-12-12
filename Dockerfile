@@ -9,6 +9,9 @@ RUN cd /usr/src/app/public/ && git clone https://github.com/novnc/noVNC.git
 
 RUN cd /usr/src/app && npm install && npm run build
 
+# Install the 'file' utility
+RUN apt-get update && apt-get install -y file
+
 # NGINX Image
 FROM nginx:1.27-alpine
 

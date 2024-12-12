@@ -33,11 +33,20 @@ import { showFormErrors } from "../utils/commonFunctions";
 import { longOverlayText, timeTemplate } from "../shared/TableHelpers";
 import { confirmDialog } from "primereact/confirmdialog";
 import { Link } from "react-router-dom";
+import { FaCompactDisc } from 'react-icons/fa';
 import {
   filterNamespacesByCrudImages,
   checkNamespaceValue
 } from "../utils/commonFunctions";
 import { showToastAction } from "../store/slices/commonSlice";
+
+const iconTemplate = () => {
+  return (
+    <div className="flex justify-center">
+      <FaCompactDisc className="text-gray-600 text-xl" />
+    </div>
+  );
+};
 
 const breadcrumItems = [{ label: "Images", url: "/#/images" }];
 export default function Images() {
@@ -265,35 +274,24 @@ export default function Images() {
   return (
     <>
       <div ref={ref}></div>
-      <CustomBreadcrum items={breadcrumItems} />
       <Page
         title="Images"
         onSearch={setSearch}
-        onRefresh={onLoad}
+        onRefresh={() => {
+          dispatch(getImagesAction());
+        }}
         onAdd={onOpenAddDialog}
-        addText="Create New Image"
+        breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
+        addText="New Image"
       >
         <DataTable value={images}>
+          <Column body={iconTemplate} style={{ width: '2rem' }}></Column>
+          <Column field="name" header="Name" body={nameTemplate} style={{ minWidth: "200px" }} />
           <Column field="namespace" header="Namespace" />
-          <Column
-            field="name"
-            header="Name"
-            body={nameTemplate}
-            style={{ minWidth: "200px" }}
-          />
           <Column field="type" header="Type" />
           <Column field="readableName" header="Readable Name" />
-          <Column
-            field="url"
-            header="URL "
-            body={(item) => longOverlayText(item, "url")}
-          />
-          <Column
-            field="time"
-            header="Created"
-            body={timeTemplate}
-            style={{ minWidth: "160px" }}
-          />
+          <Column field="url" header="URL" body={(item) => longOverlayText(item, "url")} />
+          <Column field="time" header="Created" body={timeTemplate} style={{ minWidth: "160px" }} />
           <Column body={actionTemplate} />
         </DataTable>
       </Page>

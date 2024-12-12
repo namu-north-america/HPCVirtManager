@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1200;
 }
 
 .modal-overlay {
@@ -20,6 +20,7 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  z-index: 1200;
 }
 
 .modal {
@@ -31,7 +32,7 @@
   width: 800px;
   max-height: 90vh;
   overflow-y: auto;
-  z-index: 1001;
+  z-index: 1201;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
               0 2px 4px -1px rgba(0, 0, 0, 0.06);
 

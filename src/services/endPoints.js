@@ -23,11 +23,11 @@ const endPoints = {
   STORAGE_DISKS: "/apis/cdi.kubevirt.io/v1beta1/datavolumes",
   IMAGES: "/apis/kubevirt-manager.io/v1/images",
   ADD_IMAGE: ({ namespace }) =>
-    `/apis/kubevirt-manager.io/v1/namespaces/${namespace}/images`,
+    `/apis/hpc-virt-manager.io/v1/namespaces/${namespace}/images`,
   UPDATE_IMAGE: ({ namespace, name }) =>
-    `/apis/kubevirt-manager.io/v1/namespaces/${namespace}/images/${name}`,
+    `/apis/hpc-virt-manager.io/v1/namespaces/${namespace}/images/${name}`,
   DELETE_IMAGE: ({ namespace, name }) =>
-    `/apis/kubevirt-manager.io/v1/namespaces/${namespace}/images/${name}`,
+    `/apis/hpc-virt-manager.io/v1/namespaces/${namespace}/images/${name}`,
   GET_STORAGE_DISK: ({ namespace, name }) =>
     `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`,
   STORAGE_DISK_RESIZE: ({ namespace, name }) =>
@@ -67,5 +67,6 @@ const endPoints = {
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",
 };
+
 export default endPoints;
-// unpause
+

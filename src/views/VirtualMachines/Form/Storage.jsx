@@ -11,12 +11,8 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
 
   const handleChangeDisk = ({ name, value }) => {
     let formErrors = formValidation(name, value, disk);
-    // Don't validate cache if it's false (Automatic)
-    if (name === "cache" && value === false) {
-      formErrors = {};
-    }
-    // Reset errors when changing create type
-    if (name === "createType") {
+    // Reset errors when changing create type or when cache is "Automatic"
+    if (name === "createType" || (name === "cache" && (value === false || value === "false"))) {
       formErrors = {};
     }
     setDisk((prev) => {
