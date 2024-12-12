@@ -49,15 +49,15 @@ export const sidebarItems = [
     link: "/images",
     icon: <FaCompactDisc size={14} />,
   },
-  // {
-  //   title: "Clusters",
-  //   link: "/clusters",
-  //   icon: "pi pi-sitemap",
-  // },
   {
     title: "Nodes",
     link: "/nodes",
     icon: <FaServer size={14} />,
+  },
+  {
+    title: "Clusters",
+    link: "/clusters",
+    icon: "pi pi-sitemap",
   },
   {
     title: "Users (RBAC)",

@@ -98,6 +98,12 @@ export const PrivateRoutes = [
     role: "shared",
   },
   {
+    path: "/clusters/create",
+    name: "Create Cluster",
+    element: <CreateK8sCluster />,
+    role: "shared",
+  },
+  {
     path: "/nodes",
     name: "Nodes",
     element: <AllNodes />,
