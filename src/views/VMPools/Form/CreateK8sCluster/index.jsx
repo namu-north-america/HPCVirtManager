@@ -160,7 +160,7 @@ export default function CreateK8sCluster() {
                               "spec": {
                                   "domain": {
                                       "cpu": {
-                                          "cores": formData.controlPlane.cores
+                                          "cores": +formData.controlPlane.cores
                                       },
                                       "devices": {
                                           "disks": [
@@ -266,7 +266,7 @@ export default function CreateK8sCluster() {
                               "spec": {
                                   "domain": {
                                       "cpu": {
-                                          "cores": formData.workerNode.cores
+                                          "cores": +formData.workerNode.cores
                                       },
                                       "devices": {
                                           "disks": [
