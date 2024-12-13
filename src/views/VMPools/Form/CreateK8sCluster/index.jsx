@@ -174,7 +174,7 @@ export default function CreateK8sCluster() {
                                           "networkInterfaceMultiqueue": true
                                       },
                                       "memory": {
-                                          "guest": formData.controlPlane.memory+formData.controlPlane.memoryType
+                                          "guest": "4Gi"
                                       }
                                   },
                                   "evictionStrategy": "External",
@@ -280,7 +280,7 @@ export default function CreateK8sCluster() {
                                           "networkInterfaceMultiqueue": true
                                       },
                                       "memory": {
-                                          "guest": formData.workerNode.memory+formData.workerNode.memoryType
+                                          "guest": "4Gi"
                                       }
                                   },
                                   "evictionStrategy": "External",
