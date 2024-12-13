@@ -28,7 +28,7 @@ import _throttle from "lodash/throttle";
 export default function AddVirtualMachineForm({ onClose }) {
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector((state) => state.project);
-  const { selectedTemplate } = useSelector((state) => state.vm);
+  const { selectedTemplate, useVmTemplate } = useSelector((state) => state.vm);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [completedSteps, setCompletedSteps] = useState([]);
@@ -139,7 +139,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     }
   }, [selectedTemplate]);
 
-  const onBasicDetailsFocus = useCallback(
+  const onFocus = useCallback(
     _throttle(() => {
       dispatch(setFormFocusEvent({ form: "addVirtualMachine", focus: true }));
     }, 20000),
@@ -174,6 +174,9 @@ export default function AddVirtualMachineForm({ onClose }) {
       // Moving backward
       setActiveIndex(index);
     }
+    if (index > 0 && !useVmTemplate) {
+      onFocus();
+    }
   };
 
   const validateDisk = () => {
@@ -194,7 +197,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       if (disk.cache !== false && disk.cache !== "false") {
         requiredFields.push("cache");
       }
-      
+
       const missingRequired = requiredFields.filter((field) => !disk[field] && !ignore.includes(field));
 
       if (missingRequired.length > 0) {
@@ -299,7 +302,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 0:
         return (
           <>
-            <BasicDetails data={data} handleChange={handleChange} onFocus={onBasicDetailsFocus} />
+            <BasicDetails data={data} handleChange={handleChange} />
             <Buttonlayout>
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(1)} />
             </Buttonlayout>
@@ -342,7 +345,7 @@ export default function AddVirtualMachineForm({ onClose }) {
             {networks.length < 2 && (
               <button className="add-disk-button" onClick={onAddMoreNetwork}>
                 <i className="pi pi-plus-circle"></i>
-              Add More Network
+                Add More Network
               </button>
             )}
             <Buttonlayout>

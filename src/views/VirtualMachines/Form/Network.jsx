@@ -3,7 +3,7 @@ import { CustomDropDown, CustomForm, CustomInput } from "../../../shared/AllInpu
 import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 
-export default function Network({ data, onRemove, index, setNetworks, network }) {
+export default function Network({ data, onRemove, index, setNetworks, network, ...rest }) {
   const { bindingModeDropdown, networksDropdown } = useSelector((state) => state.project);
   const { useVmTemplate } = useSelector((state) => state.vm);
   const networksOption = useMemo(() => ["podNetwork", ...networksDropdown]);
@@ -26,7 +26,7 @@ export default function Network({ data, onRemove, index, setNetworks, network })
     });
   };
   return (
-    <CustomForm>
+    <CustomForm {...rest}>
       <CustomDropDown
         data={data}
         onChange={handleChangeNetwork}

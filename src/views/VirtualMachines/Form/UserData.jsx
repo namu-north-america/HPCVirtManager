@@ -4,7 +4,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllSSHKeysAction } from '../../../store/actions/sshKeyActions';
 
-export default function UserData({ data, handleChange }) {
+export default function UserData({ data, handleChange, ...rest }) {
   const dispatch = useDispatch();
   const { sshKeys } = useSelector((state) => state.sshKeys);
 
@@ -13,7 +13,7 @@ export default function UserData({ data, handleChange }) {
   }, [dispatch]);
 
   return (
-    <CustomForm>
+    <CustomForm {...rest}>
       <CustomInput
         data={data}
         onChange={handleChange}

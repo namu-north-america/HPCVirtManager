@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../../../shared/AllInputs";
 import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 import { confirmPopup } from "primereact/confirmpopup";
-import {cacheOptions} from "../../../constants";
+import { cacheOptions } from "../../../constants";
 
 export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   const { storageClassesDropdown, accessModeDropdown, disksDropdown, images } = useSelector((state) => state.project);
@@ -45,8 +45,6 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
     { name: "GCS", value: "gcs" },
     { name: "S3", value: "s3" },
   ];
-
-  
 
   const filteredDiskes = useMemo(
     () => disksDropdown.filter((item) => item.namespace === data?.namespace).map((item) => item?.name),
