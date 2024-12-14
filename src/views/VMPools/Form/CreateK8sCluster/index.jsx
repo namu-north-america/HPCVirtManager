@@ -160,7 +160,7 @@ export default function CreateK8sCluster() {
                               "spec": {
                                   "domain": {
                                       "cpu": {
-                                          "cores": 2
+                                          "cores": +formData.controlPlane.cores
                                       },
                                       "devices": {
                                           "disks": [
@@ -174,14 +174,14 @@ export default function CreateK8sCluster() {
                                           "networkInterfaceMultiqueue": true
                                       },
                                       "memory": {
-                                          "guest": "4Gi"
+                                          "guest": formData.controlPlane.memory+formData.controlPlane.memoryType
                                       }
                                   },
                                   "evictionStrategy": "External",
                                   "volumes": [
                                       {
                                           "containerDisk": {
-                                              "image": "quay.io/capk/ubuntu-2004-container-disk:v1.23.10"
+                                              "image": formData.clusterDetails.nodeVMImage
                                           },
                                           "name": "containervolume"
                                       }
@@ -234,7 +234,7 @@ export default function CreateK8sCluster() {
                   "namespace": namespace
               }
           },
-          "replicas": 1,
+          "replicas": formData.controlPlane.workerNodes,
           "version": formData.clusterDetails.k8sVersion
       }
     }
@@ -266,7 +266,7 @@ export default function CreateK8sCluster() {
                               "spec": {
                                   "domain": {
                                       "cpu": {
-                                          "cores": 2
+                                          "cores": +formData.workerNode.cores
                                       },
                                       "devices": {
                                           "disks": [
@@ -280,14 +280,14 @@ export default function CreateK8sCluster() {
                                           "networkInterfaceMultiqueue": true
                                       },
                                       "memory": {
-                                          "guest": "4Gi"
+                                          "guest": formData.workerNode.memory+formData.workerNode.memoryType
                                       }
                                   },
                                   "evictionStrategy": "External",
                                   "volumes": [
                                       {
                                           "containerDisk": {
-                                              "image": "quay.io/capk/ubuntu-2004-container-disk:v1.23.10"
+                                              "image": formData.clusterDetails.nodeVMImage
                                           },
                                           "name": "containervolume"
                                       }
@@ -336,7 +336,7 @@ export default function CreateK8sCluster() {
       },
       "spec": {
           "clusterName": name,
-          "replicas": 1,
+          "replicas": formData.workerNode.workerNodes,
           "selector": {
               "matchLabels": null
           },

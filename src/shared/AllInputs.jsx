@@ -254,14 +254,11 @@ export const CustomSwitch = ({
 export const CustomMemoryInput = ({
   label,
   name,
-  data,
   value,
   onChange,
-
   typeValue,
   typeName,
   onTypeChange,
-
   errorMessage,
   extraClassName,
   required,
@@ -279,41 +276,44 @@ export const CustomMemoryInput = ({
       name={name}
       required={required}
       extraClassName={extraClassName}
-      data={data}
       errorMessage={errorMessage}
     >
       <div className="p-inputgroup flex-1">
+        {/* Input for the memory value */}
         <InputText
           id={name}
           name={name}
-          value={value || data?.[name] || ""}
+          value={value} // Directly bind `value`
           type={type}
-          onChange={(e) =>
-            onChange &&
-            onChange({ ...e, name: e.target.name, value: e.target.value })
-          }
-          className={`input w-full ${inputClass ? inputClass : ""} ${
+          onChange={(e) => onChange && onChange(e.target.value)} // Update the value
+          className={`input w-full ${inputClass || ""} ${
             errorMessage ? "p-invalid" : ""
           }`}
-          placeholder={placeholder || `Enter ${capitalizeCamelCase(name)}`}
+          placeholder={placeholder || `Enter ${label}`}
           disabled={disabled}
           {...props}
         />
+
+        {/* Dropdown for memory type */}
         <Dropdown
           id={typeName}
           name={typeName}
-          value={typeValue || data?.[typeName]}
-          onChange={(e) =>
-            onTypeChange &&
-            onTypeChange({ ...e, name: e.target.name, value: e.value })
-          }
+          value={typeValue} // Bind `typeValue` directly
+          onChange={(e) => onTypeChange && onTypeChange(e.value)} // Update the memory type
           className="custom-dropdown w-3"
-          options={["Pi", "Ti", "Gi", "Mi"]}
+          options={[
+            { label: "Pi", value: "Pi" },
+            { label: "Ti", value: "Ti" },
+            { label: "Gi", value: "Gi" },
+            { label: "Mi", value: "Mi" },
+          ]}
+          placeholder="Select Memory Type"
         />
       </div>
     </InputLayout>
   );
 };
+
 
 export const CustomPasswordInput = ({
   label,

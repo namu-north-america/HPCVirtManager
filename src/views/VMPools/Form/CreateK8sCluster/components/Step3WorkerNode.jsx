@@ -58,9 +58,9 @@ export default function Step3WorkerNode({ data, onChange }) {
           <CustomMemoryInput
             label="Memory *"
             value={data.memory}
-            memoryType={data.memoryType}
-            onChangeSize={(value) => handleChange('memory', value)}
-            onChangeType={(value) => handleChange('memoryType', value)}
+            typeValue={data.memoryType}
+            onChange={(value) => handleChange('memory', value)}
+            onTypeChange={(value) => handleChange('memoryType', value)}
             keyfilter="pint"
             required
           />
