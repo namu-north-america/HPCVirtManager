@@ -540,7 +540,7 @@ export default function ViewVM() {
           </TabPanel>
           <TabPanel header="Disk">
             <Grid>
-              <Col size={12} extraClassNames="text-right">
+              <Col size={12}>
                 <HotPlugModal
                   title="Add New Storage Disk"
                   isOpen={isOpenAddNewStorageModal}
@@ -549,13 +549,11 @@ export default function ViewVM() {
                   name={name}
                   namespace={namespace}
                 />
-                <Col size={6} extraClassNames="p-2">
-                  <Button
-                    label="Add New Storage Disk"
-                    icon="pi pi-plus"
-                    onClick={() => setIsOpenAddNewStorageModal(true)}
-                  />
-                </Col>
+                <Button
+                  label="Add New Storage Disk"
+                  icon="pi pi-plus"
+                  onClick={() => setIsOpenAddNewStorageModal(true)}
+                />
               </Col>
               {volumes &&
                 volumes?.map((item, i) => (
@@ -576,7 +574,7 @@ export default function ViewVM() {
           </TabPanel>
           <TabPanel header="Network Interfaces">
             <Grid>
-              <Col size={12} extraClassNames="text-right">
+              <Col size={12}>
                 <NetworkHotPlugModal
                   title="Add New Network Interface"
                   isOpen={isOpenAddNewStorageModal}
@@ -587,13 +585,11 @@ export default function ViewVM() {
                   name={name}
                   namespace={namespace}
                 />
-                <Col size={6} extraClassNames="p-2">
-                  <Button
-                    label="Add New Network Interface"
-                    icon="pi pi-plus"
-                    onClick={() => setIsOpenAddNewStorageModal(true)}
-                  />
-                </Col>
+                <Button
+                  label="Add New Network Interface"
+                  icon="pi pi-plus"
+                  onClick={() => setIsOpenAddNewStorageModal(true)}
+                />
               </Col>
               {data?.networks?.map((item) => (
                 <Col size={4}>
