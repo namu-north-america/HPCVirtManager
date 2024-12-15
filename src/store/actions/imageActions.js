@@ -43,7 +43,7 @@ const onAddImageAction =
       });
 
       let payload = {
-        apiVersion: "kubevirt-manager.io/v1",
+        apiVersion: "cocktail-virt.io/v1",
         kind: "Image",
         metadata: {
           name: data?.name,
