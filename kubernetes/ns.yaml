@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: hpc-virt-manager
+  name: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0

@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hpc-virt-manager
-  namespace: hpc-virt-manager
+  name: cocktail-virt
+  namespace: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 spec:
   type: ClusterIP
   selector:
-    app: hpc-virt-manager
+    app: cocktail-virt
   ports:
     - protocol: TCP
       port: 8080

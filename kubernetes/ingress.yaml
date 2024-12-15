@@ -1,11 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: hpc-virt-manager
-  namespace: hpc-virt-manager
+  name: cocktail-virt
+  namespace: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
   annotations:
     nginx.org/location-snippets: |
       proxy_set_header Upgrade $http_upgrade;
@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: hpc-virt-manager
+                name: cocktail-virt
                 port:
                   number: 8080

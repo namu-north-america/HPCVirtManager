@@ -21,13 +21,13 @@ const endPoints = {
     "/apis/scheduling.k8s.io/v1/priorityclasses?labelSelector=kubevirt-manager.io/managed%3Dtrue",
   STORAGE_CLASSES: "/apis/storage.k8s.io/v1/storageclasses",
   STORAGE_DISKS: "/apis/cdi.kubevirt.io/v1beta1/datavolumes",
-  IMAGES: "/apis/kubevirt-manager.io/v1/images",
+  IMAGES: "/apis/cocktail-virt.io/v1/images",
   ADD_IMAGE: ({ namespace }) =>
-    `/apis/hpc-virt-manager.io/v1/namespaces/${namespace}/images`,
+    `/apis/cocktail-virt.io/v1/namespaces/${namespace}/images`,
   UPDATE_IMAGE: ({ namespace, name }) =>
-    `/apis/hpc-virt-manager.io/v1/namespaces/${namespace}/images/${name}`,
+    `/apis/cocktail-virt.io/v1/namespaces/${namespace}/images/${name}`,
   DELETE_IMAGE: ({ namespace, name }) =>
-    `/apis/hpc-virt-manager.io/v1/namespaces/${namespace}/images/${name}`,
+    `/apis/cocktail-virt.io/v1/namespaces/${namespace}/images/${name}`,
   GET_STORAGE_DISK: ({ namespace, name }) =>
     `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`,
   STORAGE_DISK_RESIZE: ({ namespace, name }) =>

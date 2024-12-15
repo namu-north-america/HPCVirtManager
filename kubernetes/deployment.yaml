@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hpc-virt-manager
-  namespace: hpc-virt-manager
+  name: cocktail-virt
+  namespace: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 spec:
   selector:
     matchLabels:
-      app: hpc-virt-manager
-      hpc-virt-manager.io/version: 1.0.0
+      app: cocktail-virt
+      cocktail-virt.io/version: 1.0.0
   replicas: 1
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: hpc-virt-manager
-        hpc-virt-manager.io/version: 1.0.0
+        app: cocktail-virt
+        cocktail-virt.io/version: 1.0.0
     spec:
       containers:
-        - name: hpcvirtmanager
-          image: puru2024/namutech:1.0.0
+        - name: cocktail-virt
+          image: namunorthamerica/hpc-virt:0.1.1
           imagePullPolicy: Always
           ports:
             - name: http
@@ -43,7 +43,7 @@ spec:
               mountPath: /etc/nginx/secret.d/
             - name: prometheus-config
               mountPath: /etc/nginx/location.d/
-      serviceAccountName: hpc-virt-manager
+      serviceAccountName: cocktail-virt
       restartPolicy: Always
       volumes:
         - name: cache-volume

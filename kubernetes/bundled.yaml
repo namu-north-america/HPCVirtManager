@@ -2,28 +2,28 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: hpc-virt-manager
+  name: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: hpc-virt-manager
-  namespace: hpc-virt-manager
+  name: cocktail-virt
+  namespace: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: images.hpc-virt-manager.io
+  name: images.cocktail-virt.io
 spec:
-  group: hpc-virt-manager.io
+  group: cocktail-virt.io
   versions:
     - name: v1
       served: true
@@ -101,7 +101,7 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: hpc-virt-manager
+  name: cocktail-virt
 rules:
   - apiGroups: [""]
     resources: ["nodes", "namespaces"]
@@ -172,7 +172,7 @@ rules:
   - apiGroups: ["addons.cluster.x-k8s.io"]
     resources: ["clusterresourcesets"]
     verbs: ["*"]
-  - apiGroups: ["hpc-virt-manager.io"]
+  - apiGroups: ["cocktail-virt.io"]
     resources: ["images"]
     verbs: ["*"]
 
@@ -180,24 +180,24 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: hpc-virt-manager
+  name: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: hpc-virt-manager
+  name: cocktail-virt
 subjects:
   - kind: ServiceAccount
-    name: hpc-virt-manager
-    namespace: hpc-virt-manager
+    name: cocktail-virt
+    namespace: cocktail-virt
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: hpc-virt-manager-kccm
+  name: cocktail-virt-kccm
 rules:
   - apiGroups: ["kubevirt.io"]
     resources: ["virtualmachines"]
@@ -216,24 +216,24 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: hpc-virt-manager-kccm
+  name: cocktail-virt-kccm
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: hpc-virt-manager-kccm
+  name: cocktail-virt-kccm
 subjects:
   - kind: ServiceAccount
-    name: hpc-virt-manager
-    namespace: hpc-virt-manager
+    name: cocktail-virt
+    namespace: cocktail-virt
 
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: hpc-virt-manager-cas-workload
+  name: cocktail-virt-cas-workload
 rules:
   - apiGroups:
       - ""
@@ -334,7 +334,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: hpc-virt-manager-cas-management
+  name: cocktail-virt-cas-management
 rules:
   - apiGroups:
       - cluster.x-k8s.io
@@ -368,9 +368,9 @@ description: Priority class for VMs which should not be preemtited.
 metadata:
   name: vm-standard
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
-    hpc-virt-manager.io/managed: "true"
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/managed: "true"
 preemptionPolicy: Never
 value: 999999999
 
@@ -381,9 +381,9 @@ description: Priority class for VMs which are allowed to be preemtited.
 metadata:
   name: vm-preemptible
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
-    hpc-virt-manager.io/managed: "true"
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/managed: "true"
 preemptionPolicy: PreemptLowerPriority
 value: 1000000
 
@@ -391,28 +391,28 @@ value: 1000000
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hpc-virt-manager
-  namespace: hpc-virt-manager
+  name: cocktail-virt
+  namespace: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 spec:
   selector:
     matchLabels:
-      app: hpc-virt-manager
-      hpc-virt-manager.io/version: 1.0.0
+      app: cocktail-virt
+      cocktail-virt.io/version: 1.0.0
   replicas: 1
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: hpc-virt-manager
-        hpc-virt-manager.io/version: 1.0.0
+        app: cocktail-virt
+        cocktail-virt.io/version: 1.0.0
     spec:
       containers:
-        - name: hpcvirtmanager
-          image: puru2024/namutech:1.0.0
+        - name: cocktail-virt
+          image: namunorthamerica/hpc-virt:0.1.1
           imagePullPolicy: Always
           resources:
           ports:
@@ -434,7 +434,7 @@ spec:
               mountPath: /etc/nginx/secret.d/
             - name: prometheus-config
               mountPath: /etc/nginx/location.d/
-      serviceAccountName: hpc-virt-manager
+      serviceAccountName: cocktail-virt
       restartPolicy: Always
       volumes:
         - name: cache-volume
@@ -458,15 +458,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hpc-virt-manager
-  namespace: hpc-virt-manager
+  name: cocktail-virt
+  namespace: cocktail-virt
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
 spec:
   type: ClusterIP
   selector:
-    app: hpc-virt-manager
+    app: cocktail-virt
   ports:
     - protocol: TCP
       port: 8080

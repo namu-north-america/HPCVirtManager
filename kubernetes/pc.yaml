@@ -4,9 +4,9 @@ description: Priority class for VMs which should not be preemtited.
 metadata:
   name: vm-standard
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
-    hpc-virt-manager.io/managed: "true"
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/managed: "true"
 preemptionPolicy: Never
 value: 999999999
 
@@ -17,8 +17,8 @@ description: Priority class for VMs which are allowed to be preemtited.
 metadata:
   name: vm-preemptible
   labels:
-    app: hpc-virt-manager
-    hpc-virt-manager.io/version: 1.0.0
-    hpc-virt-manager.io/managed: "true"
+    app: cocktail-virt
+    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/managed: "true"
 preemptionPolicy: PreemptLowerPriority
 value: 1000000
