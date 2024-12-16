@@ -3,10 +3,20 @@ import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import Grid, { Col } from '../../../../../shared/Grid';
 import { useSelector } from "react-redux";
+import { Dropdown } from "primereact/dropdown";
 import { CustomDropDown, CustomMemoryInput, CustomInput } from '../../../../../shared/AllInputs';
 
 export default function Step2ControlPlane({ data, onChange }) {
   const { storageClassesDropdown, accessModeDropdown } = useSelector((state) => state.project);
+
+  const storageDiskOption = [
+    { label: "Data Volume", value: "dataVolume" },
+  ];
+
+  const typeDropdown = [
+    { label: "HTTP", value: "https" },
+    { label: "HTTPS", value: "https" },
+  ];
 
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
@@ -75,11 +85,16 @@ export default function Step2ControlPlane({ data, onChange }) {
                 <Grid>
                   <Col size={12}>
                     <div className="field">
-                      <label className="block mb-2">Storage Disk Option</label>
-                      <InputText
-                        value="Create a new storage disk"
+                      <label htmlFor="storageDiskOption" className="block mb-2">
+                        Storage Disk Option *
+                      </label>
+                      <Dropdown
+                        id="storageDiskOption"
+                        value={data.storageDiskOption}
+                        onChange={(e) => handleChange("storageDiskOption", e.value)}
+                        options={storageDiskOption}
                         className="w-full"
-                        disabled
+                        required
                       />
                     </div>
                   </Col>
@@ -88,9 +103,9 @@ export default function Step2ControlPlane({ data, onChange }) {
                     <CustomMemoryInput
                       label="Size *"
                       value={disk.size}
-                      memoryType={disk.memoryType}
-                      onChangeSize={(value) => handleDiskChange(diskIndex, 'size', value)}
-                      onChangeType={(value) => handleDiskChange(diskIndex, 'memoryType', value)}
+                      typeValue={disk.memoryType}
+                      onChange={(value) => handleDiskChange(diskIndex, 'size', value)}
+                      onTypeChange={(value) => handleDiskChange(diskIndex, 'memoryType', value)}
                       required
                     />
                   </Col>
@@ -115,13 +130,19 @@ export default function Step2ControlPlane({ data, onChange }) {
                     />
                   </Col>
 
-                  <Col size={12}>
+                  <Col size={6}>
                     <div className="field">
-                      <label className="block mb-2">Type</label>
-                      <InputText
-                        value="HTTP(s)"
+                      <label htmlFor="type" className="block mb-2">
+                        Type *
+                      </label>
+                      <Dropdown
+                        id="type"
+                        value={data.type}
+                        onChange={(e) => handleChange("type", e.value)}
+                        options={typeDropdown}
+                        placeholder='Select'
                         className="w-full"
-                        disabled
+                        required
                       />
                     </div>
                   </Col>
