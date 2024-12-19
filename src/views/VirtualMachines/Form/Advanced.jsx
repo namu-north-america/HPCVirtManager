@@ -128,7 +128,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 disk: "",
                 type: sourceType,
                 url: url,
-                cache: deviceDisk?.cache,
               };
             });
 
@@ -236,9 +235,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 },
               },
             };
-            // if (!device.disk.bus) {
-            //   device.disk.bus = currentDevice.disk.bus;
-            // }
           } else {
             const image = project.images.find((item) => item.name === disk.image);
 
@@ -289,16 +285,11 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           }
 
           let _obj = {
-            cache: disk?.cache,
             diskType: disk?.diskType,
             busType: disk?.busType,
             diskName: `disk${i + 1}`,
             volumeName: diskName,
           };
-
-          if (disk?.cache) {
-            _obj.cache = disk?.cache;
-          }
 
           return _obj;
         } else {

@@ -85,7 +85,6 @@ export default function AddVirtualMachineForm({ onClose }) {
       disk: "",
       type: "blank",
       url: "",
-      cache: "",
     },
   ]);
 
@@ -189,12 +188,8 @@ export default function AddVirtualMachineForm({ onClose }) {
         ignore = ["disk", "url"];
       }
 
-      // Always validate busType and cache
+      // Always validate busType
       const requiredFields = ["diskType", "createType", "busType"];
-      // Only validate cache if it's not "Automatic" (false)
-      if (disk.cache !== false && disk.cache !== "false") {
-        requiredFields.push("cache");
-      }
 
       const missingRequired = requiredFields.filter((field) => !disk[field] && !ignore.includes(field));
 
@@ -245,7 +240,6 @@ export default function AddVirtualMachineForm({ onClose }) {
         disk: "",
         type: "blank",
         url: "",
-        cache: "",
       },
     ]);
   };

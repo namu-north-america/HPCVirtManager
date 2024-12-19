@@ -3,7 +3,6 @@ import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../.
 import { useSelector } from "react-redux";
 import formValidation from "../../../utils/validations";
 import { confirmPopup } from "primereact/confirmpopup";
-import { cacheOptions } from "../../../constants";
 
 export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
   const { storageClassesDropdown, accessModeDropdown, disksDropdown, images } = useSelector((state) => state.project);
@@ -11,8 +10,8 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
 
   const handleChangeDisk = ({ name, value }) => {
     let formErrors = formValidation(name, value, disk);
-    // Reset errors when changing create type or when cache is "Automatic"
-    if (name === "createType" || (name === "cache" && (value === false || value === "false"))) {
+    
+    if (name === "createType") {
       formErrors = {};
     }
     setDisk((prev) => {
@@ -199,15 +198,6 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
           />
         </CustomForm>
       )}
-      <CustomDropDown
-        onChange={handleChangeDisk}
-        data={disk}
-        name="cache"
-        value={useVmTemplate ? "automatic" : ""}
-        options={cacheOptions}
-        col={12}
-        disabled={useVmTemplate}
-      />
       {index ? (
         <div className="flex justify-content-end">
           <span className="mr-3 cursor-pointer" onClick={onDelete}>

@@ -1,16 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getNamespacesAction,
-  getNodesAction,
-  getPriorityClassAction,
-} from "../../../store/actions/projectActions";
+import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Stepper } from "primereact/stepper";
 import { StepperPanel } from "primereact/stepperpanel";
-import CustomButton, {
-  Buttonlayout,
-  CustomButtonOutlined,
-} from "../../../shared/CustomButton";
+import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
 import Grid, { Col } from "../../../shared/Grid";
 import BasicDetails from "./BasicDetails";
 import Network from "./Network";
@@ -23,17 +16,12 @@ import CustomCard from "../../../shared/CustomCard";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import UserData from "./UserData";
-import {
-  getDisksAction,
-  getStorageClassesAction,
-} from "../../../store/actions/storageActions";
+import { getDisksAction, getStorageClassesAction } from "../../../store/actions/storageActions";
 
 export default function AddVirtualMachineForm({ onClose }) {
   const stepperRef = useRef(null);
   const dispatch = useDispatch();
-  const { priorityClassesDropdown, images } = useSelector(
-    (state) => state.project
-  );
+  const { priorityClassesDropdown, images } = useSelector((state) => state.project);
 
   useEffect(() => {
     dispatch(getNamespacesAction());
@@ -79,12 +67,10 @@ export default function AddVirtualMachineForm({ onClose }) {
       size: "",
       storageClass: "",
       accessMode: "",
-
       image: "",
       disk: "",
       type: "blank",
       url: "",
-      cache: "",
     },
   ]);
 
@@ -228,11 +214,7 @@ export default function AddVirtualMachineForm({ onClose }) {
             </Col>
           </Grid>
           <Buttonlayout>
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={onBasicDetailsNext}
-            />
+            <CustomButton label="Next" icon="pi pi-arrow-right" onClick={onBasicDetailsNext} />
           </Buttonlayout>
         </StepperPanel>
         <StepperPanel header="Storage">
@@ -240,13 +222,7 @@ export default function AddVirtualMachineForm({ onClose }) {
             <Col>
               {disks.map((item, i) => (
                 <CustomCard key={i}>
-                  <Storage
-                    data={data}
-                    disk={item}
-                    setDisk={setDiskes}
-                    index={i}
-                    onRemoveDisk={onRemoveDisk}
-                  />
+                  <Storage data={data} disk={item} setDisk={setDiskes} index={i} onRemoveDisk={onRemoveDisk} />
                 </CustomCard>
               ))}
               <span onClick={onAddMoreDisk} className="ml-2 cursor-pointer">
@@ -261,11 +237,7 @@ export default function AddVirtualMachineForm({ onClose }) {
               icon="pi pi-arrow-left"
               onClick={() => stepperRef.current.prevCallback()}
             />
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={onStorageNext}
-            />
+            <CustomButton label="Next" icon="pi pi-arrow-right" onClick={onStorageNext} />
           </Buttonlayout>
         </StepperPanel>
         <StepperPanel header="Network">
@@ -283,11 +255,7 @@ export default function AddVirtualMachineForm({ onClose }) {
               icon="pi pi-arrow-left"
               onClick={() => stepperRef.current.prevCallback()}
             />
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={() => stepperRef.current.nextCallback()}
-            />
+            <CustomButton label="Next" icon="pi pi-arrow-right" onClick={() => stepperRef.current.nextCallback()} />
           </Buttonlayout>
         </StepperPanel>
         {/* <StepperPanel header="Advanced">
@@ -327,11 +295,7 @@ export default function AddVirtualMachineForm({ onClose }) {
               icon="pi pi-arrow-left"
               onClick={() => stepperRef.current.prevCallback()}
             />
-            <CustomButton
-              label="Next"
-              icon="pi pi-arrow-right"
-              onClick={onUserDetailsNext}
-            />
+            <CustomButton label="Next" icon="pi pi-arrow-right" onClick={onUserDetailsNext} />
           </Buttonlayout>
         </StepperPanel>
         <StepperPanel header="Review">
