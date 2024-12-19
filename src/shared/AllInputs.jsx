@@ -302,7 +302,8 @@ export const CustomMemoryInput = ({
         <Dropdown
           id={typeName}
           name={typeName}
-          value={typeValue || data?.[typeName]}
+          value="Gi"
+          disabled
           onChange={(e) =>
             onTypeChange &&
             onTypeChange({ ...e, name: e.target.name, value: e.value })

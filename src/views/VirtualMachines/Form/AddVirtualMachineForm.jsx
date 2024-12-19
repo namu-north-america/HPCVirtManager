@@ -56,7 +56,6 @@ export default function AddVirtualMachineForm({ onClose }) {
   }, [dispatch]);
 
   const [data, setData] = useState({
-    node: "",
     name: "",
     namespace: "",
     sockets: "",
@@ -64,7 +63,6 @@ export default function AddVirtualMachineForm({ onClose }) {
     threads: "",
     memory: "",
     memoryType: "Gi",
-    priorityClass: "",
     storage1: "",
     networkType: "podNetwork",
     bindingMode: "bridge",

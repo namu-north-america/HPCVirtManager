@@ -53,7 +53,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           cores: yamlDataObject.spec?.template?.spec?.domain?.cpu?.cores || data.cores,
           sockets: yamlDataObject.spec?.template?.spec?.domain?.cpu?.sockets || data.sockets,
           threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
-          node: yamlDataObject.spec.template.spec.nodeSelector["kubernetes.io/hostname"],
           advanced: yamlDataObject,
         };
 
@@ -169,7 +168,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
       objectData.spec.template.spec.nodeSelector["kubernetes.io/hostname"] = data.node;
     }
 
-    console.log("data _ objects_____", objectData);
     objectData.spec.template.spec.networks = _getNetworks(networks);
 
     if (disks.length) {
