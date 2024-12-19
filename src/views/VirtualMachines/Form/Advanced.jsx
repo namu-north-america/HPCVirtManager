@@ -121,7 +121,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 diskType: "disk",
                 busType: deviceDisk?.disk?.bus,
                 memoryType: storageParts.unit,
-                size: storageParts.size,
+                size: storageParts.size || "",
                 storageClass: storageClass,
                 accessMode: accessModes || "",
                 image: image ? image.name : "",
@@ -223,7 +223,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                   resources: {
                     ...item.spec?.pvc?.resources,
                     requests: {
-                      storage: storage || null,
+                      storage: storage || "",
                     },
                   },
                   storageClassName: storageClass || null,
@@ -262,7 +262,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                   accessModes: [disk.accessMode],
                   resources: {
                     requests: {
-                      storage: `${disk.size}${disk?.memoryType}`,
+                      storage: `${disk.size ? disk.size : ""}${"Gi"}`,
                     },
                   },
                 },
