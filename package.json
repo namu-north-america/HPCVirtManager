@@ -1,6 +1,6 @@
 {
   "name": "cocktail-virtualization",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
