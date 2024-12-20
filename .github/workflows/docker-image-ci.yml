@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      GIT_SSL_NO_VERIFY: true # Disable ssl verification
+
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
