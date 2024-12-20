@@ -293,22 +293,6 @@ export const CustomMemoryInput = ({
           disabled={disabled}
           {...props}
         />
-
-        {/* Dropdown for memory type */}
-        <Dropdown
-          id={typeName}
-          name={typeName}
-          value={typeValue} // Bind `typeValue` directly
-          onChange={(e) => onTypeChange && onTypeChange(e.value)} // Update the memory type
-          className="custom-dropdown w-3"
-          options={[
-            { label: "Pi", value: "Pi" },
-            { label: "Ti", value: "Ti" },
-            { label: "Gi", value: "Gi" },
-            { label: "Mi", value: "Mi" },
-          ]}
-          placeholder="Select Memory Type"
-        />
       </div>
     </InputLayout>
   );

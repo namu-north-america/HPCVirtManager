@@ -11,7 +11,7 @@ import {  useSelector } from "react-redux";
 export default function BasicDetails({ data, handleChange, ...rest }) {
   
   const [namespace,setNamespace]= useState([])
-  const { namespacesDropdown, priorityClassesDropdown, nodesDropdown } =
+  const { namespacesDropdown } =
     useSelector((state) => state.project);
   const { profile,userNamespace } = useSelector((state) => state.user);
   const { useVmTemplate } = useSelector(state => state.vm);
@@ -32,14 +32,6 @@ export default function BasicDetails({ data, handleChange, ...rest }) {
     
   return (
     <CustomForm {...rest}>
-      <CustomDropDown
-        data={data}
-        onChange={handleChange}
-        name="node"
-        options={nodesDropdown}
-        required
-        col={12}
-      />
       <CustomInput
         data={data}
         onChange={handleChange}
@@ -88,15 +80,7 @@ export default function BasicDetails({ data, handleChange, ...rest }) {
         col={12}
         required
       />
-      <CustomDropDown
-        data={data}
-        onChange={handleChange}
-        name="priorityClass"
-        options={priorityClassesDropdown}
-        col={12}
-        required
-        disabled={useVmTemplate}
-      />
+      
     </CustomForm>
   );
 }
