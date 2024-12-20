@@ -2,6 +2,9 @@ name: Docker Image CI
 
 on:
   push:
+    branches:
+      - "dev"
+      - "main"
     tags:
       - "*"
 
@@ -40,15 +43,15 @@ jobs:
         with:
           clientId: ${{ vars.ARGOCD_USERNAME }}
           clientSecret: ${{ secrets.ARGOCD_PASSWORD }}
-          clusterName: 'default'
+          clusterName: ${{ vars.ARGOCD_CLUSTER_NAME }}
           baseUrl: ${{ vars.ARGOCD_SERVER }}
-          name: my-service
+          name: cocktail-virt
           namespace: cocktail-virt
           project: default
-          path: kubernetes/template
-          valuesFile: kubernetes/template/bundled.yaml
+          path: kubernetes
+          valuesFile: kubernetes/values.yaml
           tokens: |
-            TAG_NAME: ${{steps.package-version.outputs.current-version}}
+            TAG: ${{steps.package-version.outputs.current-version}}
             DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{steps.package-version.outputs.current-version}}
           labels: |
             env: prod

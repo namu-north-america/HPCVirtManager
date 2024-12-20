@@ -5,7 +5,7 @@ metadata:
   namespace: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 spec:
   type: ClusterIP
   selector:

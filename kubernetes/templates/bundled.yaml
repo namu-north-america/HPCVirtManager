@@ -5,7 +5,7 @@ metadata:
   name: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 
 ---
 apiVersion: v1
@@ -15,7 +15,7 @@ metadata:
   namespace: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 
 ---
 apiVersion: apiextensions.k8s.io/v1
@@ -183,7 +183,7 @@ metadata:
   name: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -219,7 +219,7 @@ metadata:
   name: cocktail-virt-kccm
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -369,7 +369,7 @@ metadata:
   name: vm-standard
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
     cocktail-virt.io/managed: "true"
 preemptionPolicy: Never
 value: 999999999
@@ -382,7 +382,7 @@ metadata:
   name: vm-preemptible
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
     cocktail-virt.io/managed: "true"
 preemptionPolicy: PreemptLowerPriority
 value: 1000000
@@ -395,12 +395,12 @@ metadata:
   namespace: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 spec:
   selector:
     matchLabels:
       app: cocktail-virt
-      cocktail-virt.io/version: 1.0.0
+      cocktail-virt.io/version: { { .Values.tag } }
   replicas: 1
   strategy:
     type: Recreate
@@ -408,7 +408,7 @@ spec:
     metadata:
       labels:
         app: cocktail-virt
-        cocktail-virt.io/version: 1.0.0
+        cocktail-virt.io/version: { { .Values.tag } }
     spec:
       containers:
         - name: cocktail-virt
@@ -462,7 +462,7 @@ metadata:
   namespace: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
 spec:
   type: ClusterIP
   selector:

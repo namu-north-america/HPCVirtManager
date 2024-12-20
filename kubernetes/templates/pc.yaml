@@ -5,7 +5,7 @@ metadata:
   name: vm-standard
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
     cocktail-virt.io/managed: "true"
 preemptionPolicy: Never
 value: 999999999
@@ -18,7 +18,7 @@ metadata:
   name: vm-preemptible
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: { { .Values.tag } }
     cocktail-virt.io/managed: "true"
 preemptionPolicy: PreemptLowerPriority
 value: 1000000
