@@ -34,3 +34,23 @@ jobs:
           context: .
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{steps.package-version.outputs.current-version}}
+
+      - name: Deploy to ArgoCD
+        uses: ejhayes/action-argocd-deploy@releases/v1
+        with:
+          clientId: ${{ vars.ARGOCD_USERNAME }}
+          clientSecret: ${{ secrets.ARGOCD_PASSWORD }}
+          clusterName: 'default'
+          baseUrl: ${{ vars.ARGOCD_SERVER }}
+          name: my-service
+          namespace: cocktail-virt
+          project: default
+          valuesFile: ./template/bundled.yaml
+          tokens: |
+            TAG_NAME: ${{steps.package-version.outputs.current-version}}
+            DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{steps.package-version.outputs.current-version}}
+          labels: |
+            env: prod
+          info: |
+            rev: ${{ github.ref }}
+            sha: ${{ github.sha }}
