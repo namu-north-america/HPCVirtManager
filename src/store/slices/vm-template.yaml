@@ -79,5 +79,3 @@ spec:
       #           secretName:
       #       propagationMethod:
       #         noCloud: {}
-      nodeSelector:
-        kubernetes.io/hostname: worker

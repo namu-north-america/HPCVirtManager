@@ -53,7 +53,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           cores: yamlDataObject.spec?.template?.spec?.domain?.cpu?.cores || data.cores,
           sockets: yamlDataObject.spec?.template?.spec?.domain?.cpu?.sockets || data.sockets,
           threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
-          node: yamlDataObject.spec.template.spec.nodeSelector["kubernetes.io/hostname"],
           advanced: yamlDataObject,
         };
 
@@ -122,14 +121,13 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 diskType: "disk",
                 busType: deviceDisk?.disk?.bus,
                 memoryType: storageParts.unit,
-                size: storageParts.size,
+                size: storageParts.size || "",
                 storageClass: storageClass,
                 accessMode: accessModes || "",
                 image: image ? image.name : "",
                 disk: "",
                 type: sourceType,
                 url: url,
-                cache: deviceDisk?.cache,
               };
             });
 
@@ -169,7 +167,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
       objectData.spec.template.spec.nodeSelector["kubernetes.io/hostname"] = data.node;
     }
 
-    console.log("data _ objects_____", objectData);
     objectData.spec.template.spec.networks = _getNetworks(networks);
 
     if (disks.length) {
@@ -225,7 +222,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                   resources: {
                     ...item.spec?.pvc?.resources,
                     requests: {
-                      storage: storage || null,
+                      storage: storage || "",
                     },
                   },
                   storageClassName: storageClass || null,
@@ -238,9 +235,6 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 },
               },
             };
-            // if (!device.disk.bus) {
-            //   device.disk.bus = currentDevice.disk.bus;
-            // }
           } else {
             const image = project.images.find((item) => item.name === disk.image);
 
@@ -264,7 +258,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                   accessModes: [disk.accessMode],
                   resources: {
                     requests: {
-                      storage: `${disk.size}${disk?.memoryType}`,
+                      storage: `${disk.size ? disk.size : ""}${"Gi"}`,
                     },
                   },
                 },
@@ -291,16 +285,11 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           }
 
           let _obj = {
-            cache: disk?.cache,
             diskType: disk?.diskType,
             busType: disk?.busType,
             diskName: `disk${i + 1}`,
             volumeName: diskName,
           };
-
-          if (disk?.cache) {
-            _obj.cache = disk?.cache;
-          }
 
           return _obj;
         } else {
