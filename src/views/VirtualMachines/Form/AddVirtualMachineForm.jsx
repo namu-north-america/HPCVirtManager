@@ -318,10 +318,12 @@ export default function AddVirtualMachineForm({ onClose }) {
                 />
               </>
             ))}
-            <button className="add-disk-button" onClick={onAddMoreDisk}>
-              <i className="pi pi-plus-circle"></i>
-              Add More Disk
-            </button>
+            {!useVmTemplate && (
+              <button className="add-disk-button" onClick={onAddMoreDisk}>
+                <i className="pi pi-plus-circle"></i>
+                Add More Disk
+              </button>
+            )}
             <Buttonlayout>
               <CustomButtonOutlined label="Previous" icon="pi pi-arrow-left" onClick={() => onStepChange(0)} />
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(2)} />
@@ -334,7 +336,7 @@ export default function AddVirtualMachineForm({ onClose }) {
             {networks.map((network, index) => {
               return <Network data={network} setNetworks={setNetworks} index={index} onRemove={onRemoveNetwork} />;
             })}
-            {networks.length < 2 && (
+            {networks.length < 2 && !useVmTemplate && (
               <button className="add-disk-button" onClick={onAddMoreNetwork}>
                 <i className="pi pi-plus-circle"></i>
                 Add More Network

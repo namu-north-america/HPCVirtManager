@@ -10,7 +10,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
 
   const handleChangeDisk = ({ name, value }) => {
     let formErrors = formValidation(name, value, disk);
-    
+
     if (name === "createType") {
       formErrors = {};
     }
@@ -193,6 +193,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
             onChange={handleChangeDisk}
             name="image"
             options={imagesDropdown}
+            disabled={useVmTemplate}
             required
             col={12}
           />
