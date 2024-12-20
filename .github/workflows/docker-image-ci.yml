@@ -45,7 +45,8 @@ jobs:
           name: my-service
           namespace: cocktail-virt
           project: default
-          valuesFile: ./template/bundled.yaml
+          path: kubernetes/template
+          valuesFile: kubernetes/template/bundled.yaml
           tokens: |
             TAG_NAME: ${{steps.package-version.outputs.current-version}}
             DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{steps.package-version.outputs.current-version}}
