@@ -6,7 +6,10 @@ import { CustomButtonOutlined, CustomSplitButton } from "../../shared/CustomButt
 import CustomCard, { CustomCardField } from "../../shared/CustomCard";
 import Grid, { Col } from "../../shared/Grid";
 import { useDispatch, useSelector } from "react-redux";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import {
+  getVmEvents,
   getVolumesAction,
   onChangeVmStatusAction,
   onDeleteVMAction,
@@ -108,6 +111,8 @@ export default function ViewVM() {
         storage: { used: 0, total: 0 },
       }
   );
+
+  const { vmEvents } = useSelector((state) => state.reporting);
 
   useEffect(() => {
     if (name) {
@@ -395,7 +400,9 @@ export default function ViewVM() {
          
           if(event.index === 3) {
             dispatch(getNetworksAction());
-            console.log('index of the tab is_____', event);
+          }
+          if(event.index === 4) {
+            dispatch(getVmEvents(namespace, name))
           }
           return true
         }}>
@@ -605,6 +612,36 @@ export default function ViewVM() {
                 </Col>
               ))}
             </Grid>
+          </TabPanel>
+          <TabPanel header="Events">
+            <CustomCard title="Events">
+              <DataTable
+                value={[...vmEvents]}
+                tableStyle={{ minWidth: "50rem" }}
+              >
+                <Column
+                  field="lastSeen"
+                  header="Last Seen"
+                  
+                ></Column>
+                <Column 
+                  field="type" 
+                  header="Type"
+                ></Column>
+
+                <Column field="reason" header="Reason"></Column>
+                <Column field="message" header="Message"></Column>
+                {/* <Column
+                  field="targetNodeAddress"
+                  header="Target Address"
+                ></Column>
+                <Column
+                  field="time"
+                  header="Created"
+                  // body={timeTemplate}
+                ></Column> */}
+              </DataTable>
+            </CustomCard>
           </TabPanel>
         </TabView>
       </Page>
