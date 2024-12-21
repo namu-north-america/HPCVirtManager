@@ -4,4 +4,4 @@ metadata:
   name: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: __TAG__
