@@ -2,7 +2,9 @@ import api from "../../services/api";
 import endPoints from "../../services/endPoints";
 import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations, setNetworks } from "../slices/projectSlice";
+import { setVmEvents } from "../slices/reportingSlice";
 import { getVMsAction } from "./projectActions";
+import moment from "moment";
 
 // spec:
 //   dataVolumeTemplates:
@@ -798,6 +800,36 @@ export const getNetworksAction = (next) => async (dispatch) => {
   }
 };
 
+const getVmEvents = (namespace, name, next) => async (dispatch) => {
+  let url = endPoints.GET_VM_EVENTS({ namespace, name });
+  try {
+    const res = await api("get", url);
+    console.log("response for this event___", res);
+    if (res.kind === "EventList") {
+      const events = res.items.map((item) => {
+        const timestamp = item.firstTimestamp;
+        const now = moment();
+        const targetTime = moment.utc(timestamp);
+        const duration = moment.duration(now.diff(targetTime));
+        const hours = duration.hours();
+        const minutes = duration.minutes();
+        // const seconds = duration.seconds();
+        // const seconds = totalSeconds % 60;
+
+        return {
+          type: item.type,
+          message: item.message,
+          reason: item.reason,
+          lastSeen: `${hours > 0 ? `${hours}h `: ''}${minutes > 0 ? `${minutes}m `: ''} ${duration.seconds()}s`,
+          // lastSeen: moment(targetTime).fromNow(true),
+        };
+      });
+      console.log("response for this event___", events);
+      dispatch(setVmEvents(events));
+    }
+  } catch (err) {}
+};
+
 export {
   onAddVMAction,
   onEditVMAction,
@@ -810,4 +842,5 @@ export {
   onMigrateVMAction,
   getLiveMigrationsAction,
   onAddHotPlugVmAction,
+  getVmEvents,
 };
