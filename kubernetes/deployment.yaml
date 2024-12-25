@@ -5,12 +5,12 @@ metadata:
   namespace: cocktail-virt
   labels:
     app: cocktail-virt
-    cocktail-virt.io/version: 1.0.0
+    cocktail-virt.io/version: __TAG__
 spec:
   selector:
     matchLabels:
       app: cocktail-virt
-      cocktail-virt.io/version: 1.0.0
+      cocktail-virt.io/version: __TAG__
   replicas: 1
   strategy:
     type: Recreate
@@ -18,11 +18,11 @@ spec:
     metadata:
       labels:
         app: cocktail-virt
-        cocktail-virt.io/version: 1.0.0
+        cocktail-virt.io/version: __TAG__
     spec:
       containers:
         - name: cocktail-virt
-          image: namunorthamerica/hpc-virt:0.1.3
+          image: namunorthamerica/hpc-virt:__TAG__
           imagePullPolicy: Always
           ports:
             - name: http

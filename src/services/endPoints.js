@@ -65,6 +65,8 @@ const endPoints = {
   `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}`,
   GET_NETWORKS: () => 
     `/apis/k8s.cni.cncf.io/v1/network-attachment-definitions`,
+  GET_VM_EVENTS: ({namespace, name}) =>
+    `/api/v1/namespaces/${namespace}/events?fieldSelector=involvedObject.kind=VirtualMachineInstance,involvedObject.name=${name}&limit=500`,
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",

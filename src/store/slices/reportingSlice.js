@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = {
   loader: false,
   clusterCpuInfo: {},
@@ -14,7 +15,8 @@ const initialState = {
     // Will store stats by VM name
     // Example structure:
     // "vm1": { cpu: {used, total}, memory: {used, total}, storage: {used, total} }
-  }
+  },
+  vmEvents: []
 };
 
 export const reportingSlice = createSlice({
@@ -66,9 +68,24 @@ export const reportingSlice = createSlice({
         state.vmStats[vmName] = { cpu: {}, memory: {}, storage: {} };
       }
       state.vmStats[vmName].storage = { used, total };
+    },
+    setVmEvents: (state, action) => {
+      state.vmEvents = action.payload;
     }
   },
 });
-export const { setClusterCpuInfo,setMemoryInfo,setStorageInfo ,setNodeMemory,setNodeStorage,setNodeCpu, setVmCpuStats, setVmMemoryStats, setVmStorageStats} =
-reportingSlice.actions;
+
+export const {
+  setClusterCpuInfo,
+  setMemoryInfo,
+  setStorageInfo,
+  setNodeMemory,
+  setNodeStorage,
+  setNodeCpu,
+  setVmCpuStats,
+  setVmMemoryStats,
+  setVmStorageStats,
+  setVmEvents
+} = reportingSlice.actions;
+
 export default reportingSlice.reducer;
