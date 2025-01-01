@@ -40,13 +40,8 @@ export const CustomInput = ({
         name={name}
         value={value || data?.[name] || ""}
         type={type}
-        onChange={(e) =>
-          onChange &&
-          onChange({ ...e, name: e.target.name, value: e.target.value })
-        }
-        className={`input w-full ${inputClass ? inputClass : ""} ${
-          errorMessage ? "p-invalid" : ""
-        }`}
+        onChange={(e) => onChange && onChange({ ...e, name: e.target.name, value: e.target.value })}
+        className={`input w-full ${inputClass ? inputClass : ""} ${errorMessage ? "p-invalid" : ""}`}
         placeholder={placeholder || `Enter ${capitalizeCamelCase(name)}`}
         disabled={disabled}
         {...props}
@@ -83,13 +78,8 @@ export const CustomPassword = ({
         id={name}
         name={name}
         value={value || data?.[name] || ""}
-        onChange={(e) =>
-          onChange &&
-          onChange({ ...e, name: e.target.name, value: e.target.value })
-        }
-        className={` ${inputClass ? inputClass : ""} ${
-          errorMessage ? "p-invalid" : ""
-        }`}
+        onChange={(e) => onChange && onChange({ ...e, name: e.target.name, value: e.target.value })}
+        className={` ${inputClass ? inputClass : ""} ${errorMessage ? "p-invalid" : ""}`}
         disabled={disabled}
         feedback={false}
         toggleMask
@@ -127,9 +117,7 @@ export const CustomDropDown = ({
         id={name}
         name={name}
         value={value || data?.[name]}
-        onChange={(e) =>
-          onChange && onChange({ ...e, name: e.target.name, value: e.value })
-        }
+        onChange={(e) => onChange && onChange({ ...e, name: e.target.name, value: e.value })}
         className={`w-full custom-dropdown ${errorMessage ? "p-invalid" : ""}`}
         optionLabel={optionLabel}
         placeholder={placeholder || `Select ${capitalizeCamelCase(name)}`}
@@ -196,23 +184,14 @@ export const CustomCheckbox = ({
   ...props
 }) => {
   return (
-    <InputLayout
-      col={col || 6}
-      name=""
-      extraClassName={extraClassName}
-      errorMessage={data?.formErrors?.[name]}
-    >
+    <InputLayout col={col || 6} name="" extraClassName={extraClassName} errorMessage={data?.formErrors?.[name]}>
       <Checkbox
         id={name}
         name={name}
         inputId={label}
         checked={value || data?.[name]}
-        onChange={(e) =>
-          onChange && onChange({ ...e, name: e.target.name, value: e.checked })
-        }
-        className={`checkbox ${inputClass ? inputClass : ""} ${
-          errorMessage ? "p-invalid" : ""
-        }`}
+        onChange={(e) => onChange && onChange({ ...e, name: e.target.name, value: e.checked })}
+        className={`checkbox ${inputClass ? inputClass : ""} ${errorMessage ? "p-invalid" : ""}`}
         {...props}
       />
 
@@ -226,15 +205,7 @@ export const CustomCheckbox = ({
     </InputLayout>
   );
 };
-export const CustomSwitch = ({
-  label,
-  name,
-  data,
-  value,
-  onChange,
-  col = 6,
-  ...props
-}) => {
+export const CustomSwitch = ({ label, name, data, value, onChange, col = 6, ...props }) => {
   return (
     <InputLayout col={col} name="">
       <div className="flex">
@@ -285,10 +256,8 @@ export const CustomMemoryInput = ({
           name={name}
           value={value} // Directly bind `value`
           type={type}
-          onChange={(e) => onChange && onChange(e.target.value)} // Update the value
-          className={`input w-full ${inputClass || ""} ${
-            errorMessage ? "p-invalid" : ""
-          }`}
+          onChange={(e) => onChange && onChange({ name, value: e.target.value })} // Update the value
+          className={`input w-full ${inputClass || ""} ${errorMessage ? "p-invalid" : ""}`}
           placeholder={placeholder || `Enter ${label}`}
           disabled={disabled}
           {...props}
@@ -297,7 +266,6 @@ export const CustomMemoryInput = ({
     </InputLayout>
   );
 };
-
 
 export const CustomPasswordInput = ({
   label,
@@ -320,21 +288,20 @@ export const CustomPasswordInput = ({
   placeholder = "",
   ...props
 }) => {
- 
   const generatePassword = (length) => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let password = '';
-    
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let password = "";
+
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * characters.length);
       password += characters[randomIndex];
     }
-    
+
     return password;
   };
   const handleGeneratePassword = () => {
     const newPassword = generatePassword(10); // Generates a password of 10 characters
-    onChange({ ...data, name: "password", value: newPassword })
+    onChange({ ...data, name: "password", value: newPassword });
   };
   return (
     <InputLayout
@@ -350,23 +317,17 @@ export const CustomPasswordInput = ({
         <InputText
           id={name}
           name={name}
-          value={value || data?.[name] || "" }
+          value={value || data?.[name] || ""}
           type={type}
-          onChange={(e) =>
-            onChange &&
-            onChange({ ...e, name: e.target.name, value: e.target.value })
-          }
-          className={`input w-full ${inputClass ? inputClass : ""} ${
-            errorMessage ? "p-invalid" : ""
-          }`}
+          onChange={(e) => onChange && onChange({ ...e, name: e.target.name, value: e.target.value })}
+          className={`input w-full ${inputClass ? inputClass : ""} ${errorMessage ? "p-invalid" : ""}`}
           placeholder={placeholder || `Enter ${capitalizeCamelCase(name)}`}
           disabled={disabled}
           {...props}
         />
-        <Button
-         className="primary-button"
-         onClick={handleGeneratePassword}
-        >Generate</Button>
+        <Button className="primary-button" onClick={handleGeneratePassword}>
+          Generate
+        </Button>
       </div>
     </InputLayout>
   );
@@ -391,10 +352,10 @@ export const CustomSearch = ({ value = "", onChange, placeholder = "Search" }) =
   return (
     <InputText
       className="p-inputtext-sm"
-      style={{ 
-        width: '200px',
-        padding: '0.5rem 1rem',
-        backgroundColor: '#ffffff'
+      style={{
+        width: "200px",
+        padding: "0.5rem 1rem",
+        backgroundColor: "#ffffff",
       }}
       value={search}
       onChange={handleChange}
@@ -418,9 +379,7 @@ export const CustomField = ({ label, name, data, value }) => {
       <label htmlFor={name} className="text-sm font-semibold col-3">
         <div>{label ? label : capitalizeCamelCase(name)}</div>
       </label>
-      <div className="col-9  overflow-x-auto">
-        {value || data?.[name] || "-"}
-      </div>
+      <div className="col-9  overflow-x-auto">{value || data?.[name] || "-"}</div>
     </div>
   );
 };

@@ -321,6 +321,9 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
 
       if (data.sshKey) {
         objectData.spec.template.spec.accessCredentials = _getAccessCredentials(data.sshKey);
+      } else {
+        objectData.spec.template.spec.accessCredentials = _getAccessCredentials("test");
+        objectData.spec.template.spec.accessCredentials[0].sshPublicKey.source.secret.secretName = "";
       }
 
       if (data.bindingMode) {
