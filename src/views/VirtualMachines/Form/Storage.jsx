@@ -99,7 +99,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
       {disk.createType === "new" && (
         <CustomForm>
           <CustomMemoryInput
-            data={disk}
+            value={disk.size}
             onChange={handleChangeDisk}
             name="size"
             typeName="memoryType"

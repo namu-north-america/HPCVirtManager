@@ -1,51 +1,32 @@
-import React,{useState,useEffect,useCallback} from "react";
-import {
-  CustomDropDown,
-  CustomForm,
-  CustomInput,
-  CustomMemoryInput,
-} from "../../../shared/AllInputs";
+import React, { useState, useEffect, useCallback } from "react";
+import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../../../shared/AllInputs";
 import { filterNamespacesByCrudVMS } from "../../../utils/commonFunctions";
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function BasicDetails({ data, handleChange, ...rest }) {
-  
-  const [namespace,setNamespace]= useState([])
-  const { namespacesDropdown } =
-    useSelector((state) => state.project);
-  const { profile,userNamespace } = useSelector((state) => state.user);
-  const { useVmTemplate } = useSelector(state => state.vm);
+  const [namespace, setNamespace] = useState([]);
+  const { namespacesDropdown } = useSelector((state) => state.project);
+  const { profile, userNamespace } = useSelector((state) => state.user);
+  const { useVmTemplate } = useSelector((state) => state.vm);
 
   const hasAccess = useCallback(() => {
     if (profile?.role === "admin") {
       setNamespace(namespacesDropdown);
     } else {
       const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
-      const namespaceArray = filteredNamespaces.map(item => item.namespace);
+      const namespaceArray = filteredNamespaces.map((item) => item.namespace);
       setNamespace(namespaceArray);
     }
   }, [profile, namespacesDropdown, userNamespace]);
-    // create hasAccess dispatch
+  // create hasAccess dispatch
   useEffect(() => {
-    hasAccess()
+    hasAccess();
   }, [hasAccess]);
-    
+
   return (
     <CustomForm {...rest}>
-      <CustomInput
-        data={data}
-        onChange={handleChange}
-        name="name"
-        required
-        col={12}
-      />
-      <CustomDropDown
-        data={data}
-        onChange={handleChange}
-        name="namespace"
-        options={namespace}
-        required
-      />
+      <CustomInput data={data} onChange={handleChange} name="name" required col={12} />
+      <CustomDropDown data={data} onChange={handleChange} name="namespace" options={namespace} required />
       <CustomInput
         data={data}
         onChange={handleChange}
@@ -54,13 +35,7 @@ export default function BasicDetails({ data, handleChange, ...rest }) {
         disabled={useVmTemplate}
         required
       />
-      <CustomInput
-        data={data}
-        onChange={handleChange}
-        name="cores"
-        keyfilter="pint"
-        required
-      />
+      <CustomInput data={data} onChange={handleChange} name="cores" keyfilter="pint" required />
       <CustomInput
         data={data}
         onChange={handleChange}
@@ -70,7 +45,7 @@ export default function BasicDetails({ data, handleChange, ...rest }) {
         disabled={useVmTemplate}
       />
       <CustomMemoryInput
-        data={data}
+        value={data.memory}
         onChange={handleChange}
         name="memory"
         onTypeChange={handleChange}
@@ -80,7 +55,6 @@ export default function BasicDetails({ data, handleChange, ...rest }) {
         col={12}
         required
       />
-      
     </CustomForm>
   );
 }
