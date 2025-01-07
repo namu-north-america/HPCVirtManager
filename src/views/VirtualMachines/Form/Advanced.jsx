@@ -149,25 +149,27 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
     }
 
     const objectData = jsYaml.load(yaml);
-    if (useVmTemplate) {
-      return;
+
+    // Basic settings form values
+    if (!useVmTemplate) {
+      if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
+      if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
+
+      objectData.spec.template.spec.networks = _getNetworks(networks);
     }
+
     if (data.cores) objectData.spec.template.spec.domain.cpu.cores = parseInt(data.cores);
-    if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
-    if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
+
     if (data.name) {
       objectData.metadata.name = data.name;
     }
-    if (data.userName && objectData.metadata?.labels?.["cloud-init.kubevirt-manager.io/username"])
-      objectData.metadata.labels["cloud-init.kubevirt-manager.io/username"] = data.userName;
+
     if (data.namespace) objectData.metadata.namespace = data.namespace;
     if (data.memory)
       objectData.spec.template.spec.domain.resources.requests.memory = parseInt(data.memory) + data.memoryType;
-    if (data.node) {
-      objectData.spec.template.spec.nodeSelector["kubernetes.io/hostname"] = data.node;
-    }
 
-    objectData.spec.template.spec.networks = _getNetworks(networks);
+    if (data.userName && objectData.metadata?.labels?.["cloud-init.kubevirt-manager.io/username"])
+      objectData.metadata.labels["cloud-init.kubevirt-manager.io/username"] = data.userName;
 
     if (disks.length) {
       if (disks.length > 1) {
@@ -203,7 +205,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
           if (i == 0 && disks.length === 1 && useVmTemplate) {
             const item = yamlDataVolumeTemplates[i] ? yamlDataVolumeTemplates[i] : [];
             const currentDevice = objectData.spec?.template?.spec?.domain?.devices?.disks[0];
-            const diskType = disk.type;
+            const diskType = Object.keys(item.spec.source)[0];
             const accessMode = disk.accessMode ? [disk.accessMode] : item.spec?.pvc?.accessModes;
             const storageClass = disk.storageClass ? disk.storageClass : item.spec?.pvc?.storageClassName;
             const storage = disk.size
@@ -230,7 +232,7 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
                 },
                 source: {
                   [diskType]: {
-                    url: disk.url || item?.spec?.source[diskType]?.url,
+                    url: item?.spec?.source[diskType]?.url,
                   },
                 },
               },
@@ -269,72 +271,76 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
         }
       });
 
-      const _disks = disks.map((disk, i) => {
-        if (disk?.createType === "new" || disk?.createType === "image") {
-          const diskName = `${name.trim()}-disk${i + 1}`;
-          const diskNamespace = namespace;
+      if (!useVmTemplate) {
+        const _disks = disks.map((disk, i) => {
+          if (disk?.createType === "new" || disk?.createType === "image") {
+            const diskName = `${name.trim()}-disk${i + 1}`;
+            const diskNamespace = namespace;
 
-          let existingDisks = project.disks;
+            let existingDisks = project.disks;
 
-          let diskNameCheck = existingDisks.find((item) => item.name === diskName && item.namespace === diskNamespace);
-          if (diskNameCheck) {
-            setErrors([
-              ...errors,
-              { message: `Disk ${diskName} with name/namespace combination already exists!`, startLineNumber: 14 },
-            ]);
+            let diskNameCheck = existingDisks.find(
+              (item) => item.name === diskName && item.namespace === diskNamespace
+            );
+            if (diskNameCheck) {
+              setErrors([
+                ...errors,
+                { message: `Disk ${diskName} with name/namespace combination already exists!`, startLineNumber: 14 },
+              ]);
+            }
+
+            let _obj = {
+              diskType: disk?.diskType,
+              busType: disk?.busType,
+              diskName: `disk${i + 1}`,
+              volumeName: diskName,
+            };
+
+            return _obj;
+          } else {
+            let _obj = {
+              diskType: disk?.diskType,
+              busType: disk?.busType,
+              diskName: `disk${i + 1}`,
+              volumeName: disk?.disk,
+            };
+            if (disk?.cache) {
+              _obj.cache = disk?.cache;
+            }
+
+            return _obj;
           }
-
-          let _obj = {
-            diskType: disk?.diskType,
-            busType: disk?.busType,
-            diskName: `disk${i + 1}`,
-            volumeName: diskName,
-          };
-
-          return _obj;
-        } else {
-          let _obj = {
-            diskType: disk?.diskType,
-            busType: disk?.busType,
-            diskName: `disk${i + 1}`,
-            volumeName: disk?.disk,
-          };
-          if (disk?.cache) {
-            _obj.cache = disk?.cache;
-          }
-
-          return _obj;
-        }
-      });
-
-      const _devices = _getDevices(_disks);
-      const _volumes = _getVolumes(_disks);
-
-      _setUserDataAndNetworkDisks(_devices, _volumes, { name, username: data.userName, password: data.password });
-
-      objectData.spec.template.spec.domain.devices.disks = _devices;
-      objectData.spec.template.spec.volumes = _volumes;
-
-      if (!yamlDataVolumeTemplates) {
-        objectData.spec.dataVolumeTemplates = null;
-      }
-
-      if (data.sshKey) {
-        objectData.spec.template.spec.accessCredentials = _getAccessCredentials(data.sshKey);
-      } else {
-        objectData.spec.template.spec.accessCredentials = _getAccessCredentials("test");
-        objectData.spec.template.spec.accessCredentials[0].sshPublicKey.source.secret.secretName = "";
-      }
-
-      if (data.bindingMode) {
-        // const interface = objectData.spec.template?.spec.domain.devices.interfaces[0];
-        const interfaces = objectData.spec?.template?.spec?.networks.map((network) => {
-          return {
-            name: network ? network?.name : "",
-            [data.bindingMode]: {},
-          };
         });
-        objectData.spec.template.spec.domain.devices.interfaces = interfaces;
+
+        const _devices = _getDevices(_disks);
+        const _volumes = _getVolumes(_disks);
+
+        _setUserDataAndNetworkDisks(_devices, _volumes, { name, username: data.userName, password: data.password });
+
+        objectData.spec.template.spec.domain.devices.disks = _devices;
+        objectData.spec.template.spec.volumes = _volumes;
+
+        if (!yamlDataVolumeTemplates) {
+          objectData.spec.dataVolumeTemplates = null;
+        }
+
+        if (data.sshKey) {
+          objectData.spec.template.spec.accessCredentials = _getAccessCredentials(data.sshKey);
+        } else {
+          objectData.spec.template.spec.accessCredentials = _getAccessCredentials("test");
+          objectData.spec.template.spec.accessCredentials[0].sshPublicKey.source.secret.secretName = "";
+        }
+
+        if (networks && networks.length) {
+          // const interface = objectData.spec.template?.spec.domain.devices.interfaces[0];
+          const interfaces = objectData.spec?.template?.spec?.networks.map((network, index) => {
+            return {
+              name: network ? network?.name : "",
+              [networks[index].bindingMode]: {},
+            };
+          });
+          objectData.spec.template.spec.domain.devices.interfaces = interfaces;
+        }
       }
     }
     const yamlString = jsYaml.dump(objectData, {
