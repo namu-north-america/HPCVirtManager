@@ -142,6 +142,7 @@ export default function Storage({ disk, setDisk, index, onRemoveDisk, data }) {
               placeholder="HTTP/S3/Registry source"
               onChange={handleChangeDisk}
               col={12}
+              disabled={useVmTemplate}
               required
             />
           )}

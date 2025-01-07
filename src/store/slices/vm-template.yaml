@@ -58,8 +58,8 @@ spec:
               #cloud-config
               manage_etc_hosts: true
               hostname: vm-fedora
-              user: admin
-              password: 1234
+              user: cocktail
+              password: cocktail!1
 
             networkData: |
               version: 1

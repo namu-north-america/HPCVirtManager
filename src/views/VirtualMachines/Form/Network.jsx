@@ -34,6 +34,7 @@ export default function Network({ data, onRemove, index, setNetworks, network, .
         options={networksOption}
         required
         col={12}
+        disabled={useVmTemplate}
       />
 
       <CustomDropDown
@@ -43,6 +44,7 @@ export default function Network({ data, onRemove, index, setNetworks, network, .
         options={bindingModeDropdown}
         required
         col={12}
+        disabled={useVmTemplate}
       />
       {index ? (
         <div className="flex justify-content-end">

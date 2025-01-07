@@ -7,6 +7,8 @@ import { fetchAllSSHKeysAction } from '../../../store/actions/sshKeyActions';
 export default function UserData({ data, handleChange, ...rest }) {
   const dispatch = useDispatch();
   const { sshKeys } = useSelector((state) => state.sshKeys);
+  const { useVmTemplate } = useSelector((state) => state.vm);
+
 
   useEffect(() => {
     dispatch(fetchAllSSHKeysAction());
@@ -20,6 +22,7 @@ export default function UserData({ data, handleChange, ...rest }) {
         name="userName"
         required
         col={12}
+        disabled={useVmTemplate}
       />
       <CustomInput
         data={data}
@@ -27,6 +30,8 @@ export default function UserData({ data, handleChange, ...rest }) {
         name="password"
         required
         col={12}
+        disabled={useVmTemplate}
+
       />
       <div className="col-12">
         <label htmlFor="sshKey">SSH Key</label>
@@ -40,6 +45,7 @@ export default function UserData({ data, handleChange, ...rest }) {
           }))}
           placeholder="Select SSH Key"
           className="w-full"
+          disabled={useVmTemplate}
         />
       </div>
     </CustomForm>
