@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, forwardRef } from "react";
 import InputLayout from "./InputLayout";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from "primereact/checkbox";
@@ -9,7 +9,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import { capitalizeCamelCase } from "../utils/commonFunctions";
 import { Button } from "primereact/button";
 
-export const CustomInput = ({
+export const CustomInput = forwardRef(({
   label,
   name,
   data,
@@ -24,7 +24,7 @@ export const CustomInput = ({
   type = "text",
   placeholder = "",
   ...props
-}) => {
+}, ref) => {
   return (
     <InputLayout
       col={col}
@@ -36,6 +36,7 @@ export const CustomInput = ({
       errorMessage={errorMessage}
     >
       <InputText
+        ref={ref}
         id={name}
         name={name}
         value={value || data?.[name] || ""}
@@ -48,7 +49,8 @@ export const CustomInput = ({
       />
     </InputLayout>
   );
-};
+});
+
 export const CustomPassword = ({
   label,
   name,

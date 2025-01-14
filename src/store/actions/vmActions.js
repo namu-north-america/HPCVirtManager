@@ -4,6 +4,7 @@ import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations, setNetworks } from "../slices/projectSlice";
 import { setVmEvents } from "../slices/reportingSlice";
 import { getVMsAction } from "./projectActions";
+import { setInstanceTypes } from "../slices/projectSlice";
 import moment from "moment";
 
 // spec:
@@ -459,6 +460,7 @@ const onEditVMAction = (data, setLoading, next) => async (dispatch) => {
   }
   setLoading(false);
 };
+
 const onGetVMAction = (data, next) => async () => {
   let url = endPoints.GET_VM({
     namespace: data.namespace,
@@ -477,6 +479,7 @@ const onGetVMAction = (data, next) => async () => {
     next(res, instance);
   }
 };
+
 const getVolumesAction = (namespace, volumes, next) => async () => {
   const data = await Promise.all(
     volumes.map(async (item) => {
@@ -830,6 +833,45 @@ const getVmEvents = (namespace, name, next) => async (dispatch) => {
   } catch (err) {}
 };
 
+const getInstanceTypesAction = () => async (dispatch) => {
+  const url = endPoints.GET_INSTANCE_TYPES();
+  const res = await api("get", url);
+  if(res?.kind) {
+    console.log("res for instance type___", res);
+    const items = res.items.map((item) => ({
+      name: item.metadata.name,
+      cpu: item.spec.cpu.guest,
+      memory: item.spec.memory.guest,
+    }))
+    dispatch(setInstanceTypes(items));
+  }
+};
+
+const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
+  const url = endPoints.ADD_INSTANCE_TYPE({ name: data.name });
+  const payload = {
+    apiVersion: "instancetype.kubevirt.io/v1beta1",
+    kind: "VirtualMachineClusterInstancetype",
+    metadata: {
+      name: data.name,
+    },
+    spec: {
+      cpu: {
+        guest: data.cpu,
+      },
+      memory: {
+        guest: data.memory,
+      },
+    },
+  };
+
+  const res = await api("post", url, payload);
+  if(res?.kind) {
+    dispatch(getInstanceTypesAction());
+    next(res);
+  }
+};
+
 export {
   onAddVMAction,
   onEditVMAction,
@@ -843,4 +885,6 @@ export {
   getLiveMigrationsAction,
   onAddHotPlugVmAction,
   getVmEvents,
+  onAddInstanceTypeAction,
+  getInstanceTypesAction,
 };
