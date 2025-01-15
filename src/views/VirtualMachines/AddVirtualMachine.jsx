@@ -10,8 +10,10 @@ import { setSelectedTemplate } from "../../store/slices/vmSlice";
 import UploadTemplatesModal from "./Form/UploadTemplatesModal";
 import { useDispatch, useSelector } from "react-redux";
 import { CSSTransition } from "primereact/csstransition";
+import { useLocation } from "react-router-dom";
 
 export default function AddVirtualMachine() {
+  const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { setBreadcrumbItems } = useBreadcrumb();
@@ -19,7 +21,8 @@ export default function AddVirtualMachine() {
   const [isUploadTemplatesOpen, setIsUploadTemplatesOpen] = useState(false);
   const { formsFocusEvent } = useSelector((state) => state.common);
   const { useVmTemplate } = useSelector((state) => state.vm);
-  // const [selectedTemplate, setSelectedTemplate] = useState();
+
+  const isVmPool = state?.isVmPool || false;
 
   const handleClose = () => {
     navigate("/virtual-machines/list");
@@ -78,7 +81,7 @@ export default function AddVirtualMachine() {
           </div>
         }
       >
-        <AddVirtualMachineForm onClose={handleClose} />
+        <AddVirtualMachineForm onClose={handleClose} isVmPool={isVmPool} />
       </Page>
     </>
   );

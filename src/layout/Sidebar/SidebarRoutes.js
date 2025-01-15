@@ -28,6 +28,12 @@ export const sidebarItems = [
         link: "/live-migrations",
       },
     ],
+
+  },
+  {
+    title: "VM Pools",
+    link: "/vm-pools",
+    icon: "pi pi-server",
   },
   {
     title: "Storage",

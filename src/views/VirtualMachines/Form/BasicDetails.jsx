@@ -3,7 +3,7 @@ import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../.
 import { filterNamespacesByCrudVMS } from "../../../utils/commonFunctions";
 import { useSelector } from "react-redux";
 
-export default function BasicDetails({ data, handleChange, ...rest }) {
+export default function BasicDetails({ data, handleChange, isVmPool, ...rest }) {
   const [namespace, setNamespace] = useState([]);
   const { namespacesDropdown } = useSelector((state) => state.project);
   const { profile, userNamespace } = useSelector((state) => state.user);
@@ -55,6 +55,7 @@ export default function BasicDetails({ data, handleChange, ...rest }) {
         col={12}
         required
       />
+      {isVmPool && <CustomInput data={data} onChange={handleChange} name="replicas" required col={12} />}
     </CustomForm>
   );
 }

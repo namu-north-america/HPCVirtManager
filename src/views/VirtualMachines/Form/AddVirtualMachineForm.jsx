@@ -25,7 +25,7 @@ import { getImagesAction } from "../../../store/actions/imageActions";
 import { setFormFocusEvent } from "../../../store/slices/commonSlice";
 import _throttle from "lodash/throttle";
 
-export default function AddVirtualMachineForm({ onClose }) {
+export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector((state) => state.project);
   const { selectedTemplate, useVmTemplate } = useSelector((state) => state.vm);
@@ -294,7 +294,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 0:
         return (
           <>
-            <BasicDetails data={data} handleChange={handleChange} />
+            <BasicDetails data={data} handleChange={handleChange} isVmPool={isVmPool} />
             <Buttonlayout>
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(1)} />
             </Buttonlayout>
@@ -407,9 +407,8 @@ export default function AddVirtualMachineForm({ onClose }) {
               {steps.map((step, index) => (
                 <li
                   key={index}
-                  className={`step-item ${activeIndex === index ? "active" : ""} ${
-                    completedSteps.includes(index) ? "completed" : ""
-                  }`}
+                  className={`step-item ${activeIndex === index ? "active" : ""} ${completedSteps.includes(index) ? "completed" : ""
+                    }`}
                   onClick={() => onStepChange(index)}
                   role="button"
                   tabIndex={0}
