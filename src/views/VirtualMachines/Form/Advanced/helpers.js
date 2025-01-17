@@ -1,7 +1,22 @@
 import jsYaml from "js-yaml";
 import { _getNetworks, _getDevices, _getVolumes, _setUserDataAndNetworkDisks, _getAccessCredentials } from "../../../../store/actions/vmActions";
 
-export const updateYamlString = ({ data, objectData, useVmTemplate, networks, disks, project, setErrors, errors }) => {
+/**
+ * @param {Object} data - The data object to update
+ * @param {Object} yamlDataObject - The YAML data object to update
+ * @param {Boolean} useVmTemplate - Whether to use the VM template
+ * @param {Array} networks - The networks array
+ * @param {Array} disks - The disks array
+ * @param {Object} project - The project object
+ * @param {Function} setErrors - The function to set the errors
+ * @param {Array} errors - The errors array
+ * @param {Boolean} isVmPool - Whether the VM is a pool
+ * @returns {String} The updated YAML string
+ */
+export const updateYamlString = ({ data, yamlDataObject, useVmTemplate, networks, disks, project, setErrors, errors, isVmPool }) => {
+    console.log("yamlDataObject", yamlDataObject, isVmPool);
+    const objectData = isVmPool ? yamlDataObject.spec.virtualMachineTemplate : yamlDataObject;
+    console.log("objectData", objectData);
     if (!useVmTemplate) {
         if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
         if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
@@ -13,6 +28,9 @@ export const updateYamlString = ({ data, objectData, useVmTemplate, networks, di
 
     if (data.name) {
         objectData.metadata.name = data.name;
+    }
+    if (data.replicas) {
+        yamlDataObject.spec.replicas = parseInt(data.replicas);
     }
 
     if (data.namespace) objectData.metadata.namespace = data.namespace;
@@ -194,7 +212,7 @@ export const updateYamlString = ({ data, objectData, useVmTemplate, networks, di
             }
         }
     }
-    const yamlString = jsYaml.dump(objectData, {
+    const yamlString = jsYaml.dump(yamlDataObject, {
         noArrayIndent: true,
         styles: { "!!str": "plain", "!!null": "empty" },
     });
@@ -210,7 +228,16 @@ const getMemoryParts = (memoryString) => {
     return { size: null, unit: null };
 };
 
-export const syncYamlStringToForms = ({ yamlDataObject, project, data, setDisks, handleChange }) => {
+/**
+ * @param {Object} yamlDataObject - The YAML data object to sync to the forms
+ * @param {Object} project - The project object
+ * @param {Object} data - The data object to update
+ * @param {Function} setDisks - The function to set the disks
+ * @param {Function} handleChange - The function to handle the change
+ */
+export const syncYamlStringToForms = ({ yamlData, project, data, setDisks, handleChange, isVmPool }) => {
+    const yamlDataObject = isVmPool ? yamlData.spec.virtualMachineTemplate : yamlData;
+
     const name = yamlDataObject.metadata?.name || data.name;
     const namespace = yamlDataObject.metadata?.namespace || data.namespace;
 
@@ -221,6 +248,7 @@ export const syncYamlStringToForms = ({ yamlDataObject, project, data, setDisks,
         sockets: yamlDataObject.spec?.template?.spec?.domain?.cpu?.sockets || data.sockets,
         threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
         advanced: yamlDataObject,
+        replicas: yamlData.spec?.replicas || data.replicas,
     };
 
     const memory = yamlDataObject.spec?.template?.spec?.domain?.resources?.requests?.memory;

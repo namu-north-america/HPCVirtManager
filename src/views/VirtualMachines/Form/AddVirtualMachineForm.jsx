@@ -72,6 +72,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     password: "",
     // When isVmPool active, this field is required
     virtualMachineType: isVmPool ? "custom" : "",
+    replicas: isVmPool ? 2 : "",
   });
 
   const [disks, setDisks] = useState([
@@ -365,6 +366,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
         return (
           <>
             <Advanced
+              isVmPool={isVmPool}
               data={data}
               disks={disks}
               networks={networks}
