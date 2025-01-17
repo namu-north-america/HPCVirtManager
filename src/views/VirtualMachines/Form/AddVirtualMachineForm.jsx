@@ -14,13 +14,13 @@ import Storage from "./Storage";
 import Review from "./Review";
 import UserData from "./UserData";
 import { setSelectedTemplate } from "../../../store/slices/vmSlice";
-import { onAddVMAction, getNetworksAction } from "../../../store/actions/vmActions";
+import { onAddVMAction, getNetworksAction, getInstanceTypesAction } from "../../../store/actions/vmActions";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import formValidation from "../../../utils/validations";
 import { getDisksAction, getStorageClassesAction } from "../../../store/actions/storageActions";
 import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
-import Advanced from "./Advanced";
+import Advanced from "./Advanced/Advanced";
 import { getImagesAction } from "../../../store/actions/imageActions";
 import { setFormFocusEvent } from "../../../store/slices/commonSlice";
 import _throttle from "lodash/throttle";
@@ -47,6 +47,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     dispatch(getDisksAction());
     dispatch(getImagesAction());
     dispatch(getNetworksAction());
+    if (isVmPool) dispatch(getInstanceTypesAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -69,6 +70,8 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     advanced: "",
     userName: "",
     password: "",
+    // When isVmPool active, this field is required
+    virtualMachineType: isVmPool ? "custom" : "",
   });
 
   const [disks, setDisks] = useState([
