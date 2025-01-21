@@ -17,7 +17,8 @@ const initialState = {
   bindingModeDropdown: ["bridge", "masquerade"],
   priorityClassesDropdown: [],
   networksDropdown: [],
-  instanceTypes: []
+  instanceTypes: [],
+  vmPools: []
 };
 
 export const projectSlice = createSlice({
@@ -26,6 +27,9 @@ export const projectSlice = createSlice({
   reducers: {
     setVMs: (state, action) => {
       state.vms = action.payload;
+    },
+    setVMPools: (state, action) => {
+      state.vmPools = action.payload;
     },
     setLiveMigrations: (state, action) => {
       state.migrations = action.payload;
@@ -75,6 +79,7 @@ export const {
   setPriorityClasses,
   setImages,
   setNetworks,
-  setInstanceTypes
+  setInstanceTypes,
+  setVMPools
 } = projectSlice.actions;
 export default projectSlice.reducer;
