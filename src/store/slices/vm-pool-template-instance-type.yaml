@@ -5,15 +5,22 @@ metadata:
   namespace: default
 spec:
   replicas: 2
+  selector:
+    matchLabels:
+      kubevirt.io/vmpool: vm-fedora-pool
   virtualMachineTemplate:
     metadata:
-      name: vm-fedora
-      namespace: default
+      labels:
+        kubevirt.io/vmpool: vm-fedora-pool
+        kubevirt.io/managed: true
+        fw.kubevirt.io/pool-name: vm-fedora-pool
     spec:
       dataVolumeTemplates:
         - apiVersion: "cdi.kubevirt.io/v1beta1"
+          kind: DataVolume
           metadata:
             name: datavolume-iso
+            namespace: default
           spec:
             pvc:
               accessModes:
@@ -30,13 +37,9 @@ spec:
       template:
         metadata:
           labels:
-            kubevirt.io/vm: vm-fedora
+            kubevirt.io/vm: vm-fedora-pool
         spec:
           domain:
-            cpu:
-              cores: 2
-              sockets: 1
-              threads: 1
             devices:
               disks:
                 - disk:
@@ -51,7 +54,7 @@ spec:
             resources:
               requests:
                 memory: 4G
-          priorityClassName: "vm-standard"
+          # priorityClassName: "vm-standard"
           networks:
             - name: "net1"
               pod: {}

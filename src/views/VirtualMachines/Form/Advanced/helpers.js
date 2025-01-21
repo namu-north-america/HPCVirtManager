@@ -15,57 +15,76 @@ import { _getNetworks, _getDevices, _getVolumes, _setUserDataAndNetworkDisks, _g
  */
 export const updateYamlString = ({ data, yamlDataObject, useVmTemplate, networks, disks, project, setErrors, errors, isVmPool }) => {
     console.log("yamlDataObject", yamlDataObject, isVmPool);
-    const objectData = isVmPool ? yamlDataObject.spec.virtualMachineTemplate : yamlDataObject;
-    console.log("objectData", objectData);
-    if (!useVmTemplate) {
-        if (data.sockets) objectData.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
-        if (data.threads) objectData.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
 
-        objectData.spec.template.spec.networks = _getNetworks(networks);
+    const virtualMachine = isVmPool ? yamlDataObject.spec.virtualMachineTemplate : yamlDataObject;
+
+    console.log("virtualMachineTemplate", virtualMachine);
+
+    const isCustom = isVmPool && data.virtualMachineType === "custom";
+
+    if (!useVmTemplate) {
+        if (data.sockets && isCustom) virtualMachine.spec.template.spec.domain.cpu.sockets = parseInt(data.sockets);
+        if (data.threads && isCustom) virtualMachine.spec.template.spec.domain.cpu.threads = parseInt(data.threads);
+
+        virtualMachine.spec.template.spec.networks = _getNetworks(networks);
     }
 
-    if (data.cores) objectData.spec.template.spec.domain.cpu.cores = parseInt(data.cores);
+    if (data.cores && isCustom) virtualMachine.spec.template.spec.domain.cpu.cores = parseInt(data.cores);
 
     if (data.name) {
-        objectData.metadata.name = data.name;
+        if (isVmPool) {
+            virtualMachine.metadata.labels["kubevirt.io/vmpool"] = data.name;
+            virtualMachine.metadata.labels["kubevirt.io/managed"] = "true";
+            virtualMachine.metadata.labels["fw.kubevirt.io/pool-name"] = data.name;
+            yamlDataObject.spec.selector.matchLabels["kubevirt.io/vmpool"] = data.name;
+            yamlDataObject.metadata.name = data.name;
+        } else {
+            virtualMachine.metadata.name = data.name;
+        }
     }
+
+    if (data.namespace) (isVmPool ? yamlDataObject : virtualMachine).metadata.namespace = data.namespace;
+
     if (data.replicas) {
         yamlDataObject.spec.replicas = parseInt(data.replicas);
     }
 
-    if (data.namespace) objectData.metadata.namespace = data.namespace;
     if (data.memory)
-        objectData.spec.template.spec.domain.resources.requests.memory = parseInt(data.memory) + data.memoryType;
+        virtualMachine.spec.template.spec.domain.resources.requests.memory = parseInt(data.memory) + data.memoryType;
 
-    if (data.userName && objectData.metadata?.labels?.["cloud-init.kubevirt-manager.io/username"])
-        objectData.metadata.labels["cloud-init.kubevirt-manager.io/username"] = data.userName;
+    if (data.userName && virtualMachine.metadata?.labels?.["cloud-init.kubevirt-manager.io/username"])
+        virtualMachine.metadata.labels["cloud-init.kubevirt-manager.io/username"] = data.userName;
+
+    if (data.virtualMachineType !== "custom" && isVmPool) {
+        virtualMachine.spec.template.spec.instancetype.name = data.virtualMachineType;
+    }
 
     if (disks.length) {
         if (disks.length > 1) {
-            if (objectData.spec.template?.spec?.domain?.devices?.disks) {
-                objectData.spec.template.spec.domain.devices.disks = [];
+            if (virtualMachine.spec.template?.spec?.domain?.devices?.disks) {
+                virtualMachine.spec.template.spec.domain.devices.disks = [];
             }
-            if (objectData.spec?.template?.spec?.volumes) {
-                objectData.spec.template.spec.volumes = [];
+            if (virtualMachine.spec?.template?.spec?.volumes) {
+                virtualMachine.spec.template.spec.volumes = [];
             }
-            if (objectData.spec?.dataVolumeTemplates) {
-                objectData.spec.dataVolumeTemplates = [];
+            if (virtualMachine.spec?.dataVolumeTemplates) {
+                virtualMachine.spec.dataVolumeTemplates = [];
             }
         }
 
         if (!useVmTemplate) {
-            objectData.spec.dataVolumeTemplates = [];
+            virtualMachine.spec.dataVolumeTemplates = [];
         }
 
-        let yamlDataVolumeTemplates = objectData.spec.dataVolumeTemplates;
+        let yamlDataVolumeTemplates = virtualMachine.spec.dataVolumeTemplates;
 
         if (!yamlDataVolumeTemplates) {
-            objectData.spec.dataVolumeTemplates = [];
-            yamlDataVolumeTemplates = objectData.spec.dataVolumeTemplates;
+            virtualMachine.spec.dataVolumeTemplates = [];
+            yamlDataVolumeTemplates = virtualMachine.spec.dataVolumeTemplates;
         }
 
-        const name = data.name || objectData.metadata.name;
-        const namespace = data.namespace || objectData.metadata.namespace;
+        const name = isVmPool ? yamlDataObject.metadata.name : virtualMachine.metadata?.name;
+        const namespace = isVmPool ? yamlDataObject.metadata.namespace : virtualMachine.metadata?.namespace;
 
         disks.forEach((disk, i) => {
             if (disk.createType == "new" || disk.createType === "image") {
@@ -73,13 +92,14 @@ export const updateYamlString = ({ data, yamlDataObject, useVmTemplate, networks
 
                 if (i == 0 && disks.length === 1 && useVmTemplate) {
                     const item = yamlDataVolumeTemplates[i] ? yamlDataVolumeTemplates[i] : [];
-                    const currentDevice = objectData.spec?.template?.spec?.domain?.devices?.disks[0];
+                    const currentDevice = virtualMachine.spec?.template?.spec?.domain?.devices?.disks[0];
                     const diskType = Object.keys(item.spec.source)[0];
                     const accessMode = disk.accessMode ? [disk.accessMode] : item.spec?.pvc?.accessModes;
                     const storageClass = disk.storageClass ? disk.storageClass : item.spec?.pvc?.storageClassName;
                     const storage = disk.size
                         ? `${disk.size}${disk?.memoryType}`
                         : item.spec?.pvc?.resources?.requests?.storage;
+
                     yamlDataVolumeTemplates[i] = {
                         ...item,
                         metadata: {
@@ -186,29 +206,29 @@ export const updateYamlString = ({ data, yamlDataObject, useVmTemplate, networks
 
             _setUserDataAndNetworkDisks(_devices, _volumes, { name, username: data.userName, password: data.password });
 
-            objectData.spec.template.spec.domain.devices.disks = _devices;
-            objectData.spec.template.spec.volumes = _volumes;
+            virtualMachine.spec.template.spec.domain.devices.disks = _devices;
+            virtualMachine.spec.template.spec.volumes = _volumes;
 
             if (!yamlDataVolumeTemplates) {
-                objectData.spec.dataVolumeTemplates = null;
+                virtualMachine.spec.dataVolumeTemplates = null;
             }
 
             if (data.sshKey) {
-                objectData.spec.template.spec.accessCredentials = _getAccessCredentials(data.sshKey);
+                virtualMachine.spec.template.spec.accessCredentials = _getAccessCredentials(data.sshKey);
             } else {
-                objectData.spec.template.spec.accessCredentials = _getAccessCredentials("test");
-                objectData.spec.template.spec.accessCredentials[0].sshPublicKey.source.secret.secretName = "";
+                virtualMachine.spec.template.spec.accessCredentials = _getAccessCredentials("test");
+                virtualMachine.spec.template.spec.accessCredentials[0].sshPublicKey.source.secret.secretName = "";
             }
 
             if (networks && networks.length) {
                 // const interface = objectData.spec.template?.spec.domain.devices.interfaces[0];
-                const interfaces = objectData.spec?.template?.spec?.networks.map((network, index) => {
+                const interfaces = virtualMachine.spec?.template?.spec?.networks.map((network, index) => {
                     return {
                         name: network ? network?.name : "",
                         [networks[index].bindingMode]: {},
                     };
                 });
-                objectData.spec.template.spec.domain.devices.interfaces = interfaces;
+                virtualMachine.spec.template.spec.domain.devices.interfaces = interfaces;
             }
         }
     }
@@ -237,9 +257,8 @@ const getMemoryParts = (memoryString) => {
  */
 export const syncYamlStringToForms = ({ yamlData, project, data, setDisks, handleChange, isVmPool }) => {
     const yamlDataObject = isVmPool ? yamlData.spec.virtualMachineTemplate : yamlData;
-
-    const name = yamlDataObject.metadata?.name || data.name;
-    const namespace = yamlDataObject.metadata?.namespace || data.namespace;
+    const name = isVmPool ? yamlData.metadata.name : yamlDataObject.metadata?.name || data.name;
+    const namespace = isVmPool ? yamlData.metadata.namespace : yamlDataObject.metadata?.namespace || data.namespace;
 
     const newData = {
         name,
@@ -247,7 +266,7 @@ export const syncYamlStringToForms = ({ yamlData, project, data, setDisks, handl
         cores: yamlDataObject.spec?.template?.spec?.domain?.cpu?.cores || data.cores,
         sockets: yamlDataObject.spec?.template?.spec?.domain?.cpu?.sockets || data.sockets,
         threads: yamlDataObject.spec?.template?.spec?.domain?.cpu?.threads || data.threads,
-        advanced: yamlDataObject,
+        advanced: yamlData,
         replicas: yamlData.spec?.replicas || data.replicas,
     };
 

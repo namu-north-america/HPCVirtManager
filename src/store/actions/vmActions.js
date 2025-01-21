@@ -172,7 +172,7 @@ export const _getAccessCredentials = (sshKey) => {
   return _accessCredentials;
 };
 
-const onAddVMAction = (data, disks, images, networks, setLoading, next) => async (dispatch, getState) => {
+const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next) => async (dispatch, getState) => {
   try {
     const { sshKeys } = getState().sshKeys;
     const selectedKey = sshKeys.find((key) => key.name === data.sshKey);
@@ -189,13 +189,6 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
     let { advanced } = data;
     name = data.name;
     namespace = data.namespace;
-    if (advanced) {
-      // namespace = advanced.metadata.namespace;
-      // name = advanced.metadata.name;
-    } else {
-      name = data.name;
-      namespace = data.namespace;
-    }
 
     if (vms?.length && name) {
       let vmNameCheck = vms.find((item) => item.name === name && item.namespace === namespace);
@@ -209,6 +202,24 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
         setLoading(false);
         return;
       }
+    }
+
+    if (isVmPool) {
+      const url = endPoints.ADD_VM_POOL({
+        namespace: data.namespace,
+        name: data.name,
+      });
+
+      advanced.spec.virtualMachineTemplate.spec.dataVolumeTemplates =
+        advanced.spec.virtualMachineTemplate.spec.dataVolumeTemplates.map(template => ({
+          ...template,
+          apiVersion: "cdi.kubevirt.io/v1beta1",
+          kind: "DataVolume",
+        }));
+
+      setLoading(true);
+      await addVMRequest(advanced, url, dispatch, next);
+      return;
     }
     // With the last changes on Yaml Editor in advanced step
     // We have the advanced value already all the time
@@ -338,12 +349,9 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
         [net.bindingMode]: {},
       };
     });
+
     const networkData = _getNetworks(networks);
 
-    let url = endPoints.ADD_VM({
-      namespace: data.namespace,
-      name: data.name,
-    });
     let payload = {
       apiVersion: "kubevirt.io/v1alpha3",
       kind: "VirtualMachine",
@@ -367,11 +375,6 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
                 interfaces: interfaces,
                 networkInterfaceMultiqueue: true,
               },
-              cpu: {
-                cores: parseInt(data.cores),
-                threads: parseInt(data.threads),
-                sockets: parseInt(data.sockets),
-              },
               resources: {
                 requests: {
                   memory: `${data.memory}${data.memoryType}`,
@@ -387,13 +390,19 @@ const onAddVMAction = (data, disks, images, networks, setLoading, next) => async
             // ],
             accessCredentials: _accessCredentials,
             volumes: _volumes,
-            nodeSelector: {
-              "kubernetes.io/hostname": data.node,
-            },
+            // nodeSelector: {
+            //   "kubernetes.io/hostname": data.node,
+            // },
           },
         },
       },
     };
+
+    let url = endPoints.ADD_VM({
+      namespace: data.namespace,
+      name: data.name,
+    });
+    console.log("url____", url);
 
     await addVMRequest(payload, url, dispatch, next);
     setLoading(false);
@@ -823,20 +832,20 @@ const getVmEvents = (namespace, name, next) => async (dispatch) => {
           type: item.type,
           message: item.message,
           reason: item.reason,
-          lastSeen: `${hours > 0 ? `${hours}h `: ''}${minutes > 0 ? `${minutes}m `: ''} ${duration.seconds()}s`,
+          lastSeen: `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''} ${duration.seconds()}s`,
           // lastSeen: moment(targetTime).fromNow(true),
         };
       });
       console.log("response for this event___", events);
       dispatch(setVmEvents(events));
     }
-  } catch (err) {}
+  } catch (err) { }
 };
 
 const getInstanceTypesAction = () => async (dispatch) => {
   const url = endPoints.GET_INSTANCE_TYPES();
   const res = await api("get", url);
-  if(res?.kind) {
+  if (res?.kind) {
     console.log("res for instance type___", res);
     const items = res.items.map((item) => ({
       name: item.metadata.name,
@@ -866,7 +875,7 @@ const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
   };
 
   const res = await api("post", url, payload);
-  if(res?.kind) {
+  if (res?.kind) {
     dispatch(getInstanceTypesAction());
     next(res);
   }

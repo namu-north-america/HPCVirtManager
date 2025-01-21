@@ -61,7 +61,7 @@ export default function AddVirtualMachine() {
         <UploadTemplatesModal isOpen={isUploadTemplatesOpen} onClose={() => setIsUploadTemplatesOpen(false)} />
       </CSSTransition>
       <Page
-        title="Add Virtual Machine"
+        title={isVmPool ? "Add Virtual Machine Pool" : "Add Virtual Machine"}
         breadcrumb={<BreadCrumb model={breadcrumbItems} />}
         titleAction={
           <div className="flex gap-2 ml-auto">

@@ -114,11 +114,14 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   };
 
   const onAddVM = () => {
-    if (showFormErrors(data, setData) || isTemplateMode) {
+
+    const skipFields = isVmPool && data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
+
+    if (showFormErrors(data, setData, skipFields) || isTemplateMode) {
       if (validateDisk() || isTemplateMode) {
         setLoading(true);
         dispatch(
-          onAddVMAction(data, disks, images, networks, setLoading, () => {
+          onAddVMAction(data, disks, images, networks, isVmPool, setLoading, () => {
             setLoading(false);
             if (onClose) {
               onClose();

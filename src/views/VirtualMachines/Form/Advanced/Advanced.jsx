@@ -39,14 +39,14 @@ export default function Advanced({ data, setDisks, disks, handleChange, onValida
   useEffect(() => {
     let yaml = "";
     console.log("isVmPool", isVmPool);
-    if (!updatedYamlString && !useVmTemplate) {
-      if (isVmPool) {
-        yaml = data.virtualMachineType === "custom" ? yamlVmPoolTemplateCustomOption : yamlVmPoolTemplateInstanceType;
-      } else {
-        yaml = yamlTemplate;
-      }
+    if (isVmPool) {
+      yaml = data.virtualMachineType === "custom" ? yamlVmPoolTemplateCustomOption : yamlVmPoolTemplateInstanceType;
     } else {
-      yaml = updatedYamlString;
+      if (!updatedYamlString && !useVmTemplate) {
+        yaml = yamlTemplate;
+      } else {
+        yaml = updatedYamlString;
+      }
     }
 
     const objectData = jsYaml.load(yaml);

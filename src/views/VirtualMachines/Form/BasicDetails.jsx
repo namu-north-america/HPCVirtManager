@@ -26,7 +26,7 @@ export default function BasicDetails({ data, handleChange, isVmPool, ...rest }) 
 
   useEffect(() => {
     if (isVmPool) {
-      setVirtualMachineTypes(['custom', ...instanceTypes]);
+      setVirtualMachineTypes(['custom', ...instanceTypes.map((item) => item.name)]);
     }
   }, [isVmPool, instanceTypes]);
 
@@ -42,7 +42,7 @@ export default function BasicDetails({ data, handleChange, isVmPool, ...rest }) 
             onChange={handleChange}
             name="sockets"
             keyfilter="pint"
-            disabled={useVmTemplate} nnnnnnn
+            disabled={useVmTemplate}
             required
           />
           <CustomInput data={data} onChange={handleChange} name="cores" keyfilter="pint" required />
