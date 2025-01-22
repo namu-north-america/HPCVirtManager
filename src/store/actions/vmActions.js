@@ -886,13 +886,16 @@ const getVMPoolsAction = () => async (dispatch) => {
   const res = await api("get", url);
   console.log("res for vm pools___", res.items);
   if (res?.kind) {
-    const items = res.items.map((item) => ({
-      name: item.metadata.name,
-      namespace: item.metadata.namespace,
-      status: item.status.phase,
-      instancetype: item.spec.virtualMachineTemplate.spec.instancetype.name,
-      replicas: item.spec.replicas,
-    }))
+    const items = res.items.map((item) => {
+      const instancetype = item.spec.virtualMachineTemplate.spec?.instancetype?.name || 'custom';
+      return {
+        name: item.metadata.name,
+        namespace: item.metadata.namespace,
+        status: item.status.readyReplicas,
+        instancetype: instancetype,
+        replicas: item.spec.replicas,
+      }
+    });
 
     dispatch(setVMPools(items));
   }
