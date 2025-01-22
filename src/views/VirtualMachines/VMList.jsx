@@ -7,7 +7,7 @@ import { Column } from "primereact/column";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
 import { getVMsAction } from "../../store/actions/projectActions";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   onChangeVmStatusAction,
   onDeleteVMAction,
@@ -28,6 +28,7 @@ import { Tooltip } from "primereact/tooltip";
 import { VncScreen } from 'react-vnc';
 import { Dialog } from 'primereact/dialog';
 import { FaDesktop } from 'react-icons/fa';
+import { statusTemplate } from "../../shared/DataTableTemplates";
 
 const iconTemplate = () => {
   return (
@@ -39,43 +40,6 @@ const iconTemplate = () => {
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
-};
-
-const statusTemplate = (item) => {
-  const getStatusClass = (status) => {
-    const baseClasses = "text-sm px-2 py-0.5 rounded-lg inline-block font-medium border";
-    switch (status) {
-      case "Starting":
-        return `${baseClasses} text-pink-700 bg-pink-50 border-pink-200`;
-      case "Ready":
-        return `${baseClasses} text-green-700 bg-green-50 border-green-200`;
-      case "Running":
-        return `${baseClasses} text-cyan-700 bg-cyan-50 border-cyan-200`;
-      case "Stopping":
-        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
-      case "Stopped":
-        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
-      case "Paused":
-        return `${baseClasses} text-yellow-700 bg-yellow-50 border-yellow-200`;
-      default:
-        return `${baseClasses} text-gray-700 bg-gray-50 border-gray-200`;
-    }
-  };
-
-  return (
-    <span className={getStatusClass(item.status)}>
-      <i style={{ 
-        display: 'inline-block',
-        width: '6px',
-        height: '6px',
-        borderRadius: '50%',
-        backgroundColor: 'currentColor',
-        marginRight: '6px',
-        verticalAlign: 'middle'
-      }}></i>
-      {item.status}
-    </span>
-  );
 };
 
 const osTemplate = (item) => {
@@ -103,8 +67,15 @@ const breadcrumItems = [
 export default function VMList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { state } = useLocation();
   const { profile, userNamespace } = useSelector((state) => state.user);
   let { vms, namespacesDropdown } = useSelector((state) => state.project);
+  const [search, setSearch] = useState("");
+  const [selectedNamespace, setSelectedNamespace] = useState("");
+  const [migrateVisible, setMigrateVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+  const [showVncDialog, setShowVncDialog] = useState(false);
+  const [selectedVM, setSelectedVM] = useState(null);
 
   const hasAccess = () => {
     if (profile?.role === "admin") return true;
@@ -117,14 +88,12 @@ export default function VMList() {
     }
   };
 
-  const [search, setSearch] = useState("");
-  const [selectedNamespace, setSelectedNamespace] = useState("");
-  const [selectedVm, setSelectedVm] = useState(null);
-  const [migrateVisible, setMigrateVisible] = useState(false);
-  const [editVisible, setEditVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showVncDialog, setShowVncDialog] = useState(false);
-  const [selectedVM, setSelectedVM] = useState(null);
+  let filteredVMs = vms;
+  const filteredVMPoolName = state && state.filteredVMPool || '';
+  if (filteredVMPoolName) {
+    const regex = new RegExp(`^${filteredVMPoolName}-\\d+`);
+    filteredVMs = vms.filter(item => regex.test(item.name))
+  }
 
   useEffect(() => {
     dispatch(getVMsAction());
@@ -154,10 +123,10 @@ export default function VMList() {
     return (
       <div className="flex align-items-center gap-2">
         {item?.status === "Running" && (
-          <button 
+          <button
             className="p-link inline-flex align-items-center justify-content-center"
             onClick={() => onOpenConsole(item)}
-            style={{ 
+            style={{
               width: '1.75rem',
               height: '1.75rem',
               borderRadius: '50%',
@@ -165,9 +134,9 @@ export default function VMList() {
               padding: 0
             }}
           >
-            <i 
+            <i
               className="pi pi-code"
-              style={{ 
+              style={{
                 fontSize: '0.875rem',
                 display: 'flex',
                 alignItems: 'center',
@@ -263,12 +232,12 @@ export default function VMList() {
             {!["Running", "Paused", "Stopped", "Stopping"].includes(
               item?.status
             ) && (
-              <>
-                <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                  Stop
-                </div>
-              </>
-            )}
+                <>
+                  <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+                    Stop
+                  </div>
+                </>
+              )}
           </div>
         </CustomOverlay>
       </div>
@@ -431,10 +400,10 @@ export default function VMList() {
         breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
         addText="New VM"
       >
-        <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
+        <DataTable value={filteredVMs} tableStyle={{ minWidth: "50rem" }}>
           <Column body={iconTemplate} style={{ width: '2rem' }}></Column>
           <Column field="name" header="Name" body={vmname}></Column>
-          <Column field="status" header="Status" body={statusTemplate}></Column>
+          <Column field="status" header="Status" body={(item) => statusTemplate(item.status)}></Column>
           <Column field="guestOS" header="OS" body={osTemplate}></Column>
           <Column field="time" header="Created" body={timeTemplate}></Column>
           <Column field="node" header="Node"></Column>
