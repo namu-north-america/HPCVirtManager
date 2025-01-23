@@ -888,12 +888,14 @@ const getVMPoolsAction = () => async (dispatch) => {
   if (res?.kind) {
     const items = res.items.map((item) => {
       const instancetype = item.spec.virtualMachineTemplate.spec?.instancetype?.name || 'custom';
+      const status = item.status.readyReplicas && (item.status.readyReplicas <= item.spec.replicas) ? 'Running' : "Paused";
       return {
         name: item.metadata.name,
         namespace: item.metadata.namespace,
-        status: item.status.readyReplicas,
+        status: status,
         instancetype: instancetype,
         replicas: item.spec.replicas,
+        runningReplicas: item.status.readyReplicas
       }
     });
 

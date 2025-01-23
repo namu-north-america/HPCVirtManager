@@ -21,6 +21,7 @@ const getVMsAction = () => async (dispatch) => {
   if (res?.items) {
     items = res.items;
   }
+
   items = await Promise.all(
     items.map(async (item, i) => {
       let instance = {};
@@ -33,7 +34,7 @@ const getVMsAction = () => async (dispatch) => {
           })
         );
       }
-
+      //const isVMPoolReplica = item.metadata.labels['kubevirt.io/vmpool'];
       return {
         id: item?.metadata?.uid,
         name: item?.metadata?.name,
@@ -43,7 +44,7 @@ const getVMsAction = () => async (dispatch) => {
         guestOS: instance?.status?.guestOSInfo?.name,
         node:
           item?.spec?.template?.spec?.nodeSelector?.[
-            "kubernetes.io/hostname"
+          "kubernetes.io/hostname"
           ] || instance?.status?.nodeName,
         namespace: item?.metadata?.namespace,
         cluster: "-",
