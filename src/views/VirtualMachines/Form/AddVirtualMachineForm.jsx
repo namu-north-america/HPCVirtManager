@@ -14,18 +14,18 @@ import Storage from "./Storage";
 import Review from "./Review";
 import UserData from "./UserData";
 import { setSelectedTemplate } from "../../../store/slices/vmSlice";
-import { onAddVMAction, getNetworksAction } from "../../../store/actions/vmActions";
+import { onAddVMAction, getNetworksAction, getInstanceTypesAction } from "../../../store/actions/vmActions";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import formValidation from "../../../utils/validations";
 import { getDisksAction, getStorageClassesAction } from "../../../store/actions/storageActions";
 import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
-import Advanced from "./Advanced";
+import Advanced from "./Advanced/Advanced";
 import { getImagesAction } from "../../../store/actions/imageActions";
 import { setFormFocusEvent } from "../../../store/slices/commonSlice";
 import _throttle from "lodash/throttle";
 
-export default function AddVirtualMachineForm({ onClose }) {
+export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector((state) => state.project);
   const { selectedTemplate, useVmTemplate } = useSelector((state) => state.vm);
@@ -47,6 +47,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     dispatch(getDisksAction());
     dispatch(getImagesAction());
     dispatch(getNetworksAction());
+    if (isVmPool) dispatch(getInstanceTypesAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -69,6 +70,9 @@ export default function AddVirtualMachineForm({ onClose }) {
     advanced: "",
     userName: "",
     password: "",
+    // When isVmPool active, this field is required
+    virtualMachineType: isVmPool ? "custom" : "",
+    replicas: isVmPool ? 2 : "",
   });
 
   const [disks, setDisks] = useState([
@@ -110,11 +114,14 @@ export default function AddVirtualMachineForm({ onClose }) {
   };
 
   const onAddVM = () => {
-    if (showFormErrors(data, setData) || isTemplateMode) {
+
+    const skipFields = isVmPool && data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
+
+    if (showFormErrors(data, setData, skipFields) || isTemplateMode) {
       if (validateDisk() || isTemplateMode) {
         setLoading(true);
         dispatch(
-          onAddVMAction(data, disks, images, networks, setLoading, () => {
+          onAddVMAction(data, disks, images, networks, isVmPool, setLoading, () => {
             setLoading(false);
             if (onClose) {
               onClose();
@@ -294,7 +301,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 0:
         return (
           <>
-            <BasicDetails data={data} handleChange={handleChange} />
+            <BasicDetails data={data} handleChange={handleChange} isVmPool={isVmPool} />
             <Buttonlayout>
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(1)} />
             </Buttonlayout>
@@ -362,6 +369,7 @@ export default function AddVirtualMachineForm({ onClose }) {
         return (
           <>
             <Advanced
+              isVmPool={isVmPool}
               data={data}
               disks={disks}
               networks={networks}
@@ -407,9 +415,8 @@ export default function AddVirtualMachineForm({ onClose }) {
               {steps.map((step, index) => (
                 <li
                   key={index}
-                  className={`step-item ${activeIndex === index ? "active" : ""} ${
-                    completedSteps.includes(index) ? "completed" : ""
-                  }`}
+                  className={`step-item ${activeIndex === index ? "active" : ""} ${completedSteps.includes(index) ? "completed" : ""
+                    }`}
                   onClick={() => onStepChange(index)}
                   role="button"
                   tabIndex={0}

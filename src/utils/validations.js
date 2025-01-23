@@ -80,7 +80,6 @@ const formValidation = (name, value, state, ignore = []) => {
     case "threads":
     case "memory":
     case "priorityClass":
-      // console.log("validation____", name, value, equal(length(value)));
       if (equal(length(value)) || !value) {
         formErrors[name] = `${firstLetterToUppercase(name)} is required!`;
       } else if (!stringValidation(value)) {
@@ -88,7 +87,6 @@ const formValidation = (name, value, state, ignore = []) => {
       } else {
         formErrors[name] = "";
       }
-      console.log("validation____", name, value);
       break;
     case "password":
       if (equal(length(value))) {

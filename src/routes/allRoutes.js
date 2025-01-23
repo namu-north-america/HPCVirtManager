@@ -18,6 +18,7 @@ import AddVMTemplate from "../views/VirtualMachines/AddVMTemplate";
 import VMPools from "../views/VirtualMachines/VMPools";
 import CreateK8sCluster from "../views/VMPools/Form/CreateK8sCluster";
 import InstanceTypes from "../views/InstanceTypes/InstanceTypes";
+import VMPoolsPage from "../views/VMPools/VMPools";
 
 export const PrivateRoutes = [
   {
@@ -144,6 +145,12 @@ export const PrivateRoutes = [
     path: "/instance-types",
     name: "Instance Types",
     element: <InstanceTypes />,
+    role: "shared",
+  },
+  {
+    path: "/vm-pools",
+    name: "VM Pools",
+    element: <VMPoolsPage />,
     role: "shared",
   },
 ];
