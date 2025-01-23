@@ -67,6 +67,10 @@ const endPoints = {
     `/apis/k8s.cni.cncf.io/v1/network-attachment-definitions`,
   GET_VM_EVENTS: ({namespace, name}) =>
     `/api/v1/namespaces/${namespace}/events?fieldSelector=involvedObject.kind=VirtualMachineInstance,involvedObject.name=${name}&limit=500`,
+  ADD_INSTANCE_TYPE: ({ name }) =>
+    `/apis/instancetype.kubevirt.io/v1beta1/virtualmachineclusterinstancetypes/${name}`,
+  GET_INSTANCE_TYPES: () =>
+    `/apis/instancetype.kubevirt.io/v1beta1/virtualmachineclusterinstancetypes`,
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",

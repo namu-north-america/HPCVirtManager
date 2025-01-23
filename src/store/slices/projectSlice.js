@@ -16,7 +16,8 @@ const initialState = {
   accessModeDropdown: ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"],
   bindingModeDropdown: ["bridge", "masquerade"],
   priorityClassesDropdown: [],
-  networksDropdown: []
+  networksDropdown: [],
+  instanceTypes: []
 };
 
 export const projectSlice = createSlice({
@@ -57,6 +58,9 @@ export const projectSlice = createSlice({
     },
     setNetworks: (state, action) => {
       state.networksDropdown = action.payload.map(item => item.name);
+    },
+    setInstanceTypes: (state, action) => {
+      state.instanceTypes = action.payload;
     }
   },
 });
@@ -71,5 +75,6 @@ export const {
   setPriorityClasses,
   setImages,
   setNetworks,
+  setInstanceTypes
 } = projectSlice.actions;
 export default projectSlice.reducer;
