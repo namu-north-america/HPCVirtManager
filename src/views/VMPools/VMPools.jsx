@@ -42,7 +42,9 @@ export default function VMPools() {
   const onEdit = () => { }
   const onDelete = () => { }
   const onMigrate = () => { }
-  const onPauseUnpause = () => { }
+  const onPauseUnpause = (item) => {
+    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: 'unpouse' }, () => { }))
+  }
 
   const actionTemplate = (item) => {
     return (
@@ -143,7 +145,14 @@ export default function VMPools() {
   }
 
   return (
-    <Page title="VM Pools" onAdd={onAdd} addText="Add VM Pool">
+    <Page
+      title="VM Pools"
+      onAdd={onAdd}
+      onRefresh={() => {
+        dispatch(getVMPoolsAction());
+      }}
+      addText="Add VM Pool"
+    >
       <DataTable value={vmPools}>
         <Column field="namespace" header="Namespace"></Column>
         <Column field="name" header="Name" body={nameTemplate}></Column>
