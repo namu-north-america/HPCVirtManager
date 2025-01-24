@@ -75,6 +75,8 @@ const endPoints = {
     `/apis/instancetype.kubevirt.io/v1beta1/virtualmachineclusterinstancetypes/${name}`,
   GET_INSTANCE_TYPES: () =>
     `/apis/instancetype.kubevirt.io/v1beta1/virtualmachineclusterinstancetypes`,
+  PATCH_VM_POOL: ({ namespace, name }) =>
+    `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",

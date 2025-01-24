@@ -4,7 +4,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
-import { getVMPoolsAction } from "../../store/actions/vmActions";
+import { getVMPoolsAction, onStopOrStartVMPoolActions } from "../../store/actions/vmActions";
 import { useDispatch } from "react-redux";
 import { statusTemplate } from "../../shared/DataTableTemplates";
 import CustomOverlay from '../../shared/CustomOverlay';
@@ -32,7 +32,11 @@ export default function VMPools() {
     )
   }
 
-  const onStop = () => { }
+  const onStop = (item) => {
+    console.log('on start or stop____', item)
+    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace }, () => { }))
+  }
+
   const onRestart = () => { }
   const onStart = () => { }
   const onEdit = () => { }
