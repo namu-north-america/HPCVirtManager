@@ -28,7 +28,7 @@ import { Tooltip } from "primereact/tooltip";
 import { VncScreen } from 'react-vnc';
 import { Dialog } from 'primereact/dialog';
 import { FaDesktop } from 'react-icons/fa';
-import { statusTemplate } from "../../shared/DataTableTemplates";
+import { StatusTemplate, statusTemplate } from "../../shared/DataTableTemplates";
 
 const iconTemplate = () => {
   return (
@@ -67,7 +67,6 @@ const breadcrumItems = [
 export default function VMList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { state } = useLocation();
   const { profile, userNamespace } = useSelector((state) => state.user);
   let { vms, namespacesDropdown } = useSelector((state) => state.project);
   const [search, setSearch] = useState("");
@@ -87,13 +86,6 @@ export default function VMList() {
       return filteredNamespaces.length > 0;
     }
   };
-
-  let filteredVMs = vms;
-  const filteredVMPoolName = state && state.filteredVMPool || '';
-  if (filteredVMPoolName) {
-    const regex = new RegExp(`^${filteredVMPoolName}-\\d+`);
-    filteredVMs = vms.filter(item => regex.test(item.name))
-  }
 
   useEffect(() => {
     dispatch(getVMsAction());
@@ -400,10 +392,10 @@ export default function VMList() {
         breadcrumb={<CustomBreadcrum items={breadcrumItems} />}
         addText="New VM"
       >
-        <DataTable value={filteredVMs} tableStyle={{ minWidth: "50rem" }}>
+        <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
           <Column body={iconTemplate} style={{ width: '2rem' }}></Column>
           <Column field="name" header="Name" body={vmname}></Column>
-          <Column field="status" header="Status" body={(item) => statusTemplate(item.status)}></Column>
+          <Column field="status" header="Status" body={(item) => <StatusTemplate status={item.status} />}></Column>
           <Column field="guestOS" header="OS" body={osTemplate}></Column>
           <Column field="time" header="Created" body={timeTemplate}></Column>
           <Column field="node" header="Node"></Column>

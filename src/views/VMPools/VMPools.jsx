@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getVMPoolsAction, onStopOrStartVMPoolActions } from "../../store/actions/vmActions";
 import { useDispatch } from "react-redux";
-import { statusTemplate } from "../../shared/DataTableTemplates";
+import { StatusTemplate, statusTemplate } from "../../shared/DataTableTemplates";
 import CustomOverlay from '../../shared/CustomOverlay';
 import { Link } from "react-router-dom";
 
@@ -26,7 +26,7 @@ export default function VMPools() {
 
   const nameTemplate = (item) => {
     return (
-      <Link to={`/virtual-machines/list`} state={{ filteredVMPool: item.name }}>
+      <Link to={`/virtual-machine-pools/${item.name}`} state={{ vmPoolName: item.name }}>
         {item.name}
       </Link>
     )
@@ -42,6 +42,7 @@ export default function VMPools() {
   const onEdit = () => { }
   const onDelete = () => { }
   const onMigrate = () => { }
+
   const onPauseUnpause = (item) => {
     dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: 'unpouse' }, () => { }))
   }
@@ -140,7 +141,7 @@ export default function VMPools() {
 
   const vmPoolStatusTemplate = (item) => {
     return (
-      <span>{statusTemplate(item.status)}{item.runningReplicas}</span>
+      <span>{<StatusTemplate status={item.status} />}{item.runningReplicas}</span>
     )
   }
 

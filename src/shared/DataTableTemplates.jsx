@@ -1,4 +1,4 @@
-const statusTemplate = (status) => {
+const StatusTemplate = ({ status }) => {
     const getStatusClass = (status) => {
         const baseClasses = "text-sm px-2 py-0.5 rounded-lg inline-block font-medium border";
         switch (status) {
@@ -35,4 +35,4 @@ const statusTemplate = (status) => {
     );
 };
 
-export { statusTemplate }
+export { StatusTemplate }
