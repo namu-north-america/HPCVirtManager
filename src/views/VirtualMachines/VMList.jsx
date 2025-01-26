@@ -127,7 +127,7 @@ export default function VMList() {
       >
         <VMListTable
           vms={vms}
-          userNamespace={userNamespace}
+          user={{ userNamespace, profile }}
           // actionTemplate={actionTemplate}
           onError={showError}
           onOpenConsole={onOpenConsole}

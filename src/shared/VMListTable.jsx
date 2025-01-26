@@ -44,8 +44,7 @@ const osTemplate = (item) => {
 
 export const VMListTable = ({
   vms,
-  userNamespace,
-  profile,
+  user,
   onError: showError,
   onOpenConsole: openConsole,
   onSelectVm: setSelectedVM,
@@ -53,7 +52,7 @@ export const VMListTable = ({
   onEdit: onEditPropAction
 }) => {
   const dispatch = useDispatch();
-
+  const { userNamespace, profile } = user;
   const onStart = (item) => {
     if (
       checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||

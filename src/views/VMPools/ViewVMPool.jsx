@@ -6,7 +6,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import Grid, { Col } from "../../shared/Grid";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getVmsByVMPoolAction } from "../../store/actions/projectActions";
+import { getVMsAction } from "../../store/actions/projectActions";
 import { VMListTable } from "../../shared/VMListTable";
 
 export const ViewVMPool = () => {
@@ -17,7 +17,7 @@ export const ViewVMPool = () => {
   const { name, namespace } = state || {};
 
   useEffect(() => {
-    dispatch(getVmsByVMPoolAction({ name, namespace }))
+    dispatch(getVMsAction({ name, namespace, isVmPool: true }))
   }, [])
 
 
@@ -42,18 +42,7 @@ export const ViewVMPool = () => {
           <TabPanel header="Instances">
             <Grid>
               <Col size={12}>
-                <VMListTable vms={vmPoolInstances} userNamespace={userNamespace} />
-                {/* <DataTable value={vmPoolInstances} tableStyle={{ minWidth: "50rem" }}>
-                  <Column body={<IconTemplate />} style={{ width: '2rem' }}></Column>
-                  <Column field="name" header="Name" body={(item) => <VmName item={item} user={{ userNamespace, profile }} />}></Column>
-                  <Column field="status" header="Status" body={(item) => <StatusTemplate status={item.status} />}></Column>
-                  <Column field="guestOS" header="OS" body={osTemplate}></Column>
-                  <Column field="time" header="Created" body={timeTemplate}></Column>
-                  <Column field="node" header="Node"></Column>
-                  <Column field="namespace" header="Namespace"></Column>
-                  <Column field="cluster" header="Cluster"></Column>
-                  <Column body={actionTemplate}></Column>
-                </DataTable> */}
+                <VMListTable vms={vmPoolInstances} user={{ userNamespace, profile }} />
               </Col>
             </Grid>
           </TabPanel>
