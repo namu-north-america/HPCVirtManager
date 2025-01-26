@@ -7,23 +7,6 @@ import { getVMsAction } from "./projectActions";
 import { setInstanceTypes, setVMPools } from "../slices/projectSlice";
 import moment from "moment";
 
-// spec:
-//   dataVolumeTemplates:
-//   - metadata:
-//       name: datavolume-iso
-//     spec:
-//       storage:
-//         accessModes:
-//         - ReadWriteOnce
-//         resources:
-//           requests:
-//             storage: 10Gi
-//         storageClassName: nfs-client
-//       source:
-//         http:
-//           url: >-
-//             https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
-
 const addVMRequest = async (payload, url, dispatch, next) => {
   const res = await api("post", url, payload);
 

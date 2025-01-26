@@ -26,7 +26,7 @@ export default function VMPools() {
 
   const nameTemplate = (item) => {
     return (
-      <Link to={`/virtual-machine-pools/${item.name}`} state={{ vmPoolName: item.name }}>
+      <Link to={`/virtual-machine-pools/${item.name}`} state={{ name: item.name, namespace: item.namespace }}>
         {item.name}
       </Link>
     )

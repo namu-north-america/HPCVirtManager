@@ -18,7 +18,8 @@ const initialState = {
   priorityClassesDropdown: [],
   networksDropdown: [],
   instanceTypes: [],
-  vmPools: []
+  vmPools: [],
+  vmPoolInstances: []
 };
 
 export const projectSlice = createSlice({
@@ -65,6 +66,9 @@ export const projectSlice = createSlice({
     },
     setInstanceTypes: (state, action) => {
       state.instanceTypes = action.payload;
+    },
+    setVMsOfPool: (state, action) => {
+      state.vmPoolInstances = action.payload;
     }
   },
 });
@@ -80,6 +84,7 @@ export const {
   setImages,
   setNetworks,
   setInstanceTypes,
-  setVMPools
+  setVMPools,
+  setVMsOfPool
 } = projectSlice.actions;
 export default projectSlice.reducer;

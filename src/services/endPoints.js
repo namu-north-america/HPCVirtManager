@@ -47,6 +47,8 @@ const endPoints = {
     `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
   GET_VM_POOLS: () =>
     `/apis/pool.kubevirt.io/v1alpha1/virtualmachinepools`,
+  GET_VM_POOL_VMS: ({ name, namespace }) =>
+    `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachines?labelSelector=kubevirt.io%2Fvmpool%3D${name}&limit=500`,
   EDIT_VM: ({ namespace, name }) =>
     `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachines/${name}`,
   GET_VM: ({ namespace, name }) =>

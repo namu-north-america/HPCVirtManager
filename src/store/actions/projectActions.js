@@ -8,6 +8,7 @@ import {
   setNodeDetail,
   setVMs,
   setPriorityClasses,
+  setVMsOfPool,
 } from "../slices/projectSlice";
 import {
   setNodeMemory,
@@ -245,6 +246,23 @@ const getPriorityClassAction = () => async (dispatch) => {
   dispatch(setPriorityClasses(items));
 };
 
+const getVmsByVMPoolAction = ({ name, namespace }) => async (dispatch) => {
+  const url = endPoints.GET_VM_POOL_VMS({ name, namespace });
+  const res = await api('get', url);
+  if (res.items) {
+    const { items } = res;
+    const vms = items.map(item => {
+      return {
+        name: item.metadata.name,
+        time: item?.metadata?.creationTimestamp,
+        status: item?.status?.printableStatus,
+      }
+    })
+    dispatch(setVMsOfPool(vms))
+  }
+  console.log('list of vms for the vmpool', name, res)
+}
+
 export {
   getVMsAction,
   getNodesAction,
@@ -257,4 +275,5 @@ export {
   getNodeUsedCPUCoresAction,
   getNamespacesAction,
   getPriorityClassAction,
+  getVmsByVMPoolAction
 };
