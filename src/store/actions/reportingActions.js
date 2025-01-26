@@ -1,6 +1,5 @@
 import { setClusterCpuInfo,setMemoryInfo,setStorageInfo, setVmCpuStats, setVmMemoryStats, setVmStorageStats } from "../slices/reportingSlice";
 import prometheusApi from "../../services/prometheusApi";
-import endPoints from "../../services/endPoints";
 
 const onGetStorageAction = () => async (dispatch) => {
   const cpuQuery =
