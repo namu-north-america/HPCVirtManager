@@ -931,6 +931,33 @@ const onStopOrStartVMPoolActions = ({ name, namespace, action = 'stop' }, next) 
 
 }
 
+const onVmPoolsScaleAction = ({ name, namespace, replicas }, next) => async (dispatch) => {
+  const url = endPoints.PATCH_VM_POOL({ name, namespace });
+
+  let payload = {
+    spec: {
+      replicas
+    }
+  };
+
+  const res = await api(
+    "patch",
+    url,
+    payload,
+    {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    }
+  );
+
+  if (res?.kind) {
+    dispatch(getVMPoolsAction());
+    if (next) {
+      next();
+    }
+  }
+}
+
 export {
   onAddVMAction,
   onEditVMAction,
@@ -948,5 +975,6 @@ export {
   getInstanceTypesAction,
   getVMPoolsAction,
   onStopOrStartVMPoolActions,
-  onGetVMPoolAction
+  onGetVMPoolAction,
+  onVmPoolsScaleAction
 };

@@ -2,9 +2,10 @@ import Page from "../../shared/Page";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { Button } from "primereact/button";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { getVMPoolsAction, onStopOrStartVMPoolActions } from "../../store/actions/vmActions";
+import { getVMPoolsAction, onStopOrStartVMPoolActions, onVmPoolsScaleAction } from "../../store/actions/vmActions";
 import { useDispatch } from "react-redux";
 import { StatusTemplate } from "../../shared/DataTableTemplates";
 import { Link } from "react-router-dom";
@@ -13,6 +14,7 @@ import CustomModal from "../../shared/CustomModal";
 import { CustomForm } from "../../shared/AllInputs";
 import { Controller } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { Buttonlayout } from "../../shared/CustomButton";
 import { CustomInput } from "../../shared/AllInputs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +28,7 @@ export default function VMPools() {
   const dispatch = useDispatch();
   const [showScaleDialog, setShowScaleDialog] = useState(false);
   const [selectedPool, setSelectedPool] = useState({});
+  const { vmPools } = useSelector(state => state.project);
 
   const scaleForm = useForm({
     resolver: zodResolver(schema),
@@ -37,8 +40,6 @@ export default function VMPools() {
   const onAdd = () => {
     navigate("/virtual-machines/add", { state: { isVmPool: true } });
   }
-  const { vmPools } = useSelector(state => state.project);
-  console.log(vmPools);
 
   useEffect(() => {
     dispatch(getVMPoolsAction());
@@ -62,6 +63,7 @@ export default function VMPools() {
   const onEdit = () => { }
   const onDelete = () => { }
   const onMigrate = () => { }
+
   const onScaleDownOrUp = (item) => {
     setSelectedPool(prev => {
       return item;
@@ -161,6 +163,16 @@ export default function VMPools() {
     )
   }
 
+  const onScaleSubmit = (values) => {
+    dispatch(onVmPoolsScaleAction({
+      name: selectedPool.name,
+      namespace: selectedPool.namespace,
+      replicas: values.replicas
+    }, (res) => {
+      setShowScaleDialog(false)
+    }))
+  }
+
   return (
     <Page
       title="VM Pools"
@@ -179,7 +191,7 @@ export default function VMPools() {
         <Column body={actionTemplate}></Column>
       </DataTable>
       <CustomModal title="Scale down/up" visible={showScaleDialog} onHide={setShowScaleDialog}>
-        <CustomForm>
+        <CustomForm onSubmit={scaleForm.handleSubmit(onScaleSubmit)}>
           <Controller
             control={scaleForm.control}
             name="replicas"
@@ -187,6 +199,12 @@ export default function VMPools() {
               <CustomInput label={`Replicas(${selectedPool.replicas})`} name="replicas" col={12} {...field} errorMessage={error?.message} />
             }
           />
+          <Buttonlayout position="end" className="w-full">
+            <Button
+              label={`Scale ${scaleForm.watch('replicas') > selectedPool.replicas ? 'Up' : 'Down'}`}
+              type="submit"
+            />
+          </Buttonlayout>
         </CustomForm>
       </CustomModal>
     </Page>
