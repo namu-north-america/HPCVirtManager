@@ -2,6 +2,7 @@ import { FaDesktop } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { checkNamespaceValue } from '../utils/commonFunctions';
 import CustomOverlay from "./CustomOverlay";
+import { ActionsOverlay } from './ActionsOverlay';
 
 const IconTemplate = () => {
   return (
@@ -59,97 +60,95 @@ const ActionTemplate = ({ item, onActions }) => {
           />
         </button>
       )}
-      <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
-        <div>
-          <div className="font-semibold mb-2">Actions</div>
-
-          {item?.status === "Running" && (
-            <>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onPauseUnpause(item, "pause")}
-              >
-                Pause
-              </div>
-              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                Stop
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onRestart(item)}
-              >
-                Restart
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onMigrate(item)}
-              >
-                Migrate
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onOpenConsole(item)}
-              >
-                Open Console
-              </div>
-            </>
-          )}
-          {item?.status === "Paused" && (
-            <>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onPauseUnpause(item, "unpause")}
-              >
-                Unpause
-              </div>
-              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                Stop
-              </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onRestart(item)}
-              >
-                Restart
-              </div>
-            </>
-          )}
-          {(item?.status === "Stopped" || item?.status === "Stopping") && (
-            <>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onStart(item)}
-              >
-                Start
-              </div>
+      <ActionsOverlay>
+        {item?.status === "Running" && (
+          <>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onPauseUnpause(item, "pause")}
+            >
+              Pause
+            </div>
+            <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+              Stop
+            </div>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onRestart(item)}
+            >
+              Restart
+            </div>
+            {onMigrate && (
               <div
                 className="cursor-pointer mb-2"
                 onClick={() => onMigrate(item)}
               >
                 Migrate
               </div>
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onEdit(item)}
-              >
-                Edit VM
-              </div>
-              <div className="cursor-pointer" onClick={() => onDelete(item)}>
-                Delete VM
-              </div>
-            </>
-          )}
-
-          {!["Running", "Paused", "Stopped", "Stopping"].includes(
-            item?.status
-          ) && (
-              <>
-                <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                  Stop
-                </div>
-              </>
             )}
-        </div>
-      </CustomOverlay>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onOpenConsole(item)}
+            >
+              Open Console
+            </div>
+          </>
+        )}
+        {item?.status === "Paused" && (
+          <>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onPauseUnpause(item, "unpause")}
+            >
+              Unpause
+            </div>
+            <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+              Stop
+            </div>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onRestart(item)}
+            >
+              Restart
+            </div>
+          </>
+        )}
+        {(item?.status === "Stopped" || item?.status === "Stopping") && (
+          <>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onStart(item)}
+            >
+              Start
+            </div>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onMigrate(item)}
+            >
+              Migrate
+            </div>
+            <div
+              className="cursor-pointer mb-2"
+              onClick={() => onEdit(item)}
+            >
+              Edit VM
+            </div>
+            <div className="cursor-pointer" onClick={() => onDelete(item)}>
+              Delete VM
+            </div>
+          </>
+        )}
+
+        {!["Running", "Paused", "Stopped", "Stopping"].includes(
+          item?.status
+        ) && (
+            <>
+              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+                Stop
+              </div>
+            </>
+          )}
+      </ActionsOverlay>
     </div>
   );
 };

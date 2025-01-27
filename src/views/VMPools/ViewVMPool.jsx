@@ -69,7 +69,7 @@ export const ViewVMPool = () => {
           <TabPanel header="Instances">
             <Grid>
               <Col size={12}>
-                <VMListTable vms={vmPoolInstances} user={{ userNamespace, profile }} />
+                <VMListTable vms={vmPoolInstances} user={{ userNamespace, profile }} skipActions={['onMigrate']} />
               </Col>
             </Grid>
           </TabPanel>

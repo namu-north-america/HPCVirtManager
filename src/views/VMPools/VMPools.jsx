@@ -54,7 +54,6 @@ export default function VMPools() {
   }
 
   const onStop = (item) => {
-    console.log('on start or stop____', item)
     dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace }, () => { }))
   }
 
@@ -62,7 +61,6 @@ export default function VMPools() {
   const onStart = () => { }
   const onEdit = () => { }
   const onDelete = () => { }
-  const onMigrate = () => { }
 
   const onScaleDownOrUp = (item) => {
     setSelectedPool(prev => {
@@ -91,11 +89,6 @@ export default function VMPools() {
               onClick={() => onRestart(item)}
             >
               Restart
-            </ActionItem>
-            <ActionItem
-              onClick={() => onMigrate(item)}
-            >
-              Migrate
             </ActionItem>
             <ActionItem
               onClick={() => onScaleDownOrUp(item)}
@@ -127,11 +120,6 @@ export default function VMPools() {
               onClick={() => onStart(item)}
             >
               Start
-            </ActionItem>
-            <ActionItem
-              onClick={() => onMigrate(item)}
-            >
-              Migrate
             </ActionItem>
             <ActionItem
               onClick={() => onEdit(item)}

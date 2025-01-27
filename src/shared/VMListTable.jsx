@@ -49,7 +49,8 @@ export const VMListTable = ({
   onOpenConsole: openConsole,
   onSelectVm: setSelectedVM,
   onMigrate: onMigratePropAction,
-  onEdit: onEditPropAction
+  onEdit: onEditPropAction,
+  skipActions = []
 }) => {
   const dispatch = useDispatch();
   const { userNamespace, profile } = user;
@@ -149,8 +150,12 @@ export const VMListTable = ({
   };
 
   const actionTemplate = useCallback((item) => {
+    const onActions = { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onStart, onEdit }
+    if (!skipActions.includes('onMigrate')) {
+      onActions = { ...onActions, onMigrate }
+    }
     return (
-      <ActionTemplate item={item} onActions={{ onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onMigrate, onStart, onEdit }} />
+      <ActionTemplate item={item} onActions={onActions} />
     )
   }, [vms])
   console.log('vms_____', vms, userNamespace)
