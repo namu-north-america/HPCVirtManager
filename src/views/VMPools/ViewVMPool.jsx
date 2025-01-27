@@ -21,14 +21,20 @@ export const ViewVMPool = () => {
   const [poolData, setPoolData] = useState({
     name: '',
     namespace: '',
-    yaml: ''
+    yaml: '',
+    replicas: '',
+    instanceType: ''
   });
 
   useEffect(() => {
     dispatch(getVMsAction({ name, namespace, isVmPool: true }))
     dispatch(onGetVMPoolAction({ name, namespace }, (res) => {
       console.log('response of vm ppooooo', res)
-      setPoolData({ yaml: res })
+      setPoolData({
+        yaml: res,
+        replicas: res.status.replicas,
+        instanceType: res.spec.virtualMachineTemplate.spec.instancetype.name
+      })
     }))
   }, [])
 
@@ -47,6 +53,8 @@ export const ViewVMPool = () => {
                 <CustomCard title="Details">
                   <CustomCardField title="Name" value={name} />
                   <CustomCardField title="Namespace" value={namespace} />
+                  <CustomCardField title="Replicas" value={poolData.replicas} />
+                  <CustomCardField title="Instance Type" value={poolData.instanceType} />
                 </CustomCard>
               </Col>
             </Grid>
