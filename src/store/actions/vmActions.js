@@ -472,6 +472,19 @@ const onGetVMAction = (data, next) => async () => {
   }
 };
 
+const onGetVMPoolAction = ({ name, namespace }, next) => async (dispatch) => {
+  let url = endPoints.GET_VM_POOL({
+    name,
+    namespace
+  })
+
+  const res = await api('get', url);
+  console.log('response is______', res);
+  if (res) {
+    next(res)
+  }
+}
+
 const getVolumesAction = (namespace, volumes, next) => async () => {
   const data = await Promise.all(
     volumes.map(async (item) => {
@@ -934,5 +947,6 @@ export {
   onAddInstanceTypeAction,
   getInstanceTypesAction,
   getVMPoolsAction,
-  onStopOrStartVMPoolActions
+  onStopOrStartVMPoolActions,
+  onGetVMPoolAction
 };
