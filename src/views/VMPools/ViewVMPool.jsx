@@ -33,7 +33,7 @@ export const ViewVMPool = () => {
       setPoolData({
         yaml: res,
         replicas: res.status.replicas,
-        instanceType: res.spec.virtualMachineTemplate.spec.instancetype.name
+        instanceType: res.spec?.virtualMachineTemplate.spec?.instancetype?.name || 'custom'
       })
     }))
   }, [])
