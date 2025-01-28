@@ -150,7 +150,7 @@ export const VMListTable = ({
   };
 
   const actionTemplate = useCallback((item) => {
-    const onActions = { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onStart, onEdit }
+    let onActions = { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onStart, onEdit }
     if (!skipActions.includes('onMigrate')) {
       onActions = { ...onActions, onMigrate }
     }

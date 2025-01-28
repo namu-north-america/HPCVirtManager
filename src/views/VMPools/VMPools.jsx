@@ -16,6 +16,7 @@ import { Controller } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { Buttonlayout } from "../../shared/CustomButton";
 import { CustomInput } from "../../shared/AllInputs";
+import { onDeleteVmPoolAction } from "../../store/actions/vmActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -60,7 +61,9 @@ export default function VMPools() {
   const onRestart = () => { }
   const onStart = () => { }
   const onEdit = () => { }
-  const onDelete = () => { }
+  const onDelete = (item) => {
+    dispatch(onDeleteVmPoolAction({ name: item.name, namespace: item.namespace }, (res) => { }))
+  }
 
   const onScaleDownOrUp = (item) => {
     setSelectedPool(prev => {
@@ -95,6 +98,9 @@ export default function VMPools() {
             >
               Scale
             </ActionItem>
+            <ActionItem onClick={() => onDelete(item)}>
+              Delete
+            </ActionItem>
           </>
         )}
         {item?.status === "Paused" && (
@@ -111,6 +117,9 @@ export default function VMPools() {
               onClick={() => onRestart(item)}
             >
               Restart
+            </ActionItem>
+            <ActionItem onClick={() => onDelete(item)}>
+              Delete
             </ActionItem>
           </>
         )}
@@ -171,8 +180,8 @@ export default function VMPools() {
       addText="Add VM Pool"
     >
       <DataTable value={vmPools}>
-        <Column field="namespace" header="Namespace"></Column>
         <Column field="name" header="Name" body={nameTemplate}></Column>
+        <Column field="namespace" header="Namespace"></Column>
         <Column field="status" header="Status" body={vmPoolStatusTemplate}></Column>
         <Column field="instancetype" header="Instance Type"></Column>
         <Column field="replicas" header="Replicas"></Column>

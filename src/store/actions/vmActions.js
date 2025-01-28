@@ -853,7 +853,7 @@ const getInstanceTypesAction = () => async (dispatch) => {
 };
 
 const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
-  const url = endPoints.ADD_INSTANCE_TYPE({ name: data.name });
+  const url = endPoints.INSTANCE_TYPE({ name: data.name });
   const payload = {
     apiVersion: "instancetype.kubevirt.io/v1beta1",
     kind: "VirtualMachineClusterInstancetype",
@@ -865,12 +865,51 @@ const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
         guest: data.cpu,
       },
       memory: {
-        guest: data.memory,
+        guest: data.memory + 'Gi',
       },
     },
   };
 
   const res = await api("post", url, payload);
+  if (res?.kind) {
+    dispatch(getInstanceTypesAction());
+    next(res);
+  }
+};
+
+const onEditInstanceType = (data, next) => async (dispatch) => {
+  const url = endPoints.INSTANCE_TYPE({ name: data.name });
+  const payload = {
+    apiVersion: "instancetype.kubevirt.io/v1beta1",
+    kind: "VirtualMachineClusterInstancetype",
+    metadata: {
+      name: data.name,
+    },
+    spec: {
+      cpu: {
+        guest: data.cpu,
+      },
+      memory: {
+        guest: data.memory + 'Gi',
+      },
+    },
+  };
+
+  const res = await api("patch", url, payload, {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    });
+  if (res?.kind) {
+    dispatch(getInstanceTypesAction());
+    next(res);
+  }
+};
+
+const onDeleteInstanceType = ({ name }, next) => async (dispatch) => {
+  const url = endPoints.INSTANCE_TYPE({ name });
+
+  const res = await api("delete", url);
+
   if (res?.kind) {
     dispatch(getInstanceTypesAction());
     next(res);
@@ -903,10 +942,10 @@ const onStopOrStartVMPoolActions = ({ name, namespace, action = 'stop' }, next) 
   const url = endPoints.PATCH_VM_POOL({ name, namespace });
 
   let payload = {
-    spec: {
-      virtualMachineTemplate: {
-        spec: {
-          running: action !== 'stop'
+    "spec": {
+      "virtualMachineTemplate": {
+        "spec": {
+          "running": action !== 'stop'
         }
       }
     }
@@ -958,6 +997,14 @@ const onVmPoolsScaleAction = ({ name, namespace, replicas }, next) => async (dis
   }
 }
 
+const onDeleteVmPoolAction = ({ name, namespace }, next) => async (dispatch) => {
+  const url = endPoints.DELETE_VM_POOL({ name, namespace });
+  const res = await api('delete', url)
+
+  console.log('response of delete vmpool', res);
+
+}
+
 export {
   onAddVMAction,
   onEditVMAction,
@@ -973,8 +1020,11 @@ export {
   getVmEvents,
   onAddInstanceTypeAction,
   getInstanceTypesAction,
+  onDeleteInstanceType,
+  onEditInstanceType,
   getVMPoolsAction,
   onStopOrStartVMPoolActions,
   onGetVMPoolAction,
-  onVmPoolsScaleAction
+  onVmPoolsScaleAction,
+  onDeleteVmPoolAction,
 };
