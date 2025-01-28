@@ -8,6 +8,7 @@ import {
   setNodeDetail,
   setVMs,
   setPriorityClasses,
+  setVMsOfPool,
 } from "../slices/projectSlice";
 import {
   setNodeMemory,
@@ -15,12 +16,14 @@ import {
   setNodeCpu,
 } from "../slices/reportingSlice";
 
-const getVMsAction = () => async (dispatch) => {
-  const res = await api("get", endPoints.VMS);
+const getVMsAction = ({ name, namespace, isVmPool = false } = {}) => async (dispatch) => {
+  const url = isVmPool ? endPoints.GET_VM_POOL_VMS({ name, namespace }) : endPoints.VMS;
+  const res = await api("get", url);
   let items = [];
   if (res?.items) {
     items = res.items;
   }
+
   items = await Promise.all(
     items.map(async (item, i) => {
       let instance = {};
@@ -33,7 +36,7 @@ const getVMsAction = () => async (dispatch) => {
           })
         );
       }
-
+      //const isVMPoolReplica = item.metadata.labels['kubevirt.io/vmpool'];
       return {
         id: item?.metadata?.uid,
         name: item?.metadata?.name,
@@ -43,7 +46,7 @@ const getVMsAction = () => async (dispatch) => {
         guestOS: instance?.status?.guestOSInfo?.name,
         node:
           item?.spec?.template?.spec?.nodeSelector?.[
-            "kubernetes.io/hostname"
+          "kubernetes.io/hostname"
           ] || instance?.status?.nodeName,
         namespace: item?.metadata?.namespace,
         cluster: "-",
@@ -57,7 +60,8 @@ const getVMsAction = () => async (dispatch) => {
       };
     })
   );
-  dispatch(setVMs(items));
+
+  dispatch(isVmPool ? setVMsOfPool(items) : setVMs(items));
 };
 
 // <----------------- Nodes Action-------------->>

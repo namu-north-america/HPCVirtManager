@@ -7,23 +7,6 @@ import { getVMsAction } from "./projectActions";
 import { setInstanceTypes, setVMPools } from "../slices/projectSlice";
 import moment from "moment";
 
-// spec:
-//   dataVolumeTemplates:
-//   - metadata:
-//       name: datavolume-iso
-//     spec:
-//       storage:
-//         accessModes:
-//         - ReadWriteOnce
-//         resources:
-//           requests:
-//             storage: 10Gi
-//         storageClassName: nfs-client
-//       source:
-//         http:
-//           url: >-
-//             https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
-
 const addVMRequest = async (payload, url, dispatch, next) => {
   const res = await api("post", url, payload);
 
@@ -489,6 +472,19 @@ const onGetVMAction = (data, next) => async () => {
   }
 };
 
+const onGetVMPoolAction = ({ name, namespace }, next) => async (dispatch) => {
+  let url = endPoints.GET_VM_POOL({
+    name,
+    namespace
+  })
+
+  const res = await api('get', url);
+  console.log('response is______', res);
+  if (res) {
+    next(res)
+  }
+}
+
 const getVolumesAction = (namespace, volumes, next) => async () => {
   const data = await Promise.all(
     volumes.map(async (item) => {
@@ -857,7 +853,7 @@ const getInstanceTypesAction = () => async (dispatch) => {
 };
 
 const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
-  const url = endPoints.ADD_INSTANCE_TYPE({ name: data.name });
+  const url = endPoints.INSTANCE_TYPE({ name: data.name });
   const payload = {
     apiVersion: "instancetype.kubevirt.io/v1beta1",
     kind: "VirtualMachineClusterInstancetype",
@@ -869,12 +865,51 @@ const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
         guest: data.cpu,
       },
       memory: {
-        guest: data.memory,
+        guest: data.memory + 'Gi',
       },
     },
   };
 
   const res = await api("post", url, payload);
+  if (res?.kind) {
+    dispatch(getInstanceTypesAction());
+    next(res);
+  }
+};
+
+const onEditInstanceType = (data, next) => async (dispatch) => {
+  const url = endPoints.INSTANCE_TYPE({ name: data.name });
+  const payload = {
+    apiVersion: "instancetype.kubevirt.io/v1beta1",
+    kind: "VirtualMachineClusterInstancetype",
+    metadata: {
+      name: data.name,
+    },
+    spec: {
+      cpu: {
+        guest: data.cpu,
+      },
+      memory: {
+        guest: data.memory + 'Gi',
+      },
+    },
+  };
+
+  const res = await api("patch", url, payload, {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    });
+  if (res?.kind) {
+    dispatch(getInstanceTypesAction());
+    next(res);
+  }
+};
+
+const onDeleteInstanceType = ({ name }, next) => async (dispatch) => {
+  const url = endPoints.INSTANCE_TYPE({ name });
+
+  const res = await api("delete", url);
+
   if (res?.kind) {
     dispatch(getInstanceTypesAction());
     next(res);
@@ -888,18 +923,87 @@ const getVMPoolsAction = () => async (dispatch) => {
   if (res?.kind) {
     const items = res.items.map((item) => {
       const instancetype = item.spec.virtualMachineTemplate.spec?.instancetype?.name || 'custom';
+      const status = item.status.readyReplicas && (item.status.readyReplicas <= item.spec.replicas) ? 'Running' : "Paused";
       return {
         name: item.metadata.name,
         namespace: item.metadata.namespace,
-        status: item.status.readyReplicas,
+        status: status,
         instancetype: instancetype,
         replicas: item.spec.replicas,
+        runningReplicas: item.status.readyReplicas
       }
     });
 
     dispatch(setVMPools(items));
   }
 };
+
+const onStopOrStartVMPoolActions = ({ name, namespace, action = 'stop' }, next) => async (dispatch) => {
+  const url = endPoints.PATCH_VM_POOL({ name, namespace });
+
+  let payload = {
+    "spec": {
+      "virtualMachineTemplate": {
+        "spec": {
+          "running": action !== 'stop'
+        }
+      }
+    }
+  };
+
+  const res = await api(
+    "patch",
+    url,
+    payload,
+    {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    }
+  );
+
+  if (res?.kind) {
+    dispatch(getVMPoolsAction());
+    if (next) {
+      next();
+    }
+  }
+
+}
+
+const onVmPoolsScaleAction = ({ name, namespace, replicas }, next) => async (dispatch) => {
+  const url = endPoints.PATCH_VM_POOL({ name, namespace });
+
+  let payload = {
+    spec: {
+      replicas
+    }
+  };
+
+  const res = await api(
+    "patch",
+    url,
+    payload,
+    {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    }
+  );
+
+  if (res?.kind) {
+    dispatch(getVMPoolsAction());
+    if (next) {
+      next();
+    }
+  }
+}
+
+const onDeleteVmPoolAction = ({ name, namespace }, next) => async (dispatch) => {
+  const url = endPoints.DELETE_VM_POOL({ name, namespace });
+  const res = await api('delete', url)
+
+  console.log('response of delete vmpool', res);
+
+}
 
 export {
   onAddVMAction,
@@ -916,5 +1020,11 @@ export {
   getVmEvents,
   onAddInstanceTypeAction,
   getInstanceTypesAction,
+  onDeleteInstanceType,
+  onEditInstanceType,
   getVMPoolsAction,
+  onStopOrStartVMPoolActions,
+  onGetVMPoolAction,
+  onVmPoolsScaleAction,
+  onDeleteVmPoolAction,
 };
