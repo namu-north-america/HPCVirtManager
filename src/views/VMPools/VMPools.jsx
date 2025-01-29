@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { getVMPoolsAction, onStopOrStartVMPoolActions, onVmPoolsScaleAction } from "../../store/actions/vmActions";
+import { onStopOrStartVMPoolActions, onVmPoolsScaleAction } from "../../store/actions/vmActions";
 import { useDispatch } from "react-redux";
 import { StatusTemplate } from "../../shared/DataTableTemplates";
 import { Link } from "react-router-dom";
@@ -19,6 +19,7 @@ import { CustomInput } from "../../shared/AllInputs";
 import { onDeleteVmPoolAction } from "../../store/actions/vmActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { getVMPoolsAction } from "../../store/actions/projectActions";
 
 const schema = z.object({
   replicas: z.number({ coerce: true }).min(1, { message: 'Replicas number is required' })
@@ -59,8 +60,14 @@ export default function VMPools() {
   }
 
   const onRestart = () => { }
-  const onStart = () => { }
+
+  const onStart = (item) => {
+    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: 'unpouse' }, () => { }))
+
+  }
+
   const onEdit = () => { }
+
   const onDelete = (item) => {
     dispatch(onDeleteVmPoolAction({ name: item.name, namespace: item.namespace }, (res) => { }))
   }
@@ -74,17 +81,14 @@ export default function VMPools() {
   }
 
   const onPauseUnpause = (item) => {
-    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: 'unpouse' }, () => { }))
   }
 
   const actionTemplate = (item) => {
+    const { status } = item;
     return (
       <ActionsOverlay>
-        {item?.status === "Running" && (
+        {status.running > 0 && (
           <>
-            <ActionItem onClick={() => onPauseUnpause(item, "pause")}>
-              Pause
-            </ActionItem>
             <ActionItem onClick={() => onStop(item)}>
               Stop
             </ActionItem>
@@ -98,12 +102,10 @@ export default function VMPools() {
             >
               Scale
             </ActionItem>
-            <ActionItem onClick={() => onDelete(item)}>
-              Delete
-            </ActionItem>
+
           </>
         )}
-        {item?.status === "Paused" && (
+        {status.paused > 0 && (
           <>
             <ActionItem
               onClick={() => onPauseUnpause(item, "unpause")}
@@ -123,7 +125,7 @@ export default function VMPools() {
             </ActionItem>
           </>
         )}
-        {(item?.status === "Stopped" || item?.status === "Stopping") && (
+        {(status.stopped > 0 || item?.status === "Stopping") && (
           <>
             <ActionItem
               onClick={() => onStart(item)}
@@ -135,28 +137,24 @@ export default function VMPools() {
             >
               Edit VM
             </ActionItem>
-            <ActionItem onClick={() => onDelete(item)}>
-              Delete VM
-            </ActionItem>
           </>
         )}
 
-        {!["Running", "Paused", "Stopped", "Stopping"].includes(
-          item?.status
-        ) && (
-            <>
-              <ActionItem onClick={() => onStop(item)}>
-                Stop
-              </ActionItem>
-            </>
-          )}
+        <ActionItem onClick={() => onDelete(item)}>
+          Delete
+        </ActionItem>
       </ActionsOverlay>
     );
   }
 
   const vmPoolStatusTemplate = (item) => {
+    const { status } = item;
+
     return (
-      <span>{<StatusTemplate status={item.status} />}{item.runningReplicas}</span>
+      <div className="flex">
+        {status.running > 0 && <span className="px-1"><StatusTemplate status={'Running'} />({item.runningReplicas})</span>}
+        {status.stopped > 0 && <span><StatusTemplate status={'Stopped'} />({status.stopped})</span>}
+      </div>
     )
   }
 
