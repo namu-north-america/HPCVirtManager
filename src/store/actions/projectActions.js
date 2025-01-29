@@ -9,6 +9,7 @@ import {
   setVMs,
   setPriorityClasses,
   setVMsOfPool,
+  setVMPools
 } from "../slices/projectSlice";
 import {
   setNodeMemory,
@@ -16,7 +17,7 @@ import {
   setNodeCpu,
 } from "../slices/reportingSlice";
 
-const getVMsAction = ({ name, namespace, isVmPool = false } = {}) => async (dispatch) => {
+const getVMsRequest = async ({ name, namespace, isVmPool = false } = {}) => {
   const url = isVmPool ? endPoints.GET_VM_POOL_VMS({ name, namespace }) : endPoints.VMS;
   const res = await api("get", url);
   let items = [];
@@ -60,6 +61,13 @@ const getVMsAction = ({ name, namespace, isVmPool = false } = {}) => async (disp
       };
     })
   );
+
+  return items;
+}
+
+const getVMsAction = ({ name, namespace, isVmPool = false } = {}) => async (dispatch) => {
+
+  const items = await getVMsRequest({ name, namespace, isVmPool });
 
   dispatch(isVmPool ? setVMsOfPool(items) : setVMs(items));
 };
@@ -248,6 +256,37 @@ const getPriorityClassAction = () => async (dispatch) => {
   dispatch(setPriorityClasses(items));
 };
 
+const getVMPoolsAction = () => async (dispatch) => {
+  const url = endPoints.GET_VM_POOLS();
+  const res = await api("get", url);
+  console.log("res for vm pools___", res.items);
+  if (res?.kind) {
+
+    const items = await Promise.all(res.items.map(async (item) => {
+      const instancetype = item.spec.virtualMachineTemplate.spec?.instancetype?.name || 'custom';
+
+      const name = item.metadata.name;
+      const namespace = item.metadata.namespace;
+
+      const vms = await getVMsRequest({ name, namespace, isVmPool: true });
+      const status = vms.map(vm => vm.status);
+      const runningCount = status.filter(item => item === 'Running').length;
+      const stoppedCount = status.filter(item => item == 'Stopped').length;
+      return {
+        name: item.metadata.name,
+        namespace: item.metadata.namespace,
+        status: { running: runningCount, stopped: stoppedCount },
+        instancetype: instancetype,
+        replicas: item.spec.replicas,
+        runningReplicas: item.status.readyReplicas,
+        vms: vms
+      }
+    }));
+
+    dispatch(setVMPools(items));
+  }
+};
+
 export {
   getVMsAction,
   getNodesAction,
@@ -260,4 +299,5 @@ export {
   getNodeUsedCPUCoresAction,
   getNamespacesAction,
   getPriorityClassAction,
+  getVMPoolsAction,
 };

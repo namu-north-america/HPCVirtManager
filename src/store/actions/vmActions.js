@@ -4,7 +4,8 @@ import { showToastAction } from "../slices/commonSlice";
 import { setLiveMigrations, setNetworks } from "../slices/projectSlice";
 import { setVmEvents } from "../slices/reportingSlice";
 import { getVMsAction } from "./projectActions";
-import { setInstanceTypes, setVMPools } from "../slices/projectSlice";
+import { setInstanceTypes } from "../slices/projectSlice";
+import { getVMPoolsAction } from "./projectActions";
 import moment from "moment";
 
 const addVMRequest = async (payload, url, dispatch, next) => {
@@ -916,28 +917,6 @@ const onDeleteInstanceType = ({ name }, next) => async (dispatch) => {
   }
 };
 
-const getVMPoolsAction = () => async (dispatch) => {
-  const url = endPoints.GET_VM_POOLS();
-  const res = await api("get", url);
-  console.log("res for vm pools___", res.items);
-  if (res?.kind) {
-    const items = res.items.map((item) => {
-      const instancetype = item.spec.virtualMachineTemplate.spec?.instancetype?.name || 'custom';
-      const status = item.status.readyReplicas && (item.status.readyReplicas <= item.spec.replicas) ? 'Running' : "Paused";
-      return {
-        name: item.metadata.name,
-        namespace: item.metadata.namespace,
-        status: status,
-        instancetype: instancetype,
-        replicas: item.spec.replicas,
-        runningReplicas: item.status.readyReplicas
-      }
-    });
-
-    dispatch(setVMPools(items));
-  }
-};
-
 const onStopOrStartVMPoolActions = ({ name, namespace, action = 'stop' }, next) => async (dispatch) => {
   const url = endPoints.PATCH_VM_POOL({ name, namespace });
 
@@ -1022,7 +1001,6 @@ export {
   getInstanceTypesAction,
   onDeleteInstanceType,
   onEditInstanceType,
-  getVMPoolsAction,
   onStopOrStartVMPoolActions,
   onGetVMPoolAction,
   onVmPoolsScaleAction,
