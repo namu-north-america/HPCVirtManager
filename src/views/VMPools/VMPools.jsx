@@ -20,28 +20,33 @@ import { onDeleteVmPoolAction } from "../../store/actions/vmActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { getVMPoolsAction } from "../../store/actions/projectActions";
+import { confirmDialog } from "primereact/confirmdialog";
+import { checkNamespaceValue, showFormErrors } from "../../utils/commonFunctions";
+import { showToastAction } from "../../store/slices/commonSlice";
 
 const schema = z.object({
-  replicas: z.number({ coerce: true }).min(1, { message: 'Replicas number is required' })
-})
+  replicas: z.number({ coerce: true }).min(1, { message: "Replicas number is required" }),
+});
 
 export default function VMPools() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showScaleDialog, setShowScaleDialog] = useState(false);
+  const { profile, userNamespace } = useSelector((state) => state.user);
+
   const [selectedPool, setSelectedPool] = useState({});
-  const { vmPools } = useSelector(state => state.project);
+  const { vmPools } = useSelector((state) => state.project);
 
   const scaleForm = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      replicas: 0
-    }
+      replicas: 0,
+    },
   });
 
   const onAdd = () => {
     navigate("/virtual-machines/add", { state: { isVmPool: true } });
-  }
+  };
 
   useEffect(() => {
     dispatch(getVMPoolsAction());
@@ -52,36 +57,55 @@ export default function VMPools() {
       <Link to={`/virtual-machine-pools/${item.name}`} state={{ name: item.name, namespace: item.namespace }}>
         {item.name}
       </Link>
-    )
-  }
+    );
+  };
+
+  const showError = () => {
+    dispatch(
+      showToastAction({
+        type: "error",
+        title: "Sorry You have no permission!",
+      })
+    );
+  };
 
   const onStop = (item) => {
-    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace }, () => { }))
-  }
+    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace }, () => {}));
+  };
 
-  const onRestart = () => { }
+  const onRestart = () => {};
 
   const onStart = (item) => {
-    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: 'unpouse' }, () => { }))
+    dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: "unpouse" }, () => {}));
+  };
 
-  }
-
-  const onEdit = () => { }
+  const onEdit = () => {};
 
   const onDelete = (item) => {
-    dispatch(onDeleteVmPoolAction({ name: item.name, namespace: item.namespace }, (res) => { }))
-  }
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
+      confirmDialog({
+        message: "Do you want to delete this record?",
+        header: "Delete Confirmation",
+        icon: "pi pi-info-circle",
+        position: "top",
+        accept: () => {
+          dispatch(onDeleteVmPoolAction({ name: item.name, namespace: item.namespace }, (res) => {}));
+        },
+      });
+    } else {
+      showError();
+    }
+  };
 
   const onScaleDownOrUp = (item) => {
-    setSelectedPool(prev => {
+    setSelectedPool((prev) => {
       return item;
-    })
-    scaleForm.setValue('replicas', item.replicas)
-    setShowScaleDialog(true)
-  }
+    });
+    scaleForm.setValue("replicas", item.replicas);
+    setShowScaleDialog(true);
+  };
 
-  const onPauseUnpause = (item) => {
-  }
+  const onPauseUnpause = (item) => {};
 
   const actionTemplate = (item) => {
     const { status } = item;
@@ -89,84 +113,64 @@ export default function VMPools() {
       <ActionsOverlay>
         {status.running > 0 && (
           <>
-            <ActionItem onClick={() => onStop(item)}>
-              Stop
-            </ActionItem>
-            <ActionItem
-              onClick={() => onRestart(item)}
-            >
-              Restart
-            </ActionItem>
-            <ActionItem
-              onClick={() => onScaleDownOrUp(item)}
-            >
-              Scale
-            </ActionItem>
-
+            <ActionItem onClick={() => onStop(item)}>Stop</ActionItem>
+            <ActionItem onClick={() => onRestart(item)}>Restart</ActionItem>
+            <ActionItem onClick={() => onScaleDownOrUp(item)}>Scale</ActionItem>
           </>
         )}
         {status.paused > 0 && (
           <>
-            <ActionItem
-              onClick={() => onPauseUnpause(item, "unpause")}
-            >
-              Unpause
-            </ActionItem>
-            <ActionItem onClick={() => onStop(item)}>
-              Stop
-            </ActionItem>
-            <ActionItem
-              onClick={() => onRestart(item)}
-            >
-              Restart
-            </ActionItem>
-            <ActionItem onClick={() => onDelete(item)}>
-              Delete
-            </ActionItem>
+            <ActionItem onClick={() => onPauseUnpause(item, "unpause")}>Unpause</ActionItem>
+            <ActionItem onClick={() => onStop(item)}>Stop</ActionItem>
+            <ActionItem onClick={() => onRestart(item)}>Restart</ActionItem>
+            <ActionItem onClick={() => onDelete(item)}>Delete</ActionItem>
           </>
         )}
         {(status.stopped > 0 || item?.status === "Stopping") && (
           <>
-            <ActionItem
-              onClick={() => onStart(item)}
-            >
-              Start
-            </ActionItem>
-            <ActionItem
-              onClick={() => onEdit(item)}
-            >
-              Edit VM
-            </ActionItem>
+            <ActionItem onClick={() => onStart(item)}>Start</ActionItem>
+            <ActionItem onClick={() => onEdit(item)}>Edit VM</ActionItem>
           </>
         )}
 
-        <ActionItem onClick={() => onDelete(item)}>
-          Delete
-        </ActionItem>
+        <ActionItem onClick={() => onDelete(item)}>Delete</ActionItem>
       </ActionsOverlay>
     );
-  }
+  };
 
   const vmPoolStatusTemplate = (item) => {
     const { status } = item;
 
     return (
       <div className="flex">
-        {status.running > 0 && <span className="px-1"><StatusTemplate status={'Running'} />({item.runningReplicas})</span>}
-        {status.stopped > 0 && <span><StatusTemplate status={'Stopped'} />({status.stopped})</span>}
+        {status.running > 0 && (
+          <span className="px-1">
+            <StatusTemplate status={"Running"} />({item.runningReplicas})
+          </span>
+        )}
+        {status.stopped > 0 && (
+          <span>
+            <StatusTemplate status={"Stopped"} />({status.stopped})
+          </span>
+        )}
       </div>
-    )
-  }
+    );
+  };
 
   const onScaleSubmit = (values) => {
-    dispatch(onVmPoolsScaleAction({
-      name: selectedPool.name,
-      namespace: selectedPool.namespace,
-      replicas: values.replicas
-    }, (res) => {
-      setShowScaleDialog(false)
-    }))
-  }
+    dispatch(
+      onVmPoolsScaleAction(
+        {
+          name: selectedPool.name,
+          namespace: selectedPool.namespace,
+          replicas: values.replicas,
+        },
+        (res) => {
+          setShowScaleDialog(false);
+        }
+      )
+    );
+  };
 
   return (
     <Page
@@ -190,18 +194,24 @@ export default function VMPools() {
           <Controller
             control={scaleForm.control}
             name="replicas"
-            render={({ field, fieldState: { error } }) =>
-              <CustomInput label={`Replicas(${selectedPool.replicas})`} name="replicas" col={12} {...field} errorMessage={error?.message} />
-            }
+            render={({ field, fieldState: { error } }) => (
+              <CustomInput
+                label={`Replicas(${selectedPool.replicas})`}
+                name="replicas"
+                col={12}
+                {...field}
+                errorMessage={error?.message}
+              />
+            )}
           />
           <Buttonlayout position="end" className="w-full">
             <Button
-              label={`Scale ${scaleForm.watch('replicas') > selectedPool.replicas ? 'Up' : 'Down'}`}
+              label={`Scale ${scaleForm.watch("replicas") > selectedPool.replicas ? "Up" : "Down"}`}
               type="submit"
             />
           </Buttonlayout>
         </CustomForm>
       </CustomModal>
     </Page>
-  )
+  );
 }
