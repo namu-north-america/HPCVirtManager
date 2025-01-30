@@ -120,7 +120,6 @@ export default function VMPools() {
         )}
         {status.paused > 0 && (
           <>
-            <ActionItem onClick={() => onPauseUnpause(item, "unpause")}>Unpause</ActionItem>
             <ActionItem onClick={() => onStop(item)}>Stop</ActionItem>
             <ActionItem onClick={() => onRestart(item)}>Restart</ActionItem>
             <ActionItem onClick={() => onDelete(item)}>Delete</ActionItem>
@@ -151,6 +150,11 @@ export default function VMPools() {
         {status.stopped > 0 && (
           <span>
             <StatusTemplate status={"Stopped"} />({status.stopped})
+          </span>
+        )}
+        {status.provisioning > 0 && (
+          <span>
+            <StatusTemplate status={"Provisioning"} />({status.provisioning})
           </span>
         )}
       </div>
