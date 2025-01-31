@@ -5,14 +5,19 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { onStopOrStartVMPoolActions, onVmPoolsScaleAction } from "../../store/actions/vmActions";
+import {
+  getInstanceTypesAction,
+  onEditVmPoolAction,
+  onStopOrStartVMPoolActions,
+  onVmPoolsScaleAction,
+} from "../../store/actions/vmActions";
 import { useDispatch } from "react-redux";
 import { StatusTemplate } from "../../shared/DataTableTemplates";
 import { Link } from "react-router-dom";
 import { ActionItem, ActionsOverlay } from "../../shared/ActionsOverlay";
 import CustomModal from "../../shared/CustomModal";
-import { CustomForm } from "../../shared/AllInputs";
-import { Controller } from "react-hook-form";
+import { CustomDropDown, CustomForm } from "../../shared/AllInputs";
+import { Controller, set } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { Buttonlayout } from "../../shared/CustomButton";
 import { CustomInput } from "../../shared/AllInputs";
@@ -33,7 +38,9 @@ export default function VMPools() {
   const dispatch = useDispatch();
   const [showScaleDialog, setShowScaleDialog] = useState(false);
   const { profile, userNamespace } = useSelector((state) => state.user);
-
+  const instanceTypes = useSelector((state) => state.project.instanceTypes.map((item) => item.name));
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  // const [instanceType, setInstanceType] = useState({});
   const [selectedPool, setSelectedPool] = useState({});
   const { vmPools } = useSelector((state) => state.project);
 
@@ -44,12 +51,19 @@ export default function VMPools() {
     },
   });
 
+  const editForm = useForm({
+    defaultValues: {
+      instanceType: selectedPool.instancetype,
+    },
+  });
+
   const onAdd = () => {
     navigate("/virtual-machines/add", { state: { isVmPool: true } });
   };
 
   useEffect(() => {
     dispatch(getVMPoolsAction());
+    dispatch(getInstanceTypesAction());
   }, []);
 
   const nameTemplate = (item) => {
@@ -79,7 +93,11 @@ export default function VMPools() {
     dispatch(onStopOrStartVMPoolActions({ name: item.name, namespace: item.namespace, action: "unpouse" }, () => {}));
   };
 
-  const onEdit = () => {};
+  const onEdit = (item) => {
+    setShowEditDialog(true);
+    setSelectedPool(item);
+    editForm.reset({ instanceType: item.instancetype });
+  };
 
   const onDelete = (item) => {
     if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
@@ -105,8 +123,6 @@ export default function VMPools() {
     setShowScaleDialog(true);
   };
 
-  const onPauseUnpause = (item) => {};
-
   const actionTemplate = (item) => {
     const { status } = item;
     return (
@@ -128,11 +144,11 @@ export default function VMPools() {
         {(status.stopped > 0 || item?.status === "Stopping") && (
           <>
             <ActionItem onClick={() => onStart(item)}>Start</ActionItem>
-            <ActionItem onClick={() => onEdit(item)}>Edit VM</ActionItem>
           </>
         )}
 
         <ActionItem onClick={() => onDelete(item)}>Delete</ActionItem>
+        <ActionItem onClick={() => onEdit(item)}>Edit VM</ActionItem>
       </ActionsOverlay>
     );
   };
@@ -176,6 +192,15 @@ export default function VMPools() {
     );
   };
 
+  const onEditSubmit = (values) => {
+    const data = { instancetype: values.instanceType };
+    dispatch(
+      onEditVmPoolAction({ name: selectedPool.name, namespace: selectedPool.namespace, data }, (res) => {
+        setShowEditDialog(false);
+      })
+    );
+  };
+
   return (
     <Page
       title="VM Pools"
@@ -213,6 +238,30 @@ export default function VMPools() {
               label={`Scale ${scaleForm.watch("replicas") > selectedPool.replicas ? "Up" : "Down"}`}
               type="submit"
             />
+          </Buttonlayout>
+        </CustomForm>
+      </CustomModal>
+
+      <CustomModal title="Change Instance Type" visible={showEditDialog} setVisible={setShowEditDialog}>
+        <CustomForm onSubmit={editForm.handleSubmit(onEditSubmit)}>
+          <Controller
+            control={editForm.control}
+            name="instanceType"
+            render={({ field }) => {
+              return (
+                <CustomDropDown
+                  value={field.value}
+                  options={instanceTypes}
+                  onChange={field.onChange}
+                  name="virtualMachineType"
+                  label="Virtual Machine Type"
+                  required
+                />
+              );
+            }}
+          />
+          <Buttonlayout position="end" className="w-full">
+            <Button label={`Submit`} type="submit" />
           </Buttonlayout>
         </CustomForm>
       </CustomModal>

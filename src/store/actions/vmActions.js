@@ -195,7 +195,7 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
       });
 
       advanced.spec.virtualMachineTemplate.spec.dataVolumeTemplates =
-        advanced.spec.virtualMachineTemplate.spec.dataVolumeTemplates.map(template => ({
+        advanced.spec.virtualMachineTemplate.spec.dataVolumeTemplates.map((template) => ({
           ...template,
           apiVersion: "cdi.kubevirt.io/v1beta1",
           kind: "DataVolume",
@@ -270,7 +270,7 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
             images,
             dispatch
           );
-          console.log("disk data_____", diskData);
+
           let _obj = {
             cache: disk?.cache,
             diskType: disk?.diskType,
@@ -386,7 +386,6 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
       namespace: data.namespace,
       name: data.name,
     });
-    console.log("url____", url);
 
     await addVMRequest(payload, url, dispatch, next);
     setLoading(false);
@@ -473,18 +472,20 @@ const onGetVMAction = (data, next) => async () => {
   }
 };
 
-const onGetVMPoolAction = ({ name, namespace }, next) => async (dispatch) => {
-  let url = endPoints.GET_VM_POOL({
-    name,
-    namespace
-  })
+const onGetVMPoolAction =
+  ({ name, namespace }, next) =>
+  async (dispatch) => {
+    let url = endPoints.GET_VM_POOL({
+      name,
+      namespace,
+    });
 
-  const res = await api('get', url);
-  console.log('response is______', res);
-  if (res) {
-    next(res)
-  }
-}
+    const res = await api("get", url);
+
+    if (res) {
+      next(res);
+    }
+  };
 
 const getVolumesAction = (namespace, volumes, next) => async () => {
   const data = await Promise.all(
@@ -669,7 +670,6 @@ const onMigrateVMAction = (data, next) => async (dispatch) => {
 
 const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) => {
   let url = endPoints.HOT_PLUG_VOLUME({ namespace, name });
-  console.log("vm hotplog action___", url, namespace, data);
 
   const payload = {
     name: data.volume,
@@ -710,7 +710,6 @@ const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) =
 
 export const onAddNetworkHotPlugVmAction = (namespace, name, networks, interfaces, data, next) => async (dispatch) => {
   let url = endPoints.HOT_PLUG_NETWORK({ namespace, name });
-  console.log("vm hotplog action___", url, namespace, data);
 
   const payload = {
     // apiVersion: "cdi.kubevirt.io/v1beta1",
@@ -744,7 +743,6 @@ export const onAddNetworkHotPlugVmAction = (namespace, name, networks, interface
   };
 
   const res = await api("patch", url, payload, {}, { "Content-Type": "application/merge-patch+json" });
-  console.log("response____", res, payload);
   if (res?.status === "Failure") {
     if (res?.reason == "BadRequest") {
       dispatch(
@@ -803,7 +801,7 @@ export const getNetworksAction = (next) => async (dispatch) => {
         name: network.metadata.name,
       };
     });
-    console.log("networks___", res.items);
+
     dispatch(setNetworks(networks));
     // next(res);
   }
@@ -813,7 +811,7 @@ const getVmEvents = (namespace, name, next) => async (dispatch) => {
   let url = endPoints.GET_VM_EVENTS({ namespace, name });
   try {
     const res = await api("get", url);
-    console.log("response for this event___", res);
+
     if (res.kind === "EventList") {
       const events = res.items.map((item) => {
         const timestamp = item.firstTimestamp;
@@ -829,26 +827,25 @@ const getVmEvents = (namespace, name, next) => async (dispatch) => {
           type: item.type,
           message: item.message,
           reason: item.reason,
-          lastSeen: `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''} ${duration.seconds()}s`,
+          lastSeen: `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m ` : ""} ${duration.seconds()}s`,
           // lastSeen: moment(targetTime).fromNow(true),
         };
       });
-      console.log("response for this event___", events);
+
       dispatch(setVmEvents(events));
     }
-  } catch (err) { }
+  } catch (err) {}
 };
 
 const getInstanceTypesAction = () => async (dispatch) => {
   const url = endPoints.GET_INSTANCE_TYPES();
   const res = await api("get", url);
   if (res?.kind) {
-    console.log("res for instance type___", res);
     const items = res.items.map((item) => ({
       name: item.metadata.name,
       cpu: item.spec.cpu.guest,
       memory: item.spec.memory.guest,
-    }))
+    }));
     dispatch(setInstanceTypes(items));
   }
 };
@@ -866,7 +863,7 @@ const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
         guest: data.cpu,
       },
       memory: {
-        guest: data.memory + 'Gi',
+        guest: data.memory + "Gi",
       },
     },
   };
@@ -891,98 +888,147 @@ const onEditInstanceType = (data, next) => async (dispatch) => {
         guest: data.cpu,
       },
       memory: {
-        guest: data.memory + 'Gi',
+        guest: data.memory + "Gi",
       },
     },
   };
 
-  const res = await api("patch", url, payload, {},
+  const res = await api(
+    "patch",
+    url,
+    payload,
+    {},
     {
       "Content-Type": "application/merge-patch+json",
-    });
+    }
+  );
   if (res?.kind) {
     dispatch(getInstanceTypesAction());
     next(res);
   }
 };
 
-const onDeleteInstanceType = ({ name }, next) => async (dispatch) => {
-  const url = endPoints.INSTANCE_TYPE({ name });
+const onDeleteInstanceType =
+  ({ name }, next) =>
+  async (dispatch) => {
+    const url = endPoints.INSTANCE_TYPE({ name });
 
-  const res = await api("delete", url);
+    const res = await api("delete", url);
 
-  if (res?.kind) {
-    dispatch(getInstanceTypesAction());
-    next(res);
-  }
-};
+    if (res?.kind) {
+      dispatch(getInstanceTypesAction());
+      next(res);
+    }
+  };
 
-const onStopOrStartVMPoolActions = ({ name, namespace, action = 'stop' }, next) => async (dispatch) => {
-  const url = endPoints.PATCH_VM_POOL({ name, namespace });
+const onStopOrStartVMPoolActions =
+  ({ name, namespace, action = "stop" }, next) =>
+  async (dispatch) => {
+    const url = endPoints.PATCH_VM_POOL({ name, namespace });
 
-  let payload = {
-    "spec": {
-      "virtualMachineTemplate": {
-        "spec": {
-          "running": action !== 'stop'
-        }
+    let payload = {
+      spec: {
+        virtualMachineTemplate: {
+          spec: {
+            running: action !== "stop",
+          },
+        },
+      },
+    };
+
+    const res = await api(
+      "patch",
+      url,
+      payload,
+      {},
+      {
+        "Content-Type": "application/merge-patch+json",
+      }
+    );
+
+    if (res?.kind) {
+      dispatch(getVMPoolsAction());
+      if (next) {
+        next();
       }
     }
   };
 
-  const res = await api(
-    "patch",
-    url,
-    payload,
-    {},
-    {
-      "Content-Type": "application/merge-patch+json",
-    }
-  );
+const onVmPoolsScaleAction =
+  ({ name, namespace, replicas }, next) =>
+  async (dispatch) => {
+    const url = endPoints.PATCH_VM_POOL({ name, namespace });
 
-  if (res?.kind) {
-    dispatch(getVMPoolsAction());
-    if (next) {
-      next();
-    }
-  }
+    let payload = {
+      spec: {
+        replicas,
+      },
+    };
 
-}
+    const res = await api(
+      "patch",
+      url,
+      payload,
+      {},
+      {
+        "Content-Type": "application/merge-patch+json",
+      }
+    );
 
-const onVmPoolsScaleAction = ({ name, namespace, replicas }, next) => async (dispatch) => {
-  const url = endPoints.PATCH_VM_POOL({ name, namespace });
-
-  let payload = {
-    spec: {
-      replicas
+    if (res?.kind) {
+      dispatch(getVMPoolsAction());
+      if (next) {
+        next();
+      }
     }
   };
 
-  const res = await api(
-    "patch",
-    url,
-    payload,
-    {},
-    {
-      "Content-Type": "application/merge-patch+json",
+const onDeleteVmPoolAction =
+  ({ name, namespace }, next) =>
+  async (dispatch) => {
+    const url = endPoints.DELETE_VM_POOL({ name, namespace });
+    const res = await api("delete", url);
+    if (res?.kind) {
+      dispatch(getVMPoolsAction());
+      if (next) {
+        next();
+      }
     }
-  );
+  };
 
-  if (res?.kind) {
-    dispatch(getVMPoolsAction());
-    if (next) {
-      next();
+const onEditVmPoolAction =
+  ({ name, namespace, data }, next) =>
+  async (dispatch) => {
+    const url = endPoints.PATCH_VM_POOL({ name, namespace });
+    const payload = {
+      spec: {
+        virtualMachineTemplate: {
+          spec: {
+            instancetype: {
+              name: data.instancetype,
+            },
+          },
+        },
+      },
+    };
+
+    const res = await api(
+      "patch",
+      url,
+      payload,
+      {},
+      {
+        "Content-Type": "application/merge-patch+json",
+      }
+    );
+
+    if (res?.kind) {
+      dispatch(getVMPoolsAction());
+      if (next) {
+        next();
+      }
     }
-  }
-}
-
-const onDeleteVmPoolAction = ({ name, namespace }, next) => async (dispatch) => {
-  const url = endPoints.DELETE_VM_POOL({ name, namespace });
-  const res = await api('delete', url)
-
-  console.log('response of delete vmpool', res);
-
-}
+  };
 
 export {
   onAddVMAction,
@@ -1005,4 +1051,5 @@ export {
   onGetVMPoolAction,
   onVmPoolsScaleAction,
   onDeleteVmPoolAction,
+  onEditVmPoolAction,
 };
