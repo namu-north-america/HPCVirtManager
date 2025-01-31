@@ -11,41 +11,52 @@ import { VMListTable } from "../../shared/VMListTable";
 import CustomCard, { CustomCardField } from "../../shared/CustomCard";
 import { onGetVMPoolAction } from "../../store/actions/vmActions";
 import YamlEditor from "../../shared/YamlEditor";
+import { VncDialog } from "../../shared/VncDialog";
 
 export const ViewVMPool = () => {
   const { state } = useLocation();
   const dispatch = useDispatch();
-  const { vmPoolInstances } = useSelector(state => state.project)
+  const { vmPoolInstances } = useSelector((state) => state.project);
   const { profile, userNamespace } = useSelector((state) => state.user);
+  const [showVncDialog, setShowVncDialog] = useState(false);
+  const [selectedVM, setSelectedVM] = useState(null);
+
   const { name, namespace } = state || {};
   const [poolData, setPoolData] = useState({
-    name: '',
-    namespace: '',
-    yaml: '',
-    replicas: '',
-    instanceType: ''
+    name: "",
+    namespace: "",
+    yaml: "",
+    replicas: "",
+    instanceType: "",
   });
 
-  useEffect(() => {
-    dispatch(getVMsAction({ name, namespace, isVmPool: true }))
-    dispatch(onGetVMPoolAction({ name, namespace }, (res) => {
-      console.log('response of vm ppooooo', res)
-      setPoolData({
-        yaml: res,
-        replicas: res.status.replicas,
-        instanceType: res.spec?.virtualMachineTemplate.spec?.instancetype?.name || 'custom'
-      })
-    }))
-  }, [])
+  const onCloseConsole = () => {
+    setShowVncDialog(false);
+    setSelectedVM(null);
+  };
 
+  const onOpenConsole = (vm) => {
+    setSelectedVM(vm);
+    setShowVncDialog(true);
+  };
+
+  useEffect(() => {
+    dispatch(getVMsAction({ name, namespace, isVmPool: true }));
+    dispatch(
+      onGetVMPoolAction({ name, namespace }, (res) => {
+        console.log("response of vm ppooooo", res);
+        setPoolData({
+          yaml: res,
+          replicas: res.status.replicas,
+          instanceType: res.spec?.virtualMachineTemplate.spec?.instancetype?.name || "custom",
+        });
+      })
+    );
+  }, []);
 
   return (
     <>
-      <Page
-        title={
-          <VirtualMachinePageTitle name={state.name} status={<StatusTemplate status="Running" />} />
-        }
-      >
+      <Page title={<VirtualMachinePageTitle name={state.name} status={<StatusTemplate status="Running" />} />}>
         <TabView>
           <TabPanel header="Overview">
             <Grid>
@@ -69,12 +80,18 @@ export const ViewVMPool = () => {
           <TabPanel header="Instances">
             <Grid>
               <Col size={12}>
-                <VMListTable vms={vmPoolInstances} user={{ userNamespace, profile }} skipActions={['onMigrate']} />
+                <VMListTable
+                  vms={vmPoolInstances}
+                  user={{ userNamespace, profile }}
+                  skipActions={["onMigrate"]}
+                  onOpenConsole={onOpenConsole}
+                />
               </Col>
             </Grid>
           </TabPanel>
         </TabView>
+        <VncDialog isOpen={showVncDialog} selectedVM={selectedVM} onCloseConsole={onCloseConsole} />
       </Page>
     </>
-  )
-}
+  );
+};
