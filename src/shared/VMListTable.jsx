@@ -16,6 +16,7 @@ import { checkNamespaceValue } from "../utils/commonFunctions";
 import { getVMsAction } from "../store/actions/projectActions";
 import { useDispatch } from "react-redux";
 import { useCallback } from "react";
+import { ActionItem } from "./ActionsOverlay";
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
@@ -49,6 +50,7 @@ export const VMListTable = ({
   onMigrate: onMigratePropAction,
   onEdit: onEditPropAction,
   skipActions = [],
+  extraActions = [],
 }) => {
   const dispatch = useDispatch();
   const { userNamespace, profile } = user;
@@ -134,6 +136,15 @@ export const VMListTable = ({
       let onActions = { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onStart, onEdit };
       if (!skipActions.includes("onMigrate")) {
         onActions = { ...onActions, onMigrate };
+      }
+      if (extraActions) {
+        return (
+          <ActionTemplate item={item} onActions={onActions}>
+            {extraActions.map((actionItem) => {
+              return <ActionItem onClick={() => actionItem.action(item)}>{actionItem.label}</ActionItem>;
+            })}
+          </ActionTemplate>
+        );
       }
       return <ActionTemplate item={item} onActions={onActions} />;
     },

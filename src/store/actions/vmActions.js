@@ -1030,6 +1030,53 @@ const onEditVmPoolAction =
     }
   };
 
+const onRemoveVmFromPoolAction =
+  ({ name, namespace, node }) =>
+  async (dispatch) => {
+    const url = endPoints.DELETE_VM({ name, namespace });
+
+    const payload = {
+      metadata: {
+        labels: {
+          "kubevirt.io/domain": name,
+          "kubevirt.io/vmpool": null,
+        },
+        ownerReferences: null,
+      },
+      spec: {
+        template: {
+          spec: {
+            nodeSelector: {
+              "kubernetes.io/hostname": node,
+            },
+          },
+          metadata: {
+            labels: {
+              "kubevirt.io/domain": name,
+              "kubevirt.io/vmpool": null,
+            },
+          },
+        },
+      },
+    };
+
+    const res = await api(
+      "patch",
+      url,
+      payload,
+      {},
+      {
+        "Content-Type": "application/merge-patch+json",
+      }
+    );
+
+    if (res?.kind) {
+      dispatch(getVMsAction({ name, namespace, isVmPool: true }));
+    }
+
+    console.log("payload for vm delete___vm pool", payload, res);
+  };
+
 export {
   onAddVMAction,
   onEditVMAction,
@@ -1052,4 +1099,5 @@ export {
   onVmPoolsScaleAction,
   onDeleteVmPoolAction,
   onEditVmPoolAction,
+  onRemoveVmFromPoolAction,
 };

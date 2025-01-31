@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getVMsAction } from "../../store/actions/projectActions";
 import { VMListTable } from "../../shared/VMListTable";
 import CustomCard, { CustomCardField } from "../../shared/CustomCard";
-import { onGetVMPoolAction } from "../../store/actions/vmActions";
+import { onGetVMPoolAction, onRemoveVmFromPoolAction } from "../../store/actions/vmActions";
 import YamlEditor from "../../shared/YamlEditor";
 import { VncDialog } from "../../shared/VncDialog";
 
@@ -38,6 +38,10 @@ export const ViewVMPool = () => {
   const onOpenConsole = (vm) => {
     setSelectedVM(vm);
     setShowVncDialog(true);
+  };
+
+  const onRemoveVm = (vm) => {
+    dispatch(onRemoveVmFromPoolAction({ name: vm.name, namespace: vm.namespace, node: vm.node }, () => {}));
   };
 
   useEffect(() => {
@@ -85,6 +89,12 @@ export const ViewVMPool = () => {
                   user={{ userNamespace, profile }}
                   skipActions={["onMigrate"]}
                   onOpenConsole={onOpenConsole}
+                  extraActions={[
+                    {
+                      label: "Remove from pool",
+                      action: onRemoveVm,
+                    },
+                  ]}
                 />
               </Col>
             </Grid>
