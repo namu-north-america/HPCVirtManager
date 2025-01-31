@@ -1,5 +1,5 @@
 import { ActionTemplate, IconTemplate, VmName } from "./VmTemplates";
-import { StatusTemplate, statusTemplate } from "./DataTableTemplates";
+import { StatusTemplate } from "./DataTableTemplates";
 import { Tooltip } from "primereact/tooltip";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -12,13 +12,11 @@ import {
   onPauseVMAction,
   onRestartVMAction,
 } from "../store/actions/vmActions";
-import {
-  filterNamespacesByCrudVMS,
-  checkNamespaceValue,
-} from "../utils/commonFunctions";
+import { checkNamespaceValue } from "../utils/commonFunctions";
 import { getVMsAction } from "../store/actions/projectActions";
 import { useDispatch } from "react-redux";
 import { useCallback } from "react";
+import { ActionItem } from "./ActionsOverlay";
 
 const timeTemplate = (item) => {
   return <>{timeAgo(item.time)}</>;
@@ -29,18 +27,19 @@ const osTemplate = (item) => {
   return (
     <>
       <span
-        data-pr-tooltip={item.guestOS ? undefined : "OS information is only available for running VMs with guest agent installed"}
+        data-pr-tooltip={
+          item.guestOS ? undefined : "OS information is only available for running VMs with guest agent installed"
+        }
         data-pr-position="top"
         data-pr-at="center+2 top-2"
         className="cursor-help"
       >
-        {item.guestOS || '-'}
+        {item.guestOS || "-"}
       </span>
       <Tooltip target={`[data-pr-tooltip]`} />
     </>
   );
 };
-
 
 export const VMListTable = ({
   vms,
@@ -50,15 +49,13 @@ export const VMListTable = ({
   onSelectVm: setSelectedVM,
   onMigrate: onMigratePropAction,
   onEdit: onEditPropAction,
-  skipActions = []
+  skipActions = [],
+  extraActions = [],
 }) => {
   const dispatch = useDispatch();
   const { userNamespace, profile } = user;
   const onStart = (item) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
       dispatch(
         onChangeVmStatusAction(item, {
           running: true,
@@ -70,10 +67,7 @@ export const VMListTable = ({
   };
 
   const onRestart = (item) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
       dispatch(onRestartVMAction(item));
     } else {
       showError();
@@ -81,10 +75,7 @@ export const VMListTable = ({
   };
 
   const onStop = (item) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
       dispatch(
         onChangeVmStatusAction(item, {
           running: false,
@@ -96,10 +87,7 @@ export const VMListTable = ({
   };
 
   const onPauseUnpause = (item, type) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
       dispatch(
         onPauseVMAction({ ...item, type }, () => {
           dispatch(getVMsAction());
@@ -111,10 +99,7 @@ export const VMListTable = ({
   };
 
   const onMigrate = (item) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
       setSelectedVM(item);
       onMigratePropAction(item);
     } else {
@@ -123,7 +108,7 @@ export const VMListTable = ({
   };
 
   const onOpenConsole = (vm) => {
-    openConsole(vm)
+    openConsole(vm);
   };
 
   const onEdit = (item) => {
@@ -131,10 +116,7 @@ export const VMListTable = ({
   };
 
   const onDelete = (item) => {
-    if (
-      checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-      profile?.role === "admin"
-    ) {
+    if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
       confirmDialog({
         message: "Do you want to delete this record?",
         header: "Delete Confirmation",
@@ -149,20 +131,34 @@ export const VMListTable = ({
     }
   };
 
-  const actionTemplate = useCallback((item) => {
-    let onActions = { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onStart, onEdit }
-    if (!skipActions.includes('onMigrate')) {
-      onActions = { ...onActions, onMigrate }
-    }
-    return (
-      <ActionTemplate item={item} onActions={onActions} />
-    )
-  }, [vms])
-  console.log('vms_____', vms, userNamespace)
+  const actionTemplate = useCallback(
+    (item) => {
+      let onActions = { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onStart, onEdit };
+      if (!skipActions.includes("onMigrate")) {
+        onActions = { ...onActions, onMigrate };
+      }
+      if (extraActions) {
+        return (
+          <ActionTemplate item={item} onActions={onActions}>
+            {extraActions.map((actionItem) => {
+              return <ActionItem onClick={() => actionItem.action(item)}>{actionItem.label}</ActionItem>;
+            })}
+          </ActionTemplate>
+        );
+      }
+      return <ActionTemplate item={item} onActions={onActions} />;
+    },
+    [vms]
+  );
+  console.log("vms_____", vms, userNamespace);
   return (
     <DataTable value={vms} tableStyle={{ minWidth: "50rem" }}>
-      <Column body={<IconTemplate />} style={{ width: '2rem' }}></Column>
-      <Column field="name" header="Name" body={(item) => <VmName item={item} user={{ userNamespace, profile }} />}></Column>
+      <Column body={<IconTemplate />} style={{ width: "2rem" }}></Column>
+      <Column
+        field="name"
+        header="Name"
+        body={(item) => <VmName item={item} user={{ userNamespace, profile }} />}
+      ></Column>
       <Column field="status" header="Status" body={(item) => <StatusTemplate status={item.status} />}></Column>
       <Column field="guestOS" header="OS" body={osTemplate}></Column>
       <Column field="time" header="Created" body={timeTemplate}></Column>
@@ -171,5 +167,5 @@ export const VMListTable = ({
       <Column field="cluster" header="Cluster"></Column>
       <Column body={actionTemplate}></Column>
     </DataTable>
-  )
-}
+  );
+};

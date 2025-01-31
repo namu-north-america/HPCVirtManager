@@ -1,17 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Page from "../../shared/Page";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
 import { getVMsAction } from "../../store/actions/projectActions";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { confirmDialog } from "primereact/confirmdialog";
+import { useNavigate } from "react-router-dom";
 import MigrateModal from "./Form/MigrateModal";
 import EditVmModal from "./Form/EditVmModal";
 import { showToastAction } from "../../store/slices/commonSlice";
-import {
-  filterNamespacesByCrudVMS,
-  checkNamespaceValue,
-} from "../../utils/commonFunctions";
+import { filterNamespacesByCrudVMS } from "../../utils/commonFunctions";
 import { getImagesAction } from "../../store/actions/imageActions";
 import { VMListTable } from "../../shared/VMListTable";
 import { VncDialog } from "../../shared/VncDialog";
@@ -36,10 +32,7 @@ export default function VMList() {
   const hasAccess = () => {
     if (profile?.role === "admin") return true;
     else {
-      const filteredNamespaces = filterNamespacesByCrudVMS(
-        namespacesDropdown,
-        userNamespace
-      );
+      const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
       return filteredNamespaces.length > 0;
     }
   };
@@ -61,10 +54,7 @@ export default function VMList() {
 
   useEffect(() => {
     if (namespacesDropdown.length) {
-      const _namespaces = filterNamespacesByCrudVMS(
-        namespacesDropdown,
-        userNamespace
-      );
+      const _namespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
       if (_namespaces.length) {
         setSelectedNamespace(_namespaces[0]);
       }
@@ -78,13 +68,7 @@ export default function VMList() {
     }
   }, [selectedNamespace, dispatch]);
 
-  vms = useMemo(
-    () =>
-      vms.filter((item) =>
-        item?.name?.toLowerCase()?.includes(search?.toLowerCase())
-      ),
-    [search, vms]
-  );
+  vms = useMemo(() => vms.filter((item) => item?.name?.toLowerCase()?.includes(search?.toLowerCase())), [search, vms]);
 
   const showError = () => {
     dispatch(
@@ -94,7 +78,6 @@ export default function VMList() {
       })
     );
   };
-
 
   const onAdd = () => {
     if (profile.role === "admin") {

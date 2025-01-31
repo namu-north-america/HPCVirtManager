@@ -1,8 +1,8 @@
-import { FaDesktop } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import { checkNamespaceValue } from '../utils/commonFunctions';
+import { FaDesktop } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { checkNamespaceValue } from "../utils/commonFunctions";
 import CustomOverlay from "./CustomOverlay";
-import { ActionsOverlay } from './ActionsOverlay';
+import { ActionItem, ActionsOverlay } from "./ActionsOverlay";
 
 const IconTemplate = () => {
   return (
@@ -14,22 +14,14 @@ const IconTemplate = () => {
 
 const VmName = ({ item, user }) => {
   const { userNamespace, profile } = user;
-  if (
-    checkNamespaceValue(userNamespace, item.namespace, "crudVMS") ||
-    profile?.role === "admin"
-  ) {
-    return (
-      <Link to={`/virtual-machines/details/${item.namespace}/${item.name}`}>
-        {item.name}
-      </Link>
-    );
+  if (checkNamespaceValue(userNamespace, item.namespace, "crudVMS") || profile?.role === "admin") {
+    return <Link to={`/virtual-machines/details/${item.namespace}/${item.name}`}>{item.name}</Link>;
   } else {
     return <>{item.name}</>;
   }
 };
 
-
-const ActionTemplate = ({ item, onActions }) => {
+const ActionTemplate = ({ item, onActions, children }) => {
   const { onStop, onOpenConsole, onPauseUnpause, onRestart, onDelete, onMigrate, onStart, onEdit } = onActions;
   return (
     <div className="flex align-items-center gap-2">
@@ -38,24 +30,24 @@ const ActionTemplate = ({ item, onActions }) => {
           className="p-link inline-flex align-items-center justify-content-center"
           onClick={() => onOpenConsole(item)}
           style={{
-            width: '1.75rem',
-            height: '1.75rem',
-            borderRadius: '50%',
-            transition: 'all 0.2s ease',
-            padding: 0
+            width: "1.75rem",
+            height: "1.75rem",
+            borderRadius: "50%",
+            transition: "all 0.2s ease",
+            padding: 0,
           }}
         >
           <i
             className="pi pi-code"
             style={{
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              height: '100%',
+              fontSize: "0.875rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "100%",
               margin: 0,
-              lineHeight: 0
+              lineHeight: 0,
             }}
           />
         </button>
@@ -63,74 +55,45 @@ const ActionTemplate = ({ item, onActions }) => {
       <ActionsOverlay>
         {item?.status === "Running" && (
           <>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onPauseUnpause(item, "pause")}
-            >
-              Pause
-            </div>
+            <ActionItem onClick={() => onPauseUnpause(item, "pause")}>Pause</ActionItem>
             <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
               Stop
             </div>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onRestart(item)}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onRestart(item)}>
               Restart
             </div>
             {onMigrate && (
-              <div
-                className="cursor-pointer mb-2"
-                onClick={() => onMigrate(item)}
-              >
+              <div className="cursor-pointer mb-2" onClick={() => onMigrate(item)}>
                 Migrate
               </div>
             )}
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onOpenConsole(item)}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onOpenConsole(item)}>
               Open Console
             </div>
           </>
         )}
         {item?.status === "Paused" && (
           <>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onPauseUnpause(item, "unpause")}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onPauseUnpause(item, "unpause")}>
               Unpause
             </div>
             <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
               Stop
             </div>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onRestart(item)}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onRestart(item)}>
               Restart
             </div>
           </>
         )}
         {(item?.status === "Stopped" || item?.status === "Stopping") && (
           <>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onStart(item)}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onStart(item)}>
               Start
             </div>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onMigrate(item)}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onMigrate(item)}>
               Migrate
             </div>
-            <div
-              className="cursor-pointer mb-2"
-              onClick={() => onEdit(item)}
-            >
+            <div className="cursor-pointer mb-2" onClick={() => onEdit(item)}>
               Edit VM
             </div>
             <div className="cursor-pointer" onClick={() => onDelete(item)}>
@@ -139,18 +102,17 @@ const ActionTemplate = ({ item, onActions }) => {
           </>
         )}
 
-        {!["Running", "Paused", "Stopped", "Stopping"].includes(
-          item?.status
-        ) && (
-            <>
-              <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
-                Stop
-              </div>
-            </>
-          )}
+        {!["Running", "Paused", "Stopped", "Stopping"].includes(item?.status) && (
+          <>
+            <div className="cursor-pointer mb-2" onClick={() => onStop(item)}>
+              Stop
+            </div>
+          </>
+        )}
+        {children}
       </ActionsOverlay>
     </div>
   );
 };
 
-export { IconTemplate, VmName, ActionTemplate }
+export { IconTemplate, VmName, ActionTemplate };
