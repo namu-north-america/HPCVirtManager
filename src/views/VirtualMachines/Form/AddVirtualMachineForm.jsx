@@ -47,7 +47,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     dispatch(getDisksAction());
     dispatch(getImagesAction());
     dispatch(getNetworksAction());
-    if (isVmPool) dispatch(getInstanceTypesAction());
+    dispatch(getInstanceTypesAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -114,7 +114,6 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   };
 
   const onAddVM = () => {
-
     const skipFields = isVmPool && data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
 
     if (showFormErrors(data, setData, skipFields) || isTemplateMode) {
@@ -415,8 +414,9 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
               {steps.map((step, index) => (
                 <li
                   key={index}
-                  className={`step-item ${activeIndex === index ? "active" : ""} ${completedSteps.includes(index) ? "completed" : ""
-                    }`}
+                  className={`step-item ${activeIndex === index ? "active" : ""} ${
+                    completedSteps.includes(index) ? "completed" : ""
+                  }`}
                   onClick={() => onStepChange(index)}
                   role="button"
                   tabIndex={0}
