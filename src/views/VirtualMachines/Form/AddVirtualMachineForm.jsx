@@ -70,8 +70,8 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     advanced: "",
     userName: "",
     password: "",
+    virtualMachineType: "custom",
     // When isVmPool active, this field is required
-    virtualMachineType: isVmPool ? "custom" : "",
     replicas: isVmPool ? 2 : "",
   });
 
