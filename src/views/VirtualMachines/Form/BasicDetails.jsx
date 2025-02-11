@@ -25,17 +25,22 @@ export default function BasicDetails({ data, handleChange, isVmPool, ...rest }) 
   }, [hasAccess]);
 
   useEffect(() => {
-    if (isVmPool) {
-      setVirtualMachineTypes(['custom', ...instanceTypes.map((item) => item.name)]);
-    }
+    setVirtualMachineTypes(["custom", ...instanceTypes.map((item) => item.name)]);
   }, [isVmPool, instanceTypes]);
 
   return (
     <CustomForm {...rest}>
       <CustomInput data={data} onChange={handleChange} name="name" required col={12} />
-      {isVmPool && <CustomDropDown data={data} options={virtualMachineTypes} onChange={handleChange} name="virtualMachineType" label="Virtual Machine Type" required />}
+      <CustomDropDown
+        data={data}
+        options={virtualMachineTypes}
+        onChange={handleChange}
+        name="virtualMachineType"
+        label="Virtual Machine Type"
+        required
+      />
       <CustomDropDown data={data} onChange={handleChange} name="namespace" options={namespace} required />
-      {(data.virtualMachineType === 'custom' || !isVmPool) && (
+      {data.virtualMachineType === "custom" && (
         <>
           <CustomInput
             data={data}

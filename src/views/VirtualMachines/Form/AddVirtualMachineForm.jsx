@@ -3,11 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
 import { v4 } from "uuid";
-import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
-import Grid, { Col } from "../../../shared/Grid";
 import BasicDetails from "./BasicDetails";
 import Network from "./Network";
 import Storage from "./Storage";
@@ -47,7 +45,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     dispatch(getDisksAction());
     dispatch(getImagesAction());
     dispatch(getNetworksAction());
-    if (isVmPool) dispatch(getInstanceTypesAction());
+    dispatch(getInstanceTypesAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -70,8 +68,8 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
     advanced: "",
     userName: "",
     password: "",
+    virtualMachineType: "custom",
     // When isVmPool active, this field is required
-    virtualMachineType: isVmPool ? "custom" : "",
     replicas: isVmPool ? 2 : "",
   });
 
@@ -114,8 +112,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   };
 
   const onAddVM = () => {
-
-    const skipFields = isVmPool && data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
+    const skipFields = data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
 
     if (showFormErrors(data, setData, skipFields) || isTemplateMode) {
       if (validateDisk() || isTemplateMode) {
@@ -415,8 +412,9 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
               {steps.map((step, index) => (
                 <li
                   key={index}
-                  className={`step-item ${activeIndex === index ? "active" : ""} ${completedSteps.includes(index) ? "completed" : ""
-                    }`}
+                  className={`step-item ${activeIndex === index ? "active" : ""} ${
+                    completedSteps.includes(index) ? "completed" : ""
+                  }`}
                   onClick={() => onStepChange(index)}
                   role="button"
                   tabIndex={0}
