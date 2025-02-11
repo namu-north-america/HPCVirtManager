@@ -174,6 +174,8 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
     name = data.name;
     namespace = data.namespace;
 
+    const virtualMachineType = data.virtualMachineType;
+
     if (vms?.length && name) {
       let vmNameCheck = vms.find((item) => item.name === name && item.namespace === namespace);
       if (vmNameCheck) {
@@ -359,11 +361,6 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
                 interfaces: interfaces,
                 networkInterfaceMultiqueue: true,
               },
-              resources: {
-                requests: {
-                  memory: `${data.memory}${data.memoryType}`,
-                },
-              },
             },
             networks: networkData,
             // networks: [
@@ -381,6 +378,24 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
         },
       },
     };
+
+    if (virtualMachineType === "custom") {
+      payload.spec.template.spec.domain.cpu = {
+        sockets: parseInt(data.sockets),
+        cores: parseInt(data.cores),
+        threads: parseInt(data.threads),
+      };
+      payload.spec.template.spec.domain.resources = {
+        requests: {
+          memory: `${data.memory}${data.memoryType}`,
+        },
+      };
+    } else {
+      payload.spec["instancetype"] = {
+        kind: "VirtualMachineClusterInstancetype",
+        name: virtualMachineType,
+      };
+    }
 
     let url = endPoints.ADD_VM({
       namespace: data.namespace,

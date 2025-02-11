@@ -3,11 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
 import { v4 } from "uuid";
-import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
-import Grid, { Col } from "../../../shared/Grid";
 import BasicDetails from "./BasicDetails";
 import Network from "./Network";
 import Storage from "./Storage";
@@ -114,7 +112,7 @@ export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   };
 
   const onAddVM = () => {
-    const skipFields = isVmPool && data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
+    const skipFields = data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
 
     if (showFormErrors(data, setData, skipFields) || isTemplateMode) {
       if (validateDisk() || isTemplateMode) {
