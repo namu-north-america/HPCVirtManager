@@ -1,6 +1,5 @@
 import React from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-// import { isAuthenticated } from "../services/auth";
 import { PrivateRoutes } from "./allRoutes";
 import Layout from "../layout/Layout";
 import { isAuthenticated, getUserRole } from "../services/auth";
@@ -9,11 +8,12 @@ const Auth = ({ allowedRoles }) => {
   const isLoggedIn = isAuthenticated(); // Check if the user is authenticated
   const userRole = getUserRole().role; // Get the current user's role
  
-
   if (!isLoggedIn) {
+    console.log("user is not logged in")
     return <Navigate to="/403" />; // Redirect if not logged in
   }
   if (!allowedRoles.includes(userRole)) {
+    console.log("user role not allowed")
     return <Navigate to="/403" />; // Redirect if role is not allowed
   }
   return (
@@ -22,6 +22,7 @@ const Auth = ({ allowedRoles }) => {
     </Layout>
   );
 };
+
 
 export const ProtectedRoutes = () => {
   return (

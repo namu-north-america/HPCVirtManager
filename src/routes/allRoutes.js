@@ -3,6 +3,7 @@ import Clusters from "../views/Clusters";
 import Users from "../views/Users";
 import EditUser from "../views/User/EditUser";
 import UpdateUser from "../views/User/UpdateUser";
+import ViewUser from "../views/User/ViewUser";
 import AllNodes from "../views/AllNodes";
 import NodeDetail from "../views/NodeDetail/NodeDetail";
 import VMList from "../views/VirtualMachines/VMList";
@@ -130,7 +131,7 @@ export const PrivateRoutes = [
   {
     path: "/users/profile",
     name: "User Profile",
-    element: <UpdateUser />,
+    element: <ViewUser />,
     role: "shared",
   },
   {

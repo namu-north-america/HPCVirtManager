@@ -8,16 +8,16 @@ import {
 import api from "../../services/api";
 import apiEmail from "../../services/apiEmail"
 import endPoints from "../../services/endPoints";
+import keycloak from "../../keycloak";
 
 const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
   loading(true);
 
-  // const res = await api("post", endPoints.LOGIN, data);
   const res = {
     email: "user@yopmail.com",
     password: "User@1234",
-    firstName: "John",
-    lastName: "Doe",
+    firstName: "Srin",
+    lastName: "Nats",
     token: "qwertyu",
     role: "admin",
     rememberMe: data.rememberMe,
@@ -27,8 +27,8 @@ const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
     let user = {
       email: data.email,
       password: data.password,
-      firstName: "John",
-      lastName: "Doe",
+      firstName: "Srin",
+      lastName: "Nats",
       token: "qwertyu",
       role: "admin",
       rememberMe: data.rememberMe,
@@ -43,7 +43,6 @@ const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
       }
     });
   } else if (data.email !== res.email) {
-    // Call onGetUserSecretsAction here
     dispatch(onGetUserSecretsAction(data, loading, navigate));
   } else {
     dispatch(
@@ -56,11 +55,11 @@ const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
   loading(false);
 };
 
+
 const getProfileAction = () => async (dispatch) => {
-  // const res = await api("get", endPoints.PROFILE);
-  // data is store in local storage at login
   dispatch(getUserProfile());
 };
+
 
 const onGetUserSecretsAction =
   (data, loading, navigate) => async (dispatch) => {
@@ -91,10 +90,9 @@ const onGetUserSecretsAction =
         decodeFromBase64.lastName = lastName;
         decodeFromBase64.token = "qwertyu";
         decodeFromBase64.rememberMe = data.rememberMe;
-        let user = decodeFromBase64;
 
+        let user = decodeFromBase64;
         let token = user.token;
-        
         
         authenticate(token, decodeFromBase64, () => {
           dispatch(setUserProfile(user));
@@ -114,37 +112,25 @@ const onGetUserSecretsAction =
       );
     }
     loading(false);
-  };
-// get user by   
-const onGetUserDetailAction =
-  (data) => async (dispatch) => {
-   
-    let secretName = data.email.replace(/[@.]/g, "-");
-    let url = endPoints.GET_USER_SECRET({
-      namespace: "default",
-      name: 'cocktail-'+secretName,
-    });
-
-    const res = await api("get", url);
-    console.log('res',res);
-    
-    if (res?.status!=='Failure') {
-      const decodeFromBase64 = Object.fromEntries(
-        Object.entries(res.data).map(([key, value]) => [
-          key,
-          (value!=='')?decodeURIComponent(atob(value)):value,
-        ])
-      );
-      return decodeFromBase64 
-    }else{
-      return {
-        status:'Failure'}
-    } 
-    
-  };
+};
 
 
-// on forget password 
+const onGetUserDetailAction = (data) => async (dispatch) => {
+  //
+  if (keycloak && keycloak.tokenParsed) {
+    const tokenData = keycloak.tokenParsed;
+    const userData = {
+      firstName: tokenData.given_name || tokenData.name || "",
+      lastName: tokenData.family_name || "",
+      email: tokenData.email || "",
+    };
+    return userData;
+  } else {
+    return { status: 'Failure', message: 'User not authenticated via Keycloak' };
+  }
+};
+
+
 const onForgetPasswordAction =
   (data, loading, navigate) => async (dispatch) => {
     loading(true);
@@ -200,13 +186,12 @@ const onForgetPasswordAction =
       );
     }
     loading(false);
-  };  
+};  
+
 
 const onAddUserAction = (data) => async (dispatch) => {
   let url = endPoints.ADD_USER;
   let secretName = data.email.replace(/[@.]/g, "-");
-  // Convert each value to Base64
-  
   
   const base64Data = Object.fromEntries(
     Object.entries(data).map(([key, value]) => [
@@ -233,8 +218,6 @@ const onAddUserAction = (data) => async (dispatch) => {
       password: data.password
     }
      await apiEmail("post", '/send-email',ePayload);
-   
-
     console.log("add user response", res);
     dispatch(
       showToastAction({
@@ -255,15 +238,14 @@ const onAddUserAction = (data) => async (dispatch) => {
   }
 };
 
-const onUpdateUserAction = (data) => async (dispatch) => {
 
+const onUpdateUserAction = (data) => async (dispatch) => {
   let secretName = data.email.replace(/[@.]/g, "-");
-  // Convert each value to Base64
+
   let url = endPoints.GET_USER_SECRET({
     namespace: "default",
     name: 'cocktail-'+secretName,
   });
-
   
   const base64Data = Object.fromEntries(
     Object.entries(data).map(([key, value]) => [
@@ -275,22 +257,19 @@ const onUpdateUserAction = (data) => async (dispatch) => {
     apiVersion: "v1",
     kind: "Secret",
     metadata: {
-      name: "cocktail-"+secretName, // set on the base of last user
-      namespace: "default", // always default namespace don`t change
+      name: "cocktail-"+secretName,
+      namespace: "default",
     },
     data: base64Data,
   };
   const res = await api("put", url, payload);
   if (res?.kind === "Secret") {
-
-   
     dispatch(
       showToastAction({
         type: "success",
         title: "User updated Successfully",
       })
     );
-  
   } 
   else {
     console.log("add user error", res.message);
@@ -303,9 +282,9 @@ const onUpdateUserAction = (data) => async (dispatch) => {
   }
 };
 
+
 const onGetUserALLAction = () => async (dispatch) => {
   let url = endPoints.GET_USER_ALL;
-
   const res = await api("get", url);
 
   if (res?.kind === "SecretList") {
@@ -315,6 +294,7 @@ const onGetUserALLAction = () => async (dispatch) => {
     console.log("all user list", res.message);
   }
 };
+
 
 const onDeleteUserAction = (data) => async (dispatch) => {
   let secretName = data.email.replace(/[@.]/g, "-");
@@ -343,6 +323,7 @@ const onDeleteUserAction = (data) => async (dispatch) => {
     );
   }
 };
+
 
 export {
   onGetUserDetailAction,

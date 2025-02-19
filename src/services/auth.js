@@ -1,29 +1,39 @@
 import { jwtDecode } from "jwt-decode";
+import keycloak from "../keycloak";
 
 export const isAuthenticated = () => {
   if (typeof window == "undefined") {
     return false;
   }
-  if (localStorage.getItem("appToken")) {
-    return JSON.parse(localStorage.getItem("appToken"));
-  } else if (sessionStorage.getItem("appToken")) {
-    return JSON.parse(sessionStorage.getItem("appToken"));
+  if (keycloak.authenticated) {
+    console.log("isAuthenticated : ", true)
+    return true;
   } else {
+    console.log("isAuthenticated : ", false)
     return false;
   }
 };
+
+
 export const getUserRole = () => {
   if (typeof window == "undefined") {
     return false;
   }
+  let user = null;
   if (localStorage.getItem("appUser")) {
-    return JSON.parse(localStorage.getItem("appUser"));
+    user = JSON.parse(localStorage.getItem("appUser"));
   } else if (sessionStorage.getItem("appUser")) {
-    return JSON.parse(sessionStorage.getItem("appUser"));
+    user = JSON.parse(sessionStorage.getItem("appUser"));
   } else {
+    console.log("getUserRole : appUser not found in localStorage and sessionStorage")
     return false;
   }
+  if (!user.role && user.realm_access && user.realm_access.roles) {
+    user.role = user.realm_access.roles.includes("admin") ? "admin" : "user";
+  }
+  return user;
 };
+
 
 export const getMyId = () => {
   let token = "";
@@ -35,6 +45,8 @@ export const getMyId = () => {
   const decoded = jwtDecode(token);
   return decoded.userId;
 };
+
+
 export const authenticate = (appToken, data, next) => {
   if (typeof window !== "undefined") {
     appToken = JSON.stringify(appToken);
@@ -49,6 +61,7 @@ export const authenticate = (appToken, data, next) => {
     next();
   }
 };
+
 
 export const logout = (next) => {
   if (typeof window !== "undefined") {

@@ -13,6 +13,7 @@ import {
 } from "../../store/actions/userActions";
 import { CustomForm, CustomInput } from "../../shared/AllInputs";
 import CustomButton, { Buttonlayout } from "../../shared/CustomButton";
+
 export default function EditUser() {
   const dispatch = useDispatch();
   const [data, setData] = useState({
@@ -58,7 +59,7 @@ export default function EditUser() {
         console.error("No response received from the API");
         return;
       }
-      console.log("chnage page", res);
+      console.log("change page", res);
       if (res.status !== "Failure") {
         console.log("user", res);
         setUser(res);
