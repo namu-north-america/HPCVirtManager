@@ -15,9 +15,9 @@ const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
 
   const res = {
     email: "user@yopmail.com",
-    password: "User@1234",
-    firstName: "Srin",
-    lastName: "Nats",
+    password: "user@1234",
+    firstName: "John",
+    lastName: "Doe",
     token: "qwertyu",
     role: "admin",
     rememberMe: data.rememberMe,
@@ -27,8 +27,8 @@ const onUserLoginAction = (data, loading, navigate) => async (dispatch) => {
     let user = {
       email: data.email,
       password: data.password,
-      firstName: "Srin",
-      lastName: "Nats",
+      firstName: "John",
+      lastName: "Doe",
       token: "qwertyu",
       role: "admin",
       rememberMe: data.rememberMe,
