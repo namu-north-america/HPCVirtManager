@@ -83,6 +83,10 @@ const endPoints = {
     `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
   DELETE_VM_POOL: ({ namespace, name }) =>
     `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
+  CREATE_AUTO_SCALE: ({ namespace }) =>
+    `/apis/autoscaling/v2/namespaces/${namespace}/horizontalpodautoscalers`,
+  UPDATE_AUTO_SCALE: ({ namespace, name }) =>
+    `/apis/autoscaling/v2/namespaces/${namespace}/horizontalpodautoscalers/${name}`,
 
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
@@ -109,6 +113,8 @@ const endPoints = {
     `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
   GET_CLUSTER: ({ namespace, name }) =>
     `/apis/cluster.x-k8s.io/v1beta1/namespaces/${namespace}/clusters/${name}`,
+  GET_AUTO_SCALES: () =>
+    `/apis/autoscaling/v2/horizontalpodautoscalers`,
 
   // others API
   LIST_CLUSTERS: "/apis/cluster.x-k8s.io/v1beta1/clusters"
