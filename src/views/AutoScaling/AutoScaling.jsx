@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAutoScalingGroups, deleteAutoScaleItemAction } from "../../store/actions/scalingActions";
 import { ActionItem, ActionsOverlay } from "../../shared/ActionsOverlay";
 import { UpdateScalingGroupModal } from "./EditAutoScaleItem";
+import { confirmDialog } from "primereact/confirmdialog";
 
 export function AutoScaling() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -32,11 +33,19 @@ export function AutoScaling() {
         </ActionItem>
         <ActionItem
           onClick={() => {
-            dispatch(
-              deleteAutoScaleItemAction({ name: item.name, namespace: item.namespace }, (res) => {
-                dispatch(getAutoScalingGroups());
-              })
-            );
+            confirmDialog({
+              message: "Do you want to delete this record?",
+              header: "Delete Confirmation",
+              icon: "pi pi-info-circle",
+              position: "top",
+              accept: () => {
+                dispatch(
+                  deleteAutoScaleItemAction({ name: item.name, namespace: item.namespace }, (res) => {
+                    dispatch(getAutoScalingGroups());
+                  })
+                );
+              },
+            });
           }}
         >
           Delete

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
 import { getVMPoolsAction } from "../../store/actions/projectActions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createAutoScalingAction } from "../../store/actions/scalingActions";
+import { createAutoScalingAction, getAutoScalingGroups } from "../../store/actions/scalingActions";
 import { Buttonlayout } from "../../shared/CustomButton";
 import { Button } from "primereact/button";
 
@@ -42,6 +42,7 @@ export const CreateScalingGroupModal = ({ isOpen, onHide }) => {
       createAutoScalingAction(data, (res) => {
         setIsPending(false);
         if (res?.status !== "Failure") {
+          dispatch(getAutoScalingGroups());
           reset({});
           onHide();
         }
