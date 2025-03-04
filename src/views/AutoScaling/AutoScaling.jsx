@@ -4,7 +4,7 @@ import { Column } from "primereact/column";
 import { useEffect, useState } from "react";
 import { CreateScalingGroupModal } from "./CreateScalingGroupModal";
 import { useDispatch, useSelector } from "react-redux";
-import { getAutoScalingGroups } from "../../store/actions/scalingActions";
+import { getAutoScalingGroups, deleteAutoScaleItemAction } from "../../store/actions/scalingActions";
 import { ActionItem, ActionsOverlay } from "../../shared/ActionsOverlay";
 import { UpdateScalingGroupModal } from "./EditAutoScaleItem";
 
@@ -30,7 +30,17 @@ export function AutoScaling() {
         >
           Settings
         </ActionItem>
-        <ActionItem onClick={() => {}}>Delete</ActionItem>
+        <ActionItem
+          onClick={() => {
+            dispatch(
+              deleteAutoScaleItemAction({ name: item.name, namespace: item.namespace }, (res) => {
+                dispatch(getAutoScalingGroups());
+              })
+            );
+          }}
+        >
+          Delete
+        </ActionItem>
       </ActionsOverlay>
     );
   };

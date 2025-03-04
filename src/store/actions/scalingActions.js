@@ -4,8 +4,8 @@ import { showToastAction } from "../slices/commonSlice";
 import { setAutoScalings } from "../slices/projectSlice";
 
 const createAutoScalingAction = (data, next) => async (dispatch) => {
-  console.log("handle api action and dispatch", data);
   const { name, namespace, min, max, threshold, vmpool } = data;
+
   const payload = {
     apiVersion: "autoscaling/v2",
     kind: "HorizontalPodAutoscaler",
@@ -38,9 +38,11 @@ const createAutoScalingAction = (data, next) => async (dispatch) => {
       ],
     },
   };
+
   const url = endPoints.CREATE_AUTO_SCALE({ namespace });
+
   const res = await api("post", url, payload);
-  console.log("response____", res);
+
   if (res?.kind) {
     if (res?.reason && res.reason === "AlreadyExists") {
       dispatch(
@@ -57,7 +59,7 @@ const createAutoScalingAction = (data, next) => async (dispatch) => {
 const getAutoScalingGroups = () => async (dispatch) => {
   const url = endPoints.GET_AUTO_SCALES();
   const res = await api("get", url);
-  console.log("auto scaling options___", res);
+
   if (res.kind === "HorizontalPodAutoscalerList") {
     const items = res.items.map((item) => {
       const metrics = item.status.currentMetrics;
@@ -111,10 +113,19 @@ const updateAutoScaleItemAction = (data, next) => async () => {
     }
   );
 
-  console.log("response____", res);
   if (res?.kind && res.kind === "HorizontalPodAutoscaler") {
     if (next) next(res);
   }
 };
 
-export { createAutoScalingAction, getAutoScalingGroups, updateAutoScaleItemAction };
+const deleteAutoScaleItemAction =
+  ({ name, namespace }, next) =>
+  async (dispatch) => {
+    const url = endPoints.UPDATE_AUTO_SCALE({ name, namespace });
+    const res = await api("delete", url);
+
+    console.log("Delete auto-scale item", res);
+    if (next) next();
+  };
+
+export { createAutoScalingAction, getAutoScalingGroups, updateAutoScaleItemAction, deleteAutoScaleItemAction };
