@@ -43,6 +43,14 @@ const endPoints = {
 
   ADD_VM: ({ namespace, name }) =>
     `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachines/${name}`,
+  ADD_VM_POOL: ({ namespace, name }) =>
+    `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
+  GET_VM_POOL: ({ name, namespace }) =>
+    `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
+  GET_VM_POOLS: () =>
+    `/apis/pool.kubevirt.io/v1alpha1/virtualmachinepools`,
+  GET_VM_POOL_VMS: ({ name, namespace }) =>
+    `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachines?labelSelector=kubevirt.io%2Fvmpool%3D${name}&limit=500`,
   EDIT_VM: ({ namespace, name }) =>
     `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachines/${name}`,
   GET_VM: ({ namespace, name }) =>
@@ -62,11 +70,20 @@ const endPoints = {
   HOT_PLUG_VOLUME: ({ namespace, name }) =>
     `/apis/subresources.kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}/addvolume`,
   HOT_PLUG_NETWORK: ({ namespace, name }) =>
-  `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}`,
-  GET_NETWORKS: () => 
+    `/apis/kubevirt.io/v1/namespaces/${namespace}/virtualmachines/${name}`,
+  GET_NETWORKS: () =>
     `/apis/k8s.cni.cncf.io/v1/network-attachment-definitions`,
-  GET_VM_EVENTS: ({namespace, name}) =>
+  GET_VM_EVENTS: ({ namespace, name }) =>
     `/api/v1/namespaces/${namespace}/events?fieldSelector=involvedObject.kind=VirtualMachineInstance,involvedObject.name=${name}&limit=500`,
+  INSTANCE_TYPE: ({ name }) =>
+    `/apis/instancetype.kubevirt.io/v1beta1/virtualmachineclusterinstancetypes/${name}`,
+  GET_INSTANCE_TYPES: () =>
+    `/apis/instancetype.kubevirt.io/v1beta1/virtualmachineclusterinstancetypes`,
+  PATCH_VM_POOL: ({ namespace, name }) =>
+    `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
+  DELETE_VM_POOL: ({ namespace, name }) =>
+    `/apis/pool.kubevirt.io/v1alpha1/namespaces/${namespace}/virtualmachinepools/${name}`,
+
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",

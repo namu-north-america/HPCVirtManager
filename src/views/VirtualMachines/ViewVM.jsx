@@ -20,22 +20,21 @@ import { timeAgo } from "../../utils/date";
 import { longOverlayText } from "../../shared/TableHelpers";
 import { confirmDialog } from "primereact/confirmdialog";
 import moment from "moment";
-import constants from "../../constants";
 import EditVmModal from "./Form/EditVmModal";
 import MigrateModal from "./Form/MigrateModal";
 import HotPlugModal from "./Form/HotPlugModal";
-import { findByLabelText } from "@testing-library/react";
 import { getVmCpuStats, getVmMemoryStats, getVmStorageStats } from "../../store/actions/reportingActions";
 import { VncScreen } from "react-vnc";
 import { Dialog } from "primereact/dialog";
 import { showToastAction } from "../../store/slices/commonSlice";
 import YamlEditor from "../../shared/YamlEditor";
 import { Button } from "primereact/button";
-import { Tooltip } from 'primereact/tooltip';
+import { Tooltip } from "primereact/tooltip";
 import SemiCircleGauge from "../../shared/SemiCircle";
-import { FaDesktop } from 'react-icons/fa';
 import NetworkHotPlugModal from "./Form/NetworkHotplugModal";
 import { getNetworksAction } from "../../store/actions/vmActions";
+import { VirtualMachinePageTitle } from "../../shared/VirtualMachines";
+import { StatusTemplate } from "../../shared/DataTableTemplates";
 
 export default function ViewVM() {
   const dispatch = useDispatch();
@@ -136,6 +135,7 @@ export default function ViewVM() {
     dispatch(
       onGetVMAction({ name, namespace }, (res, instance) => {
         const changedOrder = Object.assign({ apiVersion: null, kind: null, metadata: null, status: null }, res);
+        console.log("instance of vm is_____", instance, res);
         setData((prev) => ({
           ...prev,
           created: res?.metadata?.creationTimestamp,
@@ -148,6 +148,8 @@ export default function ViewVM() {
           sockets: res?.spec?.template?.spec?.domain?.cpu?.sockets,
           threads: res?.spec?.template?.spec?.domain?.cpu?.threads,
           memory: res?.spec?.template?.spec?.domain?.resources?.requests?.memory,
+
+          instanceType: res?.spec?.instancetype?.name,
 
           storageDisks: res?.spec?.template?.spec?.volumes,
 
@@ -195,41 +197,6 @@ export default function ViewVM() {
       );
     } // eslint-disable-next-line
   }, [data?.storageDisks]);
-
-  const getStatusClass = (status) => {
-    const baseClasses = "text-sm px-2 py-0.5 rounded-lg inline-block font-medium border";
-    switch (status) {
-      case "Starting":
-        return `${baseClasses} text-pink-700 bg-pink-50 border-pink-200`;
-      case "Ready":
-        return `${baseClasses} text-green-700 bg-green-50 border-green-200`;
-      case "Running":
-        return `${baseClasses} text-green-700 bg-green-50 border-green-200`;
-      case "Stopping":
-        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
-      case "Stopped":
-        return `${baseClasses} text-red-700 bg-red-50 border-red-200`;
-      case "Paused":
-        return `${baseClasses} text-yellow-700 bg-yellow-50 border-yellow-200`;
-      default:
-        return `${baseClasses} text-gray-700 bg-gray-50 border-gray-200`;
-    }
-  };
-
-  const statusTemplate = (item) => (
-    <span className={getStatusClass(item.status)}>
-      <i style={{ 
-        display: 'inline-block',
-        width: '6px',
-        height: '6px',
-        borderRadius: '50%',
-        backgroundColor: 'currentColor',
-        marginRight: '6px',
-        verticalAlign: 'middle'
-      }}></i>
-      {item.status}
-    </span>
-  );
 
   const onStart = () => {
     dispatch(
@@ -310,7 +277,7 @@ export default function ViewVM() {
             onClick={data.status === "Running" ? () => onStop() : null}
           />
         </div>
-        
+
         <div className="flex items-center gap-2 flex-nowrap flex-shrink-0 ml-auto">
           <CustomButtonOutlined
             label="Refresh"
@@ -379,39 +346,30 @@ export default function ViewVM() {
       <Tooltip target=".vm-status-icon" />
       <EditVmModal visible={editInfo} setVisible={setEditInfo} />
       <MigrateModal visible={onOpenMigrate} setVisible={setOpenMigrate} />
-      <Page 
-        title={
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center justify-center">
-              <FaDesktop className="text-gray-600 text-xl leading-none my-auto" style={{ verticalAlign: 'middle' }} />
-            </div>
-            <span>{name}</span>
-            <div className="self-center">
-              {statusTemplate({ status: data.status })}
-            </div>
-          </div>
-        }
-      >
-        <div className="flex justify-between items-center mb-3">
-          {renderButtons()}
-        </div>
-        
-        <TabView onBeforeTabChange={(event) => {
-         
-          if(event.index === 3) {
-            dispatch(getNetworksAction());
-          }
-          if(event.index === 4) {
-            dispatch(getVmEvents(namespace, name))
-          }
-          return true
-        }}>
+      <Page title={<VirtualMachinePageTitle name={name} status={<StatusTemplate status={data.status} />} />}>
+        <div className="flex justify-between items-center mb-3">{renderButtons()}</div>
+
+        <TabView
+          onBeforeTabChange={(event) => {
+            if (event.index === 3) {
+              dispatch(getNetworksAction());
+            }
+            if (event.index === 4) {
+              dispatch(getVmEvents(namespace, name));
+            }
+            return true;
+          }}
+        >
           <TabPanel header="Overview">
             <Grid>
               <Col size={4}>
                 <CustomCard title="Status">
                   <CustomCardField title="Name" value={name} />
-                  <CustomCardField title="Status" value={data?.status} template={statusTemplate(data)} />
+                  <CustomCardField
+                    title="Status"
+                    value={data?.status}
+                    template={<StatusTemplate status={data.status} />}
+                  />
                   <CustomCardField title="Conditions" value={data?.conditions?.type} />
                   <CustomCardField title="Created" value={data.created && timeAgo(data.created)} />
                   <CustomCardField
@@ -425,10 +383,11 @@ export default function ViewVM() {
                   <CustomCardField title="Namespace" value={namespace} />
                   <CustomCardField title="Node" template={<Link>{data?.node}</Link>} />
                   <CustomCardField title="Cluster" value={data?.cluster} template={<Link>{data?.cluster}</Link>} />
+                  <CustomCardField title="Virtual Machine Type" value={data.instanceType}/>
                   <CustomCardField title="IP Address" value={data?.ipAddress} />
                 </CustomCard>
               </Col>
-              
+
               <Col size={8}>
                 <CustomCard>
                   <Grid>
@@ -455,48 +414,60 @@ export default function ViewVM() {
                         </div>
                       </div>
                     </Col>
-                    
+
                     <Col size={4}>
                       <div className="py-4 px-3">
                         <div className="space-y-1">
                           <div className="grid grid-col-2 justify-content-center gap-2">
                             <SemiCircleGauge
                               title="Memory"
-                              percentage={Number(((vmStats?.memory?.used || 0) / (vmStats?.memory?.total || 1) * 100).toFixed(2))}
+                              percentage={Number(
+                                (((vmStats?.memory?.used || 0) / (vmStats?.memory?.total || 1)) * 100).toFixed(2)
+                              )}
                               used={(vmStats?.memory?.used || 0).toFixed(2)}
                               available={(vmStats?.memory?.total || 0).toFixed(2)}
                             />
                           </div>
                           <div className="grid grid-col-2 justify-content-center gap-2">
                             <div className="">
-                              <span className="text-black font-semibold">{(vmStats?.memory?.used || 0).toFixed(2)} GB</span>
+                              <span className="text-black font-semibold">
+                                {(vmStats?.memory?.used || 0).toFixed(2)} GB
+                              </span>
                               <span className="text-gray-500"> used</span>
                               <br />
-                              <span className="text-black font-semibold">{(vmStats?.memory?.total || 0).toFixed(2)} GB</span>
+                              <span className="text-black font-semibold">
+                                {(vmStats?.memory?.total || 0).toFixed(2)} GB
+                              </span>
                               <span className="text-gray-500"> available</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </Col>
-                    
+
                     <Col size={4}>
                       <div className="py-4 px-3">
                         <div className="space-y-1">
                           <div className="grid grid-col-2 justify-content-center gap-2">
                             <SemiCircleGauge
                               title="Storage"
-                              percentage={Number(((vmStats?.storage?.used || 0) / (vmStats?.storage?.total || 1) * 100).toFixed(2))}
+                              percentage={Number(
+                                (((vmStats?.storage?.used || 0) / (vmStats?.storage?.total || 1)) * 100).toFixed(2)
+                              )}
                               used={(vmStats?.storage?.used || 0).toFixed(2)}
                               available={(vmStats?.storage?.total || 0).toFixed(2)}
                             />
                           </div>
                           <div className="grid grid-col-2 justify-content-center gap-2">
                             <div className="">
-                              <span className="text-black font-semibold">{(vmStats?.storage?.used || 0).toFixed(2)} GB</span>
+                              <span className="text-black font-semibold">
+                                {(vmStats?.storage?.used || 0).toFixed(2)} GB
+                              </span>
                               <span className="text-gray-500"> used</span>
                               <br />
-                              <span className="text-black font-semibold">{(vmStats?.storage?.total || 0).toFixed(2)} GB</span>
+                              <span className="text-black font-semibold">
+                                {(vmStats?.storage?.total || 0).toFixed(2)} GB
+                              </span>
                               <span className="text-gray-500"> available</span>
                             </div>
                           </div>
@@ -505,7 +476,7 @@ export default function ViewVM() {
                     </Col>
                   </Grid>
                 </CustomCard>
-                
+
                 <Grid>
                   <Col size={6}>
                     <CustomCard title="Allocated Resources">
@@ -515,27 +486,17 @@ export default function ViewVM() {
                       <CustomCardField title="Memory" value={data?.memory} />
                     </CustomCard>
                     <CustomCard title="Mounted Components">
-                      <CustomCardField
-                        title="Storage Disks"
-                        value={volumes?.length}
-                      />
-                      <CustomCardField
-                        title="Networking (NIC)"
-                        value={data?.networks?.length}
-                      />
+                      <CustomCardField title="Storage Disks" value={volumes?.length} />
+                      <CustomCardField title="Networking (NIC)" value={data?.networks?.length} />
                     </CustomCard>
                   </Col>
-                  
+
                   <Col size={6}>
                     <CustomCard title="Events">
-                      <div className="p-4 text-gray-500 text-center">
-                        No events to display
-                      </div>
+                      <div className="p-4 text-gray-500 text-center">No events to display</div>
                     </CustomCard>
                     <CustomCard title="Notes">
-                      <div className="p-4 text-gray-500 text-center">
-                        No notes available
-                      </div>
+                      <div className="p-4 text-gray-500 text-center">No notes available</div>
                     </CustomCard>
                   </Col>
                 </Grid>
@@ -615,19 +576,9 @@ export default function ViewVM() {
           </TabPanel>
           <TabPanel header="Events">
             <CustomCard title="Events">
-              <DataTable
-                value={[...vmEvents]}
-                tableStyle={{ minWidth: "50rem" }}
-              >
-                <Column
-                  field="lastSeen"
-                  header="Last Seen"
-                  
-                ></Column>
-                <Column 
-                  field="type" 
-                  header="Type"
-                ></Column>
+              <DataTable value={[...vmEvents]} tableStyle={{ minWidth: "50rem" }}>
+                <Column field="lastSeen" header="Last Seen"></Column>
+                <Column field="type" header="Type"></Column>
 
                 <Column field="reason" header="Reason"></Column>
                 <Column field="message" header="Message"></Column>
@@ -654,9 +605,10 @@ export default function ViewVM() {
         onHide={onCloseConsole}
         maximizable
       >
-        <div style={{ height: '70vh', width: '100%' }}>
-          <div style={{ color: 'white', padding: '10px', backgroundColor: 'black' }}>
-            <strong>VNC URL :</strong> {`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
+        <div style={{ height: "70vh", width: "100%" }}>
+          <div style={{ color: "white", padding: "10px", backgroundColor: "black" }}>
+            <strong>VNC URL :</strong>{" "}
+            {`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}
           </div>
           <VncScreen
             url={`/server/apis/subresources.kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachineinstances/${name}/vnc`}

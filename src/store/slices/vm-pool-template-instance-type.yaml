@@ -1,0 +1,94 @@
+apiVersion: pool.kubevirt.io/v1alpha1
+kind: VirtualMachinePool
+metadata:
+  name: vm-fedora-pool
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      kubevirt.io/vmpool: vm-fedora-pool
+  virtualMachineTemplate:
+    metadata:
+      labels:
+        kubevirt.io/vmpool: vm-fedora-pool
+        kubevirt.io/managed: true
+        fw.kubevirt.io/pool-name: vm-fedora-pool
+    spec:
+      dataVolumeTemplates:
+        - apiVersion: "cdi.kubevirt.io/v1beta1"
+          kind: DataVolume
+          metadata:
+            name: datavolume-iso
+            namespace: default
+          spec:
+            pvc:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 10Gi
+              storageClassName: nfs-client
+            source:
+              http:
+                url: >-
+                  https://download.fedoraproject.org/pub/fedora/linux/releases/41/Cloud/x86_64/images/Fedora-Cloud-Base-AmazonEC2-41-1.4.x86_64.raw.xz
+      running: true
+      template:
+        metadata:
+          labels:
+            kubevirt.io/vm: vm-fedora-pool
+        spec:
+          domain:
+            devices:
+              disks:
+                - disk:
+                    bus: virtio
+                  name: datavolume-iso
+              interfaces:
+                - name: net1
+                  bridge: {}
+              networkInterfaceMultiqueue: true
+            machine:
+              type:
+            resources:
+              requests:
+                memory: 4G
+          # priorityClassName: "vm-standard"
+          networks:
+            - name: "net1"
+              pod: {}
+          instancetype:
+            kind: VirtualMachineClusterInstancetype
+            name: test
+          volumes:
+            - dataVolume:
+                name: datavolume-iso
+              name: datavolume-iso
+            - name: disk1
+              cloudInitNoCloud:
+                userData: |
+                  #cloud-config
+                  manage_etc_hosts: true
+                  hostname: vm-fedora
+                  user: cocktail
+                  password: cocktail!1
+
+                networkData: |
+                  version: 1
+                  config:
+                  - type: physical
+                    name: enp1s0
+                    subnets:
+                    - type: dhcp
+                  - type: nameserver
+                    address:
+                    - 8.8.8.8
+                    - 8.8.4.4
+          # accessCredentials:
+          #   - sshPublicKey:
+          #       source:
+          #         secret:
+          #           secretName:
+          #       propagationMethod:
+          #         noCloud: {}

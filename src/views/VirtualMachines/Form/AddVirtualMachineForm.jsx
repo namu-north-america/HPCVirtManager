@@ -3,29 +3,27 @@ import { useDispatch, useSelector } from "react-redux";
 import { getNamespacesAction, getNodesAction, getPriorityClassAction } from "../../../store/actions/projectActions";
 import { Card } from "primereact/card";
 import { v4 } from "uuid";
-import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import CustomButton, { Buttonlayout, CustomButtonOutlined } from "../../../shared/CustomButton";
-import Grid, { Col } from "../../../shared/Grid";
 import BasicDetails from "./BasicDetails";
 import Network from "./Network";
 import Storage from "./Storage";
 import Review from "./Review";
 import UserData from "./UserData";
 import { setSelectedTemplate } from "../../../store/slices/vmSlice";
-import { onAddVMAction, getNetworksAction } from "../../../store/actions/vmActions";
+import { onAddVMAction, getNetworksAction, getInstanceTypesAction } from "../../../store/actions/vmActions";
 import { showFormErrors } from "../../../utils/commonFunctions";
 import formValidation from "../../../utils/validations";
 import { getDisksAction, getStorageClassesAction } from "../../../store/actions/storageActions";
 import TemplateSelectionModal from "./TemplateSelectionModal";
 import "./AddVirtualMachineForm.scss";
-import Advanced from "./Advanced";
+import Advanced from "./Advanced/Advanced";
 import { getImagesAction } from "../../../store/actions/imageActions";
 import { setFormFocusEvent } from "../../../store/slices/commonSlice";
 import _throttle from "lodash/throttle";
 
-export default function AddVirtualMachineForm({ onClose }) {
+export default function AddVirtualMachineForm({ onClose, isVmPool }) {
   const dispatch = useDispatch();
   const { priorityClassesDropdown, images } = useSelector((state) => state.project);
   const { selectedTemplate, useVmTemplate } = useSelector((state) => state.vm);
@@ -47,6 +45,7 @@ export default function AddVirtualMachineForm({ onClose }) {
     dispatch(getDisksAction());
     dispatch(getImagesAction());
     dispatch(getNetworksAction());
+    dispatch(getInstanceTypesAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -69,6 +68,9 @@ export default function AddVirtualMachineForm({ onClose }) {
     advanced: "",
     userName: "",
     password: "",
+    virtualMachineType: "custom",
+    // When isVmPool active, this field is required
+    replicas: isVmPool ? 2 : "",
   });
 
   const [disks, setDisks] = useState([
@@ -110,11 +112,13 @@ export default function AddVirtualMachineForm({ onClose }) {
   };
 
   const onAddVM = () => {
-    if (showFormErrors(data, setData) || isTemplateMode) {
+    const skipFields = data.virtualMachineType !== "custom" ? ["cores", "threads", "sockets"] : [];
+
+    if (showFormErrors(data, setData, skipFields) || isTemplateMode) {
       if (validateDisk() || isTemplateMode) {
         setLoading(true);
         dispatch(
-          onAddVMAction(data, disks, images, networks, setLoading, () => {
+          onAddVMAction(data, disks, images, networks, isVmPool, setLoading, () => {
             setLoading(false);
             if (onClose) {
               onClose();
@@ -294,7 +298,7 @@ export default function AddVirtualMachineForm({ onClose }) {
       case 0:
         return (
           <>
-            <BasicDetails data={data} handleChange={handleChange} />
+            <BasicDetails data={data} handleChange={handleChange} isVmPool={isVmPool} />
             <Buttonlayout>
               <CustomButton label="Next" icon="pi pi-arrow-right" iconPos="right" onClick={() => onStepChange(1)} />
             </Buttonlayout>
@@ -362,6 +366,7 @@ export default function AddVirtualMachineForm({ onClose }) {
         return (
           <>
             <Advanced
+              isVmPool={isVmPool}
               data={data}
               disks={disks}
               networks={networks}

@@ -8,19 +8,19 @@ import {
   setNodeDetail,
   setVMs,
   setPriorityClasses,
+  setVMsOfPool,
+  setVMPools,
 } from "../slices/projectSlice";
-import {
-  setNodeMemory,
-  setNodeStorage,
-  setNodeCpu,
-} from "../slices/reportingSlice";
+import { setNodeMemory, setNodeStorage, setNodeCpu } from "../slices/reportingSlice";
 
-const getVMsAction = () => async (dispatch) => {
-  const res = await api("get", endPoints.VMS);
+const getVMsRequest = async ({ name, namespace, isVmPool = false } = {}) => {
+  const url = isVmPool ? endPoints.GET_VM_POOL_VMS({ name, namespace }) : endPoints.VMS;
+  const res = await api("get", url);
   let items = [];
   if (res?.items) {
     items = res.items;
   }
+
   items = await Promise.all(
     items.map(async (item, i) => {
       let instance = {};
@@ -33,7 +33,7 @@ const getVMsAction = () => async (dispatch) => {
           })
         );
       }
-
+      //const isVMPoolReplica = item.metadata.labels['kubevirt.io/vmpool'];
       return {
         id: item?.metadata?.uid,
         name: item?.metadata?.name,
@@ -41,10 +41,7 @@ const getVMsAction = () => async (dispatch) => {
         conditions: instance?.status?.conditions?.[0]?.type,
         ipAddress: instance?.status?.interfaces?.map((item) => item?.ipAddress),
         guestOS: instance?.status?.guestOSInfo?.name,
-        node:
-          item?.spec?.template?.spec?.nodeSelector?.[
-            "kubernetes.io/hostname"
-          ] || instance?.status?.nodeName,
+        node: item?.spec?.template?.spec?.nodeSelector?.["kubernetes.io/hostname"] || instance?.status?.nodeName,
         namespace: item?.metadata?.namespace,
         cluster: "-",
         time: item?.metadata?.creationTimestamp,
@@ -53,12 +50,21 @@ const getVMsAction = () => async (dispatch) => {
         cores: item?.spec?.template?.spec?.domain?.cpu?.cores,
         threads: item?.spec?.template?.spec?.domain?.cpu?.threads,
         memory: item?.spec?.template?.spec?.domain?.resources?.requests?.memory,
-        volumes: item?.spec?.template?.spec?.volumes
+        volumes: item?.spec?.template?.spec?.volumes,
       };
     })
   );
-  dispatch(setVMs(items));
+
+  return items;
 };
+
+const getVMsAction =
+  ({ name, namespace, isVmPool = false } = {}) =>
+  async (dispatch) => {
+    const items = await getVMsRequest({ name, namespace, isVmPool });
+
+    dispatch(isVmPool ? setVMsOfPool(items) : setVMs(items));
+  };
 
 // <----------------- Nodes Action-------------->>
 const getNodesAction = () => async (dispatch) => {
@@ -97,16 +103,14 @@ const getNodeInstanceAction = (name) => async (dispatch) => {
       id: res?.metadata?.uid,
       name: res?.metadata?.name,
       labels: res?.metadata.labels,
-      status: res.status.conditions.find((cond) => cond.type === "Ready")
-        .status,
+      status: res.status.conditions.find((cond) => cond.type === "Ready").status,
       operatingSystem: res?.status?.nodeInfo?.osImage,
       cpu: res?.status?.capacity?.cpu,
       memory: convertKiToMBorGB(res?.status?.capacity?.memory),
       storage: convertKiToMBorGB(res?.status?.capacity?.["ephemeral-storage"]),
       k8sVersion: res?.status?.nodeInfo?.kubeletVersion,
       time: res?.metadata?.creationTimestamp,
-      ip: res.status.addresses.find((addr) => addr.type === "InternalIP")
-        .address,
+      ip: res.status.addresses.find((addr) => addr.type === "InternalIP").address,
     };
     dispatch(setNodeDetail(node));
   }
@@ -127,10 +131,7 @@ const getNodeInstanceAction = (name) => async (dispatch) => {
 //          memory
 const getNodeTotalMemoryAction = (name) => async (dispatch) => {
   const Query = `node_memory_MemTotal_bytes{node='${name}'}`;
-  const res = await prometheusApi(
-    "get",
-    `/api/v1/query?query=${encodeURIComponent(Query)}`
-  );
+  const res = await prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(Query)}`);
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
@@ -144,10 +145,7 @@ const getNodeTotalMemoryAction = (name) => async (dispatch) => {
 };
 const getNodeUsedMemoryAction = (name) => async (dispatch) => {
   const Query = `node_memory_MemTotal_bytes{node="${name}"}-node_memory_MemFree_bytes{node='${name}'}-node_memory_Cached_bytes{node='${name}'}-node_memory_Buffers_bytes{node='${name}'}`;
-  const res = await prometheusApi(
-    "get",
-    `/api/v1/query?query=${encodeURIComponent(Query)}`
-  );
+  const res = await prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(Query)}`);
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
@@ -161,10 +159,7 @@ const getNodeUsedMemoryAction = (name) => async (dispatch) => {
 //          storage
 const getNodeTotalStorageAction = (name) => async (dispatch) => {
   const Query = `node_filesystem_size_bytes{node="${name}",device!="/dev/loop.*",device!="tmpfs|nsfs",device!="gvfsd-fuse"}`;
-  const res = await prometheusApi(
-    "get",
-    `/api/v1/query?query=${encodeURIComponent(Query)}`
-  );
+  const res = await prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(Query)}`);
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
@@ -178,10 +173,7 @@ const getNodeTotalStorageAction = (name) => async (dispatch) => {
 };
 const getNodeUsedStorageAction = (name) => async (dispatch) => {
   const Query = `node_filesystem_size_bytes{node="${name}",device!~"/dev/loop.*",device!='tmpfs',device!="gvfsd-fuse"}- node_filesystem_avail_bytes{node="${name}"}`;
-  const res = await prometheusApi(
-    "get",
-    `/api/v1/query?query=${encodeURIComponent(Query)}`
-  );
+  const res = await prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(Query)}`);
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
     const numericValue = parseFloat(value); // Convert to number
@@ -195,10 +187,7 @@ const getNodeUsedStorageAction = (name) => async (dispatch) => {
 //          cpu
 const getNodeTotalCPUCoresAction = (name) => async (dispatch) => {
   const Query = `machine_cpu_cores{kubernetes_io_hostname='${name}'}`;
-  const res = await prometheusApi(
-    "get",
-    `/api/v1/query?query=${encodeURIComponent(Query)}`
-  );
+  const res = await prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(Query)}`);
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
 
@@ -213,10 +202,7 @@ const getNodeUsedCPUCoresAction = (name) => async (dispatch) => {
 / count(node_cpu_seconds_total{node='${name}'}) 
 * 100
 `;
-  const res = await prometheusApi(
-    "get",
-    `/api/v1/query?query=${encodeURIComponent(Query)}`
-  );
+  const res = await prometheusApi("get", `/api/v1/query?query=${encodeURIComponent(Query)}`);
   if (res?.status === "success") {
     const value = res?.data?.result[0]?.value[1];
 
@@ -244,6 +230,42 @@ const getPriorityClassAction = () => async (dispatch) => {
   dispatch(setPriorityClasses(items));
 };
 
+const getVMPoolsAction = () => async (dispatch) => {
+  const url = endPoints.GET_VM_POOLS();
+  const res = await api("get", url);
+  console.log("res for vm pools___", res.items);
+  if (res?.kind) {
+    const items = await Promise.all(
+      res.items.map(async (item) => {
+        const instancetype = item.spec.virtualMachineTemplate.spec?.instancetype?.name || "custom";
+
+        const name = item.metadata.name;
+        const namespace = item.metadata.namespace;
+
+        const vms = await getVMsRequest({ name, namespace, isVmPool: true });
+
+        const status = vms.map((vm) => vm.status);
+        const runningCount = status.filter((item) => item === "Running").length;
+        const stoppedCount = status.filter((item) => item === "Stopped").length;
+        const provisioningCount = status.filter((item) => item === "Provisioning").length;
+
+        console.log(vms);
+        return {
+          name: item.metadata.name,
+          namespace: item.metadata.namespace,
+          status: { running: runningCount, stopped: stoppedCount, provisioning: provisioningCount },
+          instancetype: instancetype,
+          replicas: item.spec.replicas,
+          runningReplicas: item.status.readyReplicas,
+          vms: vms,
+        };
+      })
+    );
+
+    dispatch(setVMPools(items));
+  }
+};
+
 export {
   getVMsAction,
   getNodesAction,
@@ -256,4 +278,5 @@ export {
   getNodeUsedCPUCoresAction,
   getNamespacesAction,
   getPriorityClassAction,
+  getVMPoolsAction,
 };

@@ -18,6 +18,9 @@ import VMTemplate from "../views/VirtualMachines/VMTemplate";
 import AddVMTemplate from "../views/VirtualMachines/AddVMTemplate";
 import VMPools from "../views/VirtualMachines/VMPools";
 import CreateK8sCluster from "../views/VMPools/Form/CreateK8sCluster";
+import InstanceTypes from "../views/InstanceTypes/InstanceTypes";
+import VMPoolsPage from "../views/VMPools/VMPools";
+import { ViewVMPool } from "../views/VMPools/ViewVMPool";
 
 export const PrivateRoutes = [
   {
@@ -138,6 +141,24 @@ export const PrivateRoutes = [
     path: "/sshkeys",
     name: "SSH Keys",
     element: <SSHKeys />,
+    role: "shared",
+  },
+  {
+    path: "/instance-types",
+    name: "Instance Types",
+    element: <InstanceTypes />,
+    role: "shared",
+  },
+  {
+    path: "/vm-pools",
+    name: "VM Pools",
+    element: <VMPoolsPage />,
+    role: "shared",
+  },
+  {
+    path: "/virtual-machine-pools/:name",
+    name: "Virtual Machine Pool",
+    element: <ViewVMPool />,
     role: "shared",
   },
 ];

@@ -1,4 +1,4 @@
-import { FaDesktop, FaCompactDisc, FaServer } from 'react-icons/fa';
+import { FaDesktop, FaCompactDisc, FaServer } from "react-icons/fa";
 
 export const sidebarItems = [
   {
@@ -28,6 +28,12 @@ export const sidebarItems = [
         link: "/live-migrations",
       },
     ],
+
+  },
+  {
+    title: "VM Pools",
+    link: "/vm-pools",
+    icon: "pi pi-server",
   },
   {
     title: "Storage",
@@ -68,5 +74,10 @@ export const sidebarItems = [
     title: "SSH Keys",
     link: "/sshkeys",
     icon: "pi pi-key",
+  },
+  {
+    title: "Instance Types",
+    link: "/instance-types",
+    icon: "pi pi-server",
   },
 ];

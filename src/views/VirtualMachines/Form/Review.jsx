@@ -7,10 +7,16 @@ export default function Review({ data, disks }) {
       <CustomForm>
         <CustomField label="VM Name" name="name" data={data} />
         <CustomField name="namespace" data={data} />
-        <CustomField name="sockets" data={data} />
-        <CustomField name="cores" data={data} />
-        <CustomField name="threads" data={data} />
-        <CustomField name="memory" data={data} />
+        {data.virtualMachineType === 'custom' ? (
+          <>
+            <CustomField name="sockets" data={data} />
+            <CustomField name="cores" data={data} />
+            <CustomField name="threads" data={data} />
+            <CustomField name="memory" data={data} />
+          </>
+        ) : 
+          <CustomField label="Virtual Machine Type" name="virtualMachineType" data={data}/>
+        }
       </CustomForm>
       <br />
       <CustomForm>

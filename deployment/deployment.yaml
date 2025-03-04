@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cocktail-virt
+  namespace: cocktail-virt
+  labels:
+    app: cocktail-virt
+    cocktail-virt.io/version: 0.1.7
+spec:
+  selector:
+    matchLabels:
+      app: cocktail-virt
+      cocktail-virt.io/version: 0.1.7
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cocktail-virt
+        cocktail-virt.io/version: 0.1.7
+    spec:
+      containers:
+        - name: cocktail-virt
+          image: namunorthamerica/hpc-virt:0.1.7
+          imagePullPolicy: Always
+          resources:
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 10000
+            runAsGroup: 30000
+          volumeMounts:
+            - name: cache-volume
+              mountPath: /var/cache/nginx
+            - name: run-volume
+              mountPath: /var/run
+            - name: auth-config
+              mountPath: /etc/nginx/auth.d/
+            - name: auth-secret
+              mountPath: /etc/nginx/secret.d/
+            - name: prometheus-config
+              mountPath: /etc/nginx/location.d/
+      serviceAccountName: cocktail-virt
+      restartPolicy: Always
+      volumes:
+        - name: cache-volume
+          emptyDir: {}
+        - name: run-volume
+          emptyDir: {}
+        - name: auth-config
+          configMap:
+            name: auth-config
+            optional: true
+        - name: auth-secret
+          secret:
+            secretName: auth-secret
+            optional: true
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+            optional: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cocktail-virt
+  namespace: cocktail-virt
+  labels:
+    app: cocktail-virt
+    cocktail-virt.io/version: 0.1.7
+spec:
+  type: ClusterIP
+  selector:
+    app: cocktail-virt
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

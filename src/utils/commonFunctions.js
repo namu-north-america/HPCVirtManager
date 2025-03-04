@@ -2,14 +2,16 @@ import { entries, notEqual, values } from "./javascript";
 import formValidation from "./validations";
 import constants from "../constants";
 
-const showFormErrors = (data, setData, ignore) => {
+const showFormErrors = (data, setData, ignore = []) => {
   let formErrors = data.formErrors || {};
 
   entries(data).forEach(([key, value]) => {
-    formErrors = {
-      // ...formErrors,
-      ...formValidation(key, value, { formErrors }, ignore),
-    };
+    if (!ignore.includes(key)) {
+      formErrors = {
+        // ...formErrors,
+        ...formValidation(key, value, { formErrors }, ignore),
+      };
+    }
   });
 
   console.log(formErrors);
