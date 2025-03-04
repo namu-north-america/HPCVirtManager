@@ -6,10 +6,10 @@ export const isAuthenticated = () => {
     return false;
   }
   if (keycloak.authenticated) {
-    console.log("isAuthenticated : ", true)
+    // console.log("isAuthenticated : ", true)
     return true;
   } else {
-    console.log("isAuthenticated : ", false)
+    // console.log("isAuthenticated : ", false)
     return false;
   }
 };
