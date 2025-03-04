@@ -1,12 +1,11 @@
 import { z } from "zod";
 import CustomModal from "../../shared/CustomModal";
-import { CustomDropDown, CustomForm, CustomInput } from "../../shared/AllInputs";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useMemo, useState } from "react";
-import { getVMPoolsAction } from "../../store/actions/projectActions";
+import { CustomForm, CustomInput } from "../../shared/AllInputs";
+import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createAutoScalingAction } from "../../store/actions/scalingActions";
+import { getAutoScalingGroups, updateAutoScaleItemAction } from "../../store/actions/scalingActions";
 import { Buttonlayout } from "../../shared/CustomButton";
 import { Button } from "primereact/button";
 
@@ -16,15 +15,12 @@ const schema = z.object({
   threshold: z.number({ coerce: true }).min(1, { message: "Threshold is required" }).lte(100),
 });
 
-export const CreateScalingGroupModal = ({ isOpen, onHide }) => {
+export const UpdateScalingGroupModal = ({ isOpen, onHide, defaultValues }) => {
   const [isPending, setIsPending] = useState(false);
   const dispatch = useDispatch();
   const { control, handleSubmit, reset } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: "",
-      namespace: "",
-      vmpool: "",
       min: "",
       max: "",
       threshold: "",
@@ -32,21 +28,30 @@ export const CreateScalingGroupModal = ({ isOpen, onHide }) => {
   });
 
   const onSubmit = (data) => {
+    const { name, namespace } = defaultValues;
     setIsPending(true);
     dispatch(
-      createAutoScalingAction(data, (res) => {
+      updateAutoScaleItemAction({ ...data, name, namespace }, (res) => {
         setIsPending(false);
         if (res?.status !== "Failure") {
+          dispatch(getAutoScalingGroups());
           reset({});
           onHide();
+        } else {
         }
       })
     );
   };
 
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
+
   return (
     <CustomModal
-      title="New Auto Scaling Group"
+      title={`Edit Auto Scaling Group(${defaultValues?.name})`}
       visible={isOpen}
       onHide={() => {
         reset();

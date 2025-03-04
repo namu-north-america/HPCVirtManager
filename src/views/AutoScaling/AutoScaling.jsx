@@ -6,12 +6,13 @@ import { CreateScalingGroupModal } from "./CreateScalingGroupModal";
 import { useDispatch, useSelector } from "react-redux";
 import { getAutoScalingGroups } from "../../store/actions/scalingActions";
 import { ActionItem, ActionsOverlay } from "../../shared/ActionsOverlay";
+import { UpdateScalingGroupModal } from "./EditAutoScaleItem";
 
 export function AutoScaling() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { autoScalings } = useSelector((state) => state.project);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-
+  const [selectedItem, setSelectedItem] = useState({});
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export function AutoScaling() {
       <ActionsOverlay>
         <ActionItem
           onClick={() => {
+            setSelectedItem(item);
             setEditModalOpen(true);
           }}
         >
@@ -55,6 +57,11 @@ export function AutoScaling() {
         <Column body={actionsTemplate} />
       </DataTable>
       <CreateScalingGroupModal isOpen={isCreateModalOpen} onHide={() => setIsCreateModalOpen(false)} />
+      <UpdateScalingGroupModal
+        isOpen={isEditModalOpen}
+        onHide={() => setEditModalOpen(false)}
+        defaultValues={selectedItem}
+      />
     </Page>
   );
 }

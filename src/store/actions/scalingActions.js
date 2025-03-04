@@ -78,4 +78,43 @@ const getAutoScalingGroups = () => async (dispatch) => {
   }
 };
 
-export { createAutoScalingAction, getAutoScalingGroups };
+const updateAutoScaleItemAction = (data, next) => async () => {
+  const { name, namespace, min, max, threshold } = data;
+  const url = endPoints.UPDATE_AUTO_SCALE({ name, namespace });
+
+  const payload = {
+    spec: {
+      maxReplicas: max,
+      metrics: [
+        {
+          resource: {
+            name: "cpu",
+            target: {
+              averageUtilization: threshold,
+              type: "Utilization",
+            },
+          },
+          type: "Resource",
+        },
+      ],
+      minReplicas: min,
+    },
+  };
+
+  const res = await api(
+    "patch",
+    url,
+    payload,
+    {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    }
+  );
+
+  console.log("response____", res);
+  if (res?.kind && res.kind === "HorizontalPodAutoscaler") {
+    if (next) next(res);
+  }
+};
+
+export { createAutoScalingAction, getAutoScalingGroups, updateAutoScaleItemAction };
