@@ -59,7 +59,7 @@ const createAutoScalingAction = (data, next) => async (dispatch) => {
 const getAutoScalingGroups = () => async (dispatch) => {
   const url = endPoints.GET_AUTO_SCALES();
   const res = await api("get", url);
-
+  console.log("items of scaling group____", res);
   if (res.kind === "HorizontalPodAutoscalerList") {
     const items = res.items.map((item) => {
       const metrics = item.status.currentMetrics;
@@ -71,9 +71,9 @@ const getAutoScalingGroups = () => async (dispatch) => {
         vmpool: item.spec.scaleTargetRef.name,
         desired: item.status.desiredReplicas,
         current: item.status.currentReplicas,
-        metric: item.spec.metrics[0].resource.name,
+        metric: metrics[0].resource.name,
         threshold: item.spec.metrics[0].resource.target.averageUtilization,
-        utilization: metrics == null ? 0 : metrics[0].type,
+        utilization: metrics == null ? 0 : metrics[0].resource.current.averageUtilization,
       };
     });
     dispatch(setAutoScalings(items));

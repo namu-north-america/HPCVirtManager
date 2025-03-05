@@ -69,10 +69,10 @@ export function AutoScaling() {
         <Column field="min" header="Min" body="" />
         <Column field="max" header="Max" body="" />
         <Column field="metric" header="Metric" body="" />
-        <Column field="threshold" header="Threshold" body="" />
+        <Column field="threshold" header="Threshold(%)" body="" />
         <Column field="current" header="Current" body="" />
         <Column field="desired" header="Desired" body="" />
-        <Column field="utilization" header="Utilization" body="" />
+        <Column field="utilization" header="Utilization(%)" body="" />
         <Column body={actionsTemplate} />
       </DataTable>
       <CreateScalingGroupModal isOpen={isCreateModalOpen} onHide={() => setIsCreateModalOpen(false)} />
