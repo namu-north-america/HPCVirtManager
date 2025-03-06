@@ -24,9 +24,7 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
     dispatch(getNamespacesAction());
   }, [dispatch]);
 
-  useEffect(() => {
-    console.log("Topbar breadcrumbItems:", breadcrumbItems);
-  }, [breadcrumbItems]);
+  useEffect(() => {}, [breadcrumbItems]);
 
   const { profile } = useSelector((state) => state.user);
 
@@ -42,7 +40,6 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
 
   const shouldShowBreadcrumbs =
     breadcrumbItems?.length > 0 && window.location.hash !== "#/dashboard";
-  console.log("Should show breadcrumbs:", shouldShowBreadcrumbs, window.location.hash);
 
   const topbarClass = classNames("layout-topbar", {
     collapsed: isCollapsed,
@@ -63,7 +60,7 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
       if (op.current) {
         op.current.hide();
       }
-    }, 1000);
+    }, 500);
   };
 
   const handleOverlayMouseEnter = () => {

@@ -17,7 +17,7 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
       icon: "pi pi-sign-out",
       defaultFocus: "accept",
       accept: () => {
-        logout(() => navigate("/"));
+        logout();
       },
     });
   };

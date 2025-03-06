@@ -6,10 +6,8 @@ export const isAuthenticated = () => {
     return false;
   }
   if (keycloak.authenticated) {
-    // console.log("isAuthenticated : ", true)
-    return true;
+      return keycloak.token
   } else {
-    // console.log("isAuthenticated : ", false)
     return false;
   }
 };
@@ -63,12 +61,10 @@ export const authenticate = (appToken, data, next) => {
 };
 
 
-export const logout = (next) => {
+export const logout = () => {
   if (typeof window !== "undefined") {
     localStorage.clear();
     sessionStorage.clear();
-    if (next) {
-      next();
-    }
+    keycloak.logout({ redirectUri: window.location.origin });
   }
 };

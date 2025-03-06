@@ -211,7 +211,9 @@ const getNodeUsedCPUCoresAction = (name) => async (dispatch) => {
     console.log("getNodeUsedCPUCoresAction error", res);
   }
 };
+
 // <-----------------End Nodes Action-------------->>
+
 const getNamespacesAction = () => async (dispatch) => {
   const res = await api("get", endPoints.NAMESPACE);
   let items = [];

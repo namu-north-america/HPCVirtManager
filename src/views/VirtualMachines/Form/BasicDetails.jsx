@@ -10,15 +10,22 @@ export default function BasicDetails({ data, handleChange, isVmPool, ...rest }) 
   const { useVmTemplate } = useSelector((state) => state.vm);
   const [virtualMachineTypes, setVirtualMachineTypes] = useState([]);
 
+  // currently we don't filter the namespace list at all
   const hasAccess = useCallback(() => {
-    if (profile?.role === "admin") {
-      setNamespace(namespacesDropdown);
-    } else {
-      const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
-      const namespaceArray = filteredNamespaces.map((item) => item.namespace);
-      setNamespace(namespaceArray);
-    }
-  }, [profile, namespacesDropdown, userNamespace]);
+    setNamespace(namespacesDropdown);
+  }, [namespacesDropdown]);
+
+  // filter the namespace list based on user's role
+  // const hasAccess = useCallback(() => {
+  //   if (profile?.role === "admin") {
+  //     setNamespace(namespacesDropdown);
+  //   } else {
+  //     const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
+  //     const namespaceArray = filteredNamespaces.map((item) => item.namespace);
+  //     setNamespace(namespaceArray);
+  //   }
+  // }, [profile, namespacesDropdown, userNamespace]);
+
   // create hasAccess dispatch
   useEffect(() => {
     hasAccess();

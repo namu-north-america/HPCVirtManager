@@ -14,9 +14,10 @@ export default function LandingPage() {
     if (keycloak.authenticated) {
       const tokenParsed = keycloak.tokenParsed;
       const user = {
-        ...tokenParsed, token: keycloak.token
+        ...tokenParsed,
+        token: keycloak.token,
+        role: "user",
       };
-      console.log("LandingPage : user : ", user)
       dispatch(setUserProfile(user));
       navigate("/dashboard");
     } else {
@@ -29,7 +30,7 @@ export default function LandingPage() {
   return (
     <div style={{ textAlign: "center", padding: "50px" }}>
       <h1>Welcome to HPC Virt Manager</h1>
-      <p>Redirecting you to KeyCloak for login ...</p>
+      <p>Redirecting to KeyCloak for login ...</p>
     </div>
   );
 }
