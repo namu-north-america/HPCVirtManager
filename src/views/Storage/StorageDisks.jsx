@@ -3,7 +3,6 @@ import React, {
   useMemo,
   useRef,
   useState,
-  useCallback,
 } from "react";
 import Page from "../../shared/Page";
 import { DataTable } from "primereact/datatable";
@@ -32,7 +31,6 @@ import formValidation from "../../utils/validations";
 import { showToastAction } from "../../store/slices/commonSlice";
 import {
   showFormErrors,
-  filterNamespacesBycrudDataVolume,
   checkNamespaceValue,
 } from "../../utils/commonFunctions";
 import {
@@ -45,6 +43,7 @@ import { getStorageClassesAction } from "../../store/actions/storageActions";
 import { getImagesAction } from "../../store/actions/imageActions";
 import { FaDatabase } from "react-icons/fa";
 import { Tooltip } from "primereact/tooltip";
+import { useHasAccess } from "../../utils/hooks";
 
 const iconTemplate = () => {
   return (
@@ -105,38 +104,21 @@ const conditionsTemplate = (rowData) => {
 
 export default function StorageDisks() {
   const dispatch = useDispatch();
-  const [namespace, setNamespace] = useState([]);
+  const namespace = useHasAccess();
   const { profile, userNamespace } = useSelector((state) => state.user);
   const { images } = useSelector((state) => state.project);
 
   let {
     disks,
-    namespacesDropdown,
     storageClassesDropdown,
     accessModeDropdown,
   } = useSelector((state) => state.project);
+
   useEffect(() => {
     dispatch(getDisksAction());
     dispatch(getStorageClassesAction());
     dispatch(getImagesAction());
   }, [dispatch]);
-
-  const hasAccess = useCallback(() => {
-    if (profile?.role === "admin") {
-      setNamespace(namespacesDropdown);
-    } else {
-      const filteredNamespaces = filterNamespacesBycrudDataVolume(
-        namespacesDropdown,
-        userNamespace
-      );
-      const namespaceArray = filteredNamespaces.map((item) => item.namespace);
-      setNamespace(namespaceArray);
-    }
-  }, [profile, namespacesDropdown, userNamespace]);
-  // create hasAccess dispatch
-  useEffect(() => {
-    hasAccess();
-  }, [hasAccess]);
 
   const showError = () => {
     dispatch(

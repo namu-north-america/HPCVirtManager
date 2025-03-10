@@ -7,10 +7,10 @@ import { useNavigate } from "react-router-dom";
 import MigrateModal from "./Form/MigrateModal";
 import EditVmModal from "./Form/EditVmModal";
 import { showToastAction } from "../../store/slices/commonSlice";
-import { filterNamespacesByCrudVMS } from "../../utils/commonFunctions";
 import { getImagesAction } from "../../store/actions/imageActions";
 import { VMListTable } from "../../shared/VMListTable";
 import { VncDialog } from "../../shared/VncDialog";
+import { useHasAccess } from "../../utils/hooks";
 
 const breadcrumItems = [
   { label: "Virtual Machines", url: "/#/virtual-machines/list" },
@@ -21,21 +21,14 @@ export default function VMList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile, userNamespace } = useSelector((state) => state.user);
-  let { vms, namespacesDropdown } = useSelector((state) => state.project);
+  let { vms } = useSelector((state) => state.project);
+  const namespaces = useHasAccess();
   const [search, setSearch] = useState("");
   const [selectedNamespace, setSelectedNamespace] = useState("");
   const [migrateVisible, setMigrateVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [showVncDialog, setShowVncDialog] = useState(false);
   const [selectedVM, setSelectedVM] = useState(null);
-
-  const hasAccess = () => {
-    if (profile?.role === "admin") return true;
-    else {
-      const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
-      return filteredNamespaces.length > 0;
-    }
-  };
 
   const onOpenConsole = (vm) => {
     setSelectedVM(vm);
@@ -53,13 +46,10 @@ export default function VMList() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (namespacesDropdown.length) {
-      const _namespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
-      if (_namespaces.length) {
-        setSelectedNamespace(_namespaces[0]);
-      }
+    if (namespaces.length && !selectedNamespace) {
+      setSelectedNamespace(namespaces[0]); // default to the first one
     }
-  }, [namespacesDropdown, userNamespace]);
+  }, [namespaces, selectedNamespace]);
 
   useEffect(() => {
     if (selectedNamespace) {
@@ -80,20 +70,7 @@ export default function VMList() {
   };
 
   const onAdd = () => {
-    if (profile.role === "admin") {
-      navigate("/virtual-machines/add");
-    } else {
-      if (hasAccess) {
-        navigate("/virtual-machines/add");
-      } else {
-        dispatch(
-          showToastAction({
-            type: "error",
-            title: "Sorry You have no permission!",
-          })
-        );
-      }
-    }
+    navigate("/virtual-machines/add");
   };
 
   return (

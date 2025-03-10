@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Checkbox } from "primereact/checkbox";
 import Grid, { Col } from "../../../../../shared/Grid";
-import { useSelector } from "react-redux";
-import { filterNamespacesByCrudVMS } from "../../../../../utils/commonFunctions";
+import { useHasAccess } from "../../../../../utils/hooks";
 
 export default function Step1ClusterDetails({ data, onChange }) {
-  const [namespace, setNamespace] = useState([]);
-  const { namespacesDropdown } = useSelector((state) => state.project);
-  const { profile, userNamespace } = useSelector((state) => state.user);
+  const namespace = useHasAccess();
 
   const k8sVersions = [
     { label: "v1.26.0", value: "v1.26.0" },
@@ -27,23 +23,6 @@ export default function Step1ClusterDetails({ data, onChange }) {
     "v1.23.10": "quay.io/capk/ubuntu-2004-container-disk:v1.23.10",
     "v1.22.0": "quay.io/capk/ubuntu-2004-container-disk:v1.22.0",
   };
-
-  const hasAccess = useCallback(() => {
-    if (profile?.role === "admin") {
-      setNamespace(namespacesDropdown);
-    } else {
-      const filteredNamespaces = filterNamespacesByCrudVMS(
-        namespacesDropdown,
-        userNamespace
-      );
-      const namespaceArray = filteredNamespaces.map((item) => item.namespace);
-      setNamespace(namespaceArray);
-    }
-  }, [profile, namespacesDropdown, userNamespace]);
-
-  useEffect(() => {
-    hasAccess();
-  }, [hasAccess]);
 
   const handleChange = (field, value) => {
     if (field === "k8sVersion") {

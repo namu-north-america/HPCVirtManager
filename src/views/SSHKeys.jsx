@@ -25,7 +25,7 @@ const SSHKeys = () => {
   });
   const dispatch = useDispatch();
 
-  const { profile } = useSelector((state) => state.user);
+  // const { profile } = useSelector((state) => state.user);
   const { sshKeys, loading } = useSelector((state) => state.sshKeys);
   const { namespaces } = useSelector((state) => state.project);
 
@@ -38,12 +38,12 @@ const SSHKeys = () => {
   }, [dispatch]);
 
   const handleEdit = (record) => {
-    if (profile.role !== 'admin') return showError();
+    // if (profile.role !== 'admin') return showError();
     window.location.href = `/#/sshkeys/${record.name}`;
   };
 
   const handleDelete = (record) => {
-    if (profile.role !== 'admin') return showError();
+    // if (profile.role !== 'admin') return showError();
     confirmDialog({
       target: ref.current,
       header: 'Delete Confirmation',
@@ -57,17 +57,17 @@ const SSHKeys = () => {
     });
   };
 
-  const showError = () => {
-    dispatch(
-      showToastAction({
-        type: 'error',
-        title: 'Sorry, you have no permission!',
-      })
-    );
-  };
+  // const showError = () => {
+  //   dispatch(
+  //     showToastAction({
+  //       type: 'error',
+  //       title: 'Sorry, you have no permission!',
+  //     })
+  //   );
+  // };
 
   const handleAddNew = () => {
-    if (profile.role !== 'admin') return showError();
+    // if (profile.role !== 'admin') return showError();
     setVisible(true);
   };
 

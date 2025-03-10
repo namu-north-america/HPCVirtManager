@@ -1,35 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { CustomDropDown, CustomForm, CustomInput, CustomMemoryInput } from "../../../shared/AllInputs";
-import { filterNamespacesByCrudVMS } from "../../../utils/commonFunctions";
+import { useHasAccess } from "../../../utils/hooks";
 import { useSelector } from "react-redux";
 
+
 export default function BasicDetails({ data, handleChange, isVmPool, ...rest }) {
-  const [namespace, setNamespace] = useState([]);
-  const { namespacesDropdown, instanceTypes } = useSelector((state) => state.project);
-  const { profile, userNamespace } = useSelector((state) => state.user);
+
+  const namespace = useHasAccess();
+  // const { namespacesDropdown, instanceTypes } = useSelector((state) => state.project);
+  // const { profile, userNamespace } = useSelector((state) => state.user);
+  const { instanceTypes } = useSelector((state) => state.project);
   const { useVmTemplate } = useSelector((state) => state.vm);
   const [virtualMachineTypes, setVirtualMachineTypes] = useState([]);
-
-  // currently we don't filter the namespace list at all
-  const hasAccess = useCallback(() => {
-    setNamespace(namespacesDropdown);
-  }, [namespacesDropdown]);
-
-  // filter the namespace list based on user's role
-  // const hasAccess = useCallback(() => {
-  //   if (profile?.role === "admin") {
-  //     setNamespace(namespacesDropdown);
-  //   } else {
-  //     const filteredNamespaces = filterNamespacesByCrudVMS(namespacesDropdown, userNamespace);
-  //     const namespaceArray = filteredNamespaces.map((item) => item.namespace);
-  //     setNamespace(namespaceArray);
-  //   }
-  // }, [profile, namespacesDropdown, userNamespace]);
-
-  // create hasAccess dispatch
-  useEffect(() => {
-    hasAccess();
-  }, [hasAccess]);
 
   useEffect(() => {
     setVirtualMachineTypes(["custom", ...instanceTypes.map((item) => item.name)]);

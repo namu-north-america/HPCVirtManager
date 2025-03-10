@@ -2,6 +2,7 @@ import { entries, notEqual, values } from "./javascript";
 import formValidation from "./validations";
 import constants from "../constants";
 
+
 const showFormErrors = (data, setData, ignore = []) => {
   let formErrors = data.formErrors || {};
 
@@ -13,11 +14,11 @@ const showFormErrors = (data, setData, ignore = []) => {
       };
     }
   });
-
   console.log(formErrors);
   setData({ ...data, formErrors });
   return !values(formErrors).some((v) => notEqual(v, ""));
 };
+
 
 const capitalizeCamelCase = (str) => {
   let words = str?.split(/(?=[A-Z])/) || [];
@@ -28,6 +29,7 @@ const capitalizeCamelCase = (str) => {
   return capitalizedString;
 };
 
+
 const getImageUrl = (image) => {
   if (image.includes("http")) {
     return image;
@@ -35,6 +37,7 @@ const getImageUrl = (image) => {
     return constants.baseUrl + image;
   }
 };
+
 
 function convertKiToMBorGB(input) {
   let kibibytes;
@@ -51,10 +54,13 @@ function convertKiToMBorGB(input) {
     return `${mebibytes.toFixed(2)} MiB`;
   }
 }
+
+
 function bytesToGB(bytes) {
   const gb = bytes / 1024 ** 3; // 1 GB = 1024^3 bytes
   return gb.toFixed(2); // Rounds to 2 decimal places
 }
+
 
 function splitMemoryString(string = "") {
   const result = string.match(/(\d+)([A-Za-z]+)/);
@@ -62,6 +68,7 @@ function splitMemoryString(string = "") {
   const memoryType = result?.[2];
   return { size, memoryType };
 }
+
 
 // permissions.js
 const hasPermission = (permissions, requiredPermission) => {
@@ -71,9 +78,10 @@ const hasPermission = (permissions, requiredPermission) => {
     return false;
   }
 };
+
+
 const filterNamespacesByCrudVMS = (namespaces, data) => {
   const result = [];
-
   // Loop through the data to find matching namespaces
   for (const entry of data) {
     if (
@@ -83,12 +91,12 @@ const filterNamespacesByCrudVMS = (namespaces, data) => {
       result.push(entry);
     }
   }
-
   return result;
 };
+
+
 const filterNamespacesBycrudDataVolume = (namespaces, data) => {
   const result = [];
-
   // Loop through the data to find matching namespaces
   for (const entry of data) {
     if (
@@ -98,13 +106,12 @@ const filterNamespacesBycrudDataVolume = (namespaces, data) => {
       result.push(entry);
     }
   }
-
   return result;
 };
 
+
 const filterNamespacesByCrudImages = (namespaces, data) => {
   const result = [];
-
   // Loop through the data to find matching namespaces
   for (const entry of data) {
     if (
@@ -114,23 +121,21 @@ const filterNamespacesByCrudImages = (namespaces, data) => {
       result.push(entry);
     }
   }
-
   return result;
 };
 
+
 const checkNamespaceValue = (data, namespaceName, key) => {
   // Find the object that matches the given namespace
-
   const namespaceObject = data.find((item) => item.namespace === namespaceName);
-
   // If the namespace exists and the key is present, check if its value is 'yes'
   if (namespaceObject && key in namespaceObject) {
     return namespaceObject[key] === "yes";
   }
-
   // If namespace or key doesn't exist, return false
   return false;
 };
+
 
 export {
   filterNamespacesByCrudVMS,

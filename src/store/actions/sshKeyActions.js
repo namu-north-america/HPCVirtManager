@@ -3,6 +3,7 @@ import api from '../../services/api';
 import endPoints from "../../services/endPoints";
 import { showToastAction } from '../slices/commonSlice';
 
+
 export const fetchAllSSHKeysAction = () => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -42,6 +43,7 @@ export const fetchAllSSHKeysAction = () => async (dispatch) => {
   }
 };
 
+
 export const deleteSSHKeyAction = (sshKey) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -63,6 +65,7 @@ export const deleteSSHKeyAction = (sshKey) => async (dispatch) => {
     dispatch(setLoading(false));
   }
 };
+
 
 export const createSSHKeyAction = (sshKeyData) => async (dispatch) => {
   try {
@@ -115,6 +118,7 @@ export const createSSHKeyAction = (sshKeyData) => async (dispatch) => {
   }
 };
 
+
 export const fetchSSHKeys = async () => {
   try {
     const response = await api('GET', endPoints.SSH_KEYS);
@@ -124,6 +128,7 @@ export const fetchSSHKeys = async () => {
     throw error;
   }
 };
+
 
 export const createSSHKey = async (sshKeyData) => {
   try {

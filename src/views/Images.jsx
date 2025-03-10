@@ -35,10 +35,10 @@ import { confirmDialog } from "primereact/confirmdialog";
 import { Link } from "react-router-dom";
 import { FaCompactDisc } from 'react-icons/fa';
 import {
-  filterNamespacesByCrudImages,
   checkNamespaceValue
 } from "../utils/commonFunctions";
 import { showToastAction } from "../store/slices/commonSlice";
+import { useHasAccess } from "../utils/hooks";
 
 const iconTemplate = () => {
   return (
@@ -49,10 +49,11 @@ const iconTemplate = () => {
 };
 
 const breadcrumItems = [{ label: "Images", url: "/#/images" }];
+
 export default function Images() {
   const dispatch = useDispatch();
-  const [namespace,setNamespace]= useState([])
-  let { images, namespacesDropdown } = useSelector((state) => state.project);
+  const namespace = useHasAccess();
+  let { images } = useSelector((state) => state.project);
   const { profile, userNamespace } = useSelector((state) => state.user);
 
 
@@ -256,20 +257,6 @@ export default function Images() {
       </Link>
     );
   };
-
-  const hasAccess = useCallback(() => {
-    if (profile?.role === "admin") {
-      setNamespace(namespacesDropdown);
-    } else {
-      const filteredNamespaces = filterNamespacesByCrudImages(namespacesDropdown, userNamespace);
-      const namespaceArray = filteredNamespaces.map(item => item.namespace);
-      setNamespace(namespaceArray);
-    }
-  }, [profile, namespacesDropdown, userNamespace]);
-  // create hasAccess dispatch
-  useEffect(() => {
-    hasAccess()
-  }, [hasAccess]);
 
   return (
     <>

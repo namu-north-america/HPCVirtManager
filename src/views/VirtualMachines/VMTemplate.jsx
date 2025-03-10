@@ -4,14 +4,9 @@ import { timeAgo } from "../../utils/date";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "primereact/tooltip";
-import { showToastAction } from "../../store/slices/commonSlice";
-import {
-  filterNamespacesByCrudVMS,
-  checkNamespaceValue,
-} from "../../utils/commonFunctions";
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
 const timeTemplate = (item) => {
@@ -45,10 +40,8 @@ const nameTemplate = (item) => {
 export default function VMTemplate() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { profile, userNamespace } = useSelector((state) => state.user);
-  const { namespacesDropdown } = useSelector((state) => state.project);
   const [search, setSearch] = useState("");
-  const [templates, setTemplates] = useState([]); // This will be populated from your API
+  const [templates] = useState([]);
   const { breadcrumb } = useBreadcrumb();
   
   // Filter templates based on search
@@ -60,32 +53,8 @@ export default function VMTemplate() {
     [search, templates]
   );
 
-  const hasAccess = () => {
-    if (profile?.role === "admin") return true;
-    else {
-      const filteredNamespaces = filterNamespacesByCrudVMS(
-        namespacesDropdown,
-        userNamespace
-      );
-      return filteredNamespaces.length > 0;
-    }
-  };
-
   const onAdd = () => {
-    if (profile?.role === "admin") {
       navigate("/virtual-machines/templates/add");
-    } else {
-      if (hasAccess()) {
-        navigate("/virtual-machines/templates/add");
-      } else {
-        dispatch(
-          showToastAction({
-            type: "error",
-            title: "Sorry You have no permission!",
-          })
-        );
-      }
-    }
   };
 
   // TODO: Add template fetching logic
