@@ -8,7 +8,7 @@ import { Dialog } from 'primereact/dialog';
 import CustomOverlay from '../shared/CustomOverlay';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllSSHKeysAction, deleteSSHKeyAction, createSSHKeyAction } from '../store/actions/sshKeyActions';
+import { fetchAllSSHKeysAction, deleteSSHKeyAction, createSSHKeyAction, updateSSHKeyAction } from '../store/actions/sshKeyActions';
 import { showToastAction } from '../store/slices/commonSlice';
 import { Dropdown } from 'primereact/dropdown';
 import { getNamespacesAction } from '../store/actions/projectActions';
@@ -18,6 +18,7 @@ const SSHKeys = () => {
   const ref = useRef();
   const [globalFilter, setGlobalFilter] = useState('');
   const [visible, setVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [newSSHKey, setNewSSHKey] = useState({
     name: '',
     namespace: '',
@@ -38,8 +39,13 @@ const SSHKeys = () => {
   }, [dispatch]);
 
   const handleEdit = (record) => {
-    // if (profile.role !== 'admin') return showError();
-    window.location.href = `/#/sshkeys/${record.name}`;
+    setNewSSHKey({
+      name: record.name,
+      namespace: record.namespace,
+      value: record.sshPublicKey || ''
+    });
+    setIsEditMode(true);
+    setVisible(true);
   };
 
   const handleDelete = (record) => {
@@ -68,12 +74,15 @@ const SSHKeys = () => {
 
   const handleAddNew = () => {
     // if (profile.role !== 'admin') return showError();
+    setNewSSHKey({ name: '', namespace: '', value: '' });
+    setIsEditMode(false);
     setVisible(true);
   };
 
   const handleClose = () => {
     setVisible(false);
     setNewSSHKey({ name: '', namespace: '', value: '' });
+    setIsEditMode(false);
   };
 
   const handleCreate = async () => {
@@ -92,6 +101,19 @@ const SSHKeys = () => {
     }
   };
 
+  const handleUpdate = async () => {
+    if (!newSSHKey.value) {
+      dispatch(showToastAction({
+        type: 'error',
+        title: 'Validation Error',
+        message: 'SSH Key value is required'
+      }));
+      return;
+    }
+    const success = await dispatch(updateSSHKeyAction(newSSHKey));
+    if (success) handleClose();
+  };
+
   const renderFooter = () => {
     return (
       <div className="flex justify-content-end gap-2">
@@ -101,8 +123,8 @@ const SSHKeys = () => {
           onClick={handleClose} 
         />
         <Button 
-          label="Create" 
-          onClick={handleCreate} 
+          label={isEditMode ? "Update" : "Create"}
+          onClick={isEditMode ? handleUpdate : handleCreate} 
         />
       </div>
     );
@@ -112,7 +134,7 @@ const SSHKeys = () => {
     <CustomOverlay template={<i className="pi pi-ellipsis-h" />}>
       <div>
         <div className="font-semibold mb-2">Actions</div>
-        <div className="mb-2" onClick={() => handleEdit(rowData)}>
+        <div className="mb-2 cursor-pointer" onClick={() => handleEdit(rowData)}>
           Edit
         </div>
         <div className="cursor-pointer" onClick={() => handleDelete(rowData)}>
@@ -149,9 +171,9 @@ const SSHKeys = () => {
         </DataTable>
 
       <Dialog 
-        header="New SSH Key"
+        header={isEditMode ? "Edit SSH Key" : "New SSH Key"}
         visible={visible} 
-        style={{ width: '600px' }}
+        style={{ width: '720px' }}
         modal 
         footer={renderFooter}
         onHide={handleClose}
@@ -164,6 +186,7 @@ const SSHKeys = () => {
               value={newSSHKey.name}
               onChange={(e) => setNewSSHKey(prev => ({...prev, name: e.target.value}))}
               placeholder="Enter name"
+              disabled={isEditMode}
             />
           </div>
           
@@ -179,6 +202,7 @@ const SSHKeys = () => {
               }))}
               placeholder="Select namespace"
               className="w-full"
+              disabled={isEditMode}
             />
           </div>
           

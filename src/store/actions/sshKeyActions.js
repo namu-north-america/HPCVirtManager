@@ -44,25 +44,13 @@ export const fetchAllSSHKeysAction = () => async (dispatch) => {
 };
 
 
-export const deleteSSHKeyAction = (sshKey) => async (dispatch) => {
+export const fetchSSHKeys = async () => {
   try {
-    dispatch(setLoading(true));
-    // TODO : delete API call
-    dispatch(fetchAllSSHKeysAction());
-    dispatch(showToastAction({
-      type: 'success',
-      title: 'Success',
-      message: 'SSH Key deleted successfully'
-    }));
+    const response = await api('GET', endPoints.SSH_KEYS);
+    return response;
   } catch (error) {
-    dispatch(setError(error.message));
-    dispatch(showToastAction({
-      type: 'error',
-      title: 'Error',
-      message: error.message
-    }));
-  } finally {
-    dispatch(setLoading(false));
+    console.error('Error fetching SSH keys:', error);
+    throw error;
   }
 };
 
@@ -86,8 +74,8 @@ export const createSSHKeyAction = (sshKeyData) => async (dispatch) => {
       }
     };
 
-    const response = await createSSHKey(formattedData);
-    console.log('formattedData : ', formattedData);
+    const response = await api('POST', endPoints.CREATE_SSH_KEY({ namespace: sshKeyData.namespace }), formattedData);
+    // console.log('formattedData : ', formattedData);
     if (response?.kind === 'Secret' && response.metadata) {
       dispatch(showToastAction({
         type: 'success',
@@ -119,23 +107,88 @@ export const createSSHKeyAction = (sshKeyData) => async (dispatch) => {
 };
 
 
-export const fetchSSHKeys = async () => {
+export const createSSHKey = async (sshKeyData) => {
   try {
-    const response = await api('GET', endPoints.SSH_KEYS);
+    const response = await api('POST', endPoints.CREATE_SSH_KEY({ namespace: sshKeyData.namespace }), sshKeyData);
     return response;
   } catch (error) {
-    console.error('Error fetching SSH keys:', error);
+    console.error('Error creating SSH key:', error);
     throw error;
   }
 };
 
 
-export const createSSHKey = async (sshKeyData) => {
+export const updateSSHKeyAction = (sshKeyData) => async (dispatch) => {
   try {
-    const response = await api('POST', endPoints.CREATE_SSH_KEY, sshKeyData);
-    return response;
+    dispatch(setLoading(true));
+    const patchData = [
+      {
+        op: 'replace',
+        path: '/data/ssh-publickey',
+        value: btoa(sshKeyData.value) // base64 encode the ssh key value
+      }
+    ];
+    const response = await api(
+        'PATCH',
+        endPoints.UPDATE_SSH_KEY({ namespace: sshKeyData.namespace, name: sshKeyData.name }),
+        patchData,
+        {},
+        { 'Content-Type': 'application/json-patch+json' }
+    );
+    if (response?.kind === 'Secret' && response.metadata) {
+      dispatch(showToastAction({
+        type: 'success',
+        title: 'Success',
+        message: 'SSH Key updated successfully'
+      }));
+      dispatch(fetchAllSSHKeysAction());
+      return true;
+    } else {
+      dispatch(setError('Invalid response from server'));
+      dispatch(showToastAction({
+        type: 'error',
+        title: 'Failed to update SSH key',
+        message: 'Invalid response from server'
+      }));
+      return false;
+    }
   } catch (error) {
-    console.error('Error creating SSH key:', error);
-    throw error;
+    dispatch(setError(error.message));
+    dispatch(showToastAction({
+      type: 'error',
+      title: 'Error',
+      message: error.message || 'Failed to update SSH key'
+    }));
+    return false;
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+
+export const deleteSSHKeyAction = (sshKey) => async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+
+    await api(
+      'DELETE',
+      endPoints.DELETE_SSH_KEY({ namespace: sshKey.namespace, name: sshKey.name })
+    );
+
+    dispatch(fetchAllSSHKeysAction());
+    dispatch(showToastAction({
+      type: 'success',
+      title: 'Success',
+      message: 'SSH Key deleted successfully'
+    }));
+  } catch (error) {
+    dispatch(setError(error.message));
+    dispatch(showToastAction({
+      type: 'error',
+      title: 'Error',
+      message: error.message || 'Failed to delete SSH key'
+    }));
+  } finally {
+    dispatch(setLoading(false));
   }
 };

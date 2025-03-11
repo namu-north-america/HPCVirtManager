@@ -86,8 +86,10 @@ const endPoints = {
 
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
-  CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",
-
+  CREATE_SSH_KEY: ({ namespace }) => `/api/v1/namespaces/${namespace}/secrets`,
+  UPDATE_SSH_KEY: ({ namespace, name }) => `/api/v1/namespaces/${namespace}/secrets/${name}`,
+  DELETE_SSH_KEY: ({ namespace, name }) => `/api/v1/namespaces/${namespace}/secrets/${name}`,
+  
   // cluster-api resource APIs
 
   // required to create cluster
