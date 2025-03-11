@@ -84,4 +84,9 @@ export const sidebarItems = [
     link: "/auto-scaling",
     icon: "pi pi-arrows-v",
   },
+  {
+    title: "Services",
+    link: "/services",
+    icon: "pi pi-th-large",
+  },
 ];

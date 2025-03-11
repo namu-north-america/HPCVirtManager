@@ -21,6 +21,7 @@ import InstanceTypes from "../views/InstanceTypes/InstanceTypes";
 import VMPoolsPage from "../views/VMPools/VMPools";
 import { ViewVMPool } from "../views/VMPools/ViewVMPool";
 import { AutoScaling } from "../views/AutoScaling/AutoScaling";
+import { ServicesPage } from "../views/Services/ServicesPage";
 
 export const PrivateRoutes = [
   {
@@ -165,6 +166,12 @@ export const PrivateRoutes = [
     path: "/auto-scaling",
     name: "Auto Scaling",
     element: <AutoScaling />,
+    role: "shared",
+  },
+  {
+    path: "/services",
+    name: "Services",
+    element: <ServicesPage />,
     role: "shared",
   },
 ];
