@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Buttonlayout } from "../../shared/CustomButton";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
-import { createServiceAction } from "../../store/actions/serviceActions";
+import { createServiceAction, getServicesAction } from "../../store/actions/serviceActions";
 
 const schema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -59,7 +59,6 @@ export const CreateServiceModal = ({ isOpen, onHide }) => {
 
   const ports = useFieldArray({ control, name: "ports" });
   const vmType = watch("targetVmType");
-  console.log("ports fields___", ports.fields);
 
   const onSubmit = (data) => {
     setIsPending(true);
@@ -67,7 +66,7 @@ export const CreateServiceModal = ({ isOpen, onHide }) => {
       createServiceAction(data, (res) => {
         setIsPending(false);
         if (res?.status !== "Failure") {
-          // dispatch(getAutoScalingGroups());
+          dispatch(getServicesAction());
           reset({});
           onHide();
         }
@@ -177,7 +176,6 @@ export const CreateServiceModal = ({ isOpen, onHide }) => {
             control={control}
             name="targetResource"
             render={({ field, fieldState: { error } }) => {
-              console.log("vms____", vms, vmPools);
               return (
                 <CustomDropDown
                   value={field.value}
@@ -195,7 +193,6 @@ export const CreateServiceModal = ({ isOpen, onHide }) => {
         </Fieldset>
         <Fieldset legend="Ports" className="w-full mt-2" toggleable>
           {ports.fields.map((port, index) => {
-            console.log("field of port____", port);
             return (
               <div className="flex">
                 <div className="formgrid grid align-center flex-shrink-1" key={port.id}>
