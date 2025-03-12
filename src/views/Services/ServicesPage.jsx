@@ -7,9 +7,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteServiceAction, getServicesAction } from "../../store/actions/serviceActions";
 import { ActionItem, ActionsOverlay } from "../../shared/ActionsOverlay";
 import { confirmDialog } from "primereact/confirmdialog";
+import { ServiceSettingsModal } from "./ServiceSettingsModal";
+import { ServiceDetailsModal } from "./ServiceDetailsModal";
 
 export const ServicesPage = () => {
   const [isNewServiceModalOpen, setNewServiceModalOpen] = useState(false);
+  const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState({});
   const { services } = useSelector((state) => state.services);
   const dispatch = useDispatch();
 
@@ -22,16 +27,16 @@ export const ServicesPage = () => {
       <ActionsOverlay>
         <ActionItem
           onClick={() => {
-            // setSelectedItem(item);
-            // setEditModalOpen(true);
+            setSelectedItem(item);
+            setDetailsModalOpen(true);
           }}
         >
           More Details
         </ActionItem>
         <ActionItem
           onClick={() => {
-            // setSelectedItem(item);
-            // setEditModalOpen(true);
+            setSelectedItem(item);
+            setSettingsModalOpen(true);
           }}
         >
           Settings
@@ -77,6 +82,16 @@ export const ServicesPage = () => {
         onHide={() => {
           setNewServiceModalOpen(false);
         }}
+      />
+      <ServiceSettingsModal
+        isOpen={isSettingsModalOpen}
+        serviceItem={selectedItem}
+        onHide={() => setSettingsModalOpen(false)}
+      />
+      <ServiceDetailsModal
+        isOpen={isDetailsModalOpen}
+        serviceItem={selectedItem}
+        onHide={() => setDetailsModalOpen(false)}
       />
     </Page>
   );

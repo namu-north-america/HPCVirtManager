@@ -4,7 +4,7 @@ import { setServices } from "../slices/servicesSlice";
 
 const createServiceAction = (data, next) => async (dispatch) => {
   const { name, namespace, ports, serviceType, targetResource } = data;
-  console.log("data for services____", data);
+
   const payload = {
     apiVersion: "v1",
     kind: "Service",
@@ -26,11 +26,9 @@ const createServiceAction = (data, next) => async (dispatch) => {
     },
   };
 
-  console.log("payload for the new service>>>>>", payload);
   const url = endPoints.CREATE_SERVICE({ namespace });
   const res = await api("post", url, payload);
 
-  console.log("response", res);
   if (res) {
     if (next) next(res);
   }
@@ -40,7 +38,6 @@ const getServicesAction = () => async (dispatch) => {
   const url = endPoints.GET_SERVICES();
 
   const res = await api("get", url);
-  console.log("response of services ____", res);
 
   const items = res.items.map((item) => {
     return {
@@ -62,7 +59,6 @@ const deleteServiceAction =
     const url = endPoints.DELETE_SERVICE({ name, namespace });
 
     const res = await api("delete", url);
-    console.log("response of delete of service___", name, res);
 
     if (res) {
       dispatch(getServicesAction());
@@ -70,4 +66,31 @@ const deleteServiceAction =
     }
   };
 
-export { createServiceAction, getServicesAction, deleteServiceAction };
+const updateServiceAction = (data, next) => async (dispatch) => {
+  const { name, namespace, serviceType } = data;
+
+  const url = endPoints.UPDATE_SERVICE({ name, namespace });
+
+  const payload = {
+    spec: {
+      type: serviceType,
+    },
+  };
+
+  const res = await api(
+    "patch",
+    url,
+    payload,
+    {},
+    {
+      "Content-Type": "application/merge-patch+json",
+    }
+  );
+
+  if (res?.kind && res.kind === "Service") {
+    dispatch(getServicesAction());
+    if (next) next(res);
+  }
+};
+
+export { createServiceAction, getServicesAction, deleteServiceAction, updateServiceAction };

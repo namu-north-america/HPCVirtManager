@@ -38,6 +38,7 @@ export function CustomCardValue({ size, extraClassNames, title, value }) {
     </div>
   );
 }
+
 export function CustomCardField({ extraClassNames, title, value, template }) {
   return (
     <div className={`value-field my-2 ${extraClassNames}`}>
