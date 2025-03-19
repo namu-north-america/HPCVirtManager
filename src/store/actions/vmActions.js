@@ -1,12 +1,106 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
 import { showToastAction } from "../slices/commonSlice";
-import { setLiveMigrations, setNetworks } from "../slices/projectSlice";
+import { setVMs, setLiveMigrations, setNetworks } from "../slices/projectSlice";
 import { setVmEvents } from "../slices/reportingSlice";
 import { getVMsAction } from "./projectActions";
 import { setInstanceTypes } from "../slices/projectSlice";
 import { getVMPoolsAction } from "./projectActions";
 import moment from "moment";
+
+
+const enrichVMData = async (vm) => {
+  let instance = {};
+  if (vm?.status?.printableStatus === "Running") {
+    instance = await api(
+      "get",
+      endPoints.GET_VM_INSTANCE({
+        namespace: vm?.metadata?.namespace,
+        name: vm?.metadata?.name,
+      })
+    );
+  }
+  return {
+    id: vm?.metadata?.uid,
+    name: vm?.metadata?.name,
+    status: vm?.status?.printableStatus,
+    conditions: instance?.status?.conditions?.[0]?.type,
+    ipAddress: instance?.status?.interfaces?.map((item) => item?.ipAddress),
+    guestOS: instance?.status?.guestOSInfo?.name,
+    node: vm?.spec?.template?.spec?.nodeSelector?.["kubernetes.io/hostname"] || instance?.status?.nodeName,
+    namespace: vm?.metadata?.namespace,
+    cluster: "-",
+    time: vm?.metadata?.creationTimestamp,
+    sockets: vm?.spec?.template?.spec?.domain?.cpu?.sockets,
+    cores: vm?.spec?.template?.spec?.domain?.cpu?.cores,
+    threads: vm?.spec?.template?.spec?.domain?.cpu?.threads,
+    memory: vm?.spec?.template?.spec?.domain?.resources?.requests?.memory,
+    volumes: vm?.spec?.template?.spec?.volumes,
+  };
+};
+
+
+const watchVMsAction = (namespace = "") => async (dispatch, getState) => {
+  try {
+    // initial fetch to get resourceVersion
+    const watchPath = namespace
+      ? `/apis/kubevirt.io/v1alpha3/namespaces/${namespace}/virtualmachines`
+      : "/apis/kubevirt.io/v1alpha3/virtualmachines";
+    const initialRes = await api("get", watchPath);
+    const initialVMs = await Promise.all(initialRes.items.map(enrichVMData));
+    dispatch(setVMs(initialVMs));
+    const resourceVersion = initialRes.metadata.resourceVersion;
+
+    // websocket for watching
+    const wsUrl = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/server${watchPath}?watch=true&resourceVersion=${resourceVersion}`;
+    const ws = new window.WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log("WebSocket watch started");
+    };
+
+    ws.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      const enrichedVM = await enrichVMData(data.object);
+      const currentVMs = getState().project.vms; // Get current state
+      let updatedVMs;
+
+      switch (data.type) {
+        case "ADDED":
+        case "MODIFIED":
+          updatedVMs = currentVMs.filter(
+            (v) => v.name !== enrichedVM.name || v.namespace !== enrichedVM.namespace
+          );
+          updatedVMs = [...updatedVMs, enrichedVM];
+          dispatch(setVMs(updatedVMs));
+          break;
+        case "DELETED":
+          updatedVMs = currentVMs.filter(
+            (v) => v.name !== enrichedVM.name || v.namespace !== enrichedVM.namespace
+          );
+          dispatch(setVMs(updatedVMs));
+          break;
+        default:
+          break;
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error:", err);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket closed; restarting watch");
+      dispatch(watchVMsAction(namespace));
+    };
+
+    return ws;
+  } catch (error) {
+    console.error("Error in watchVMsAction:", error);
+    dispatch(showToastAction({ type: "error", title: "Failed to watch VMs" }));
+  }
+};
+
 
 const addVMRequest = async (payload, url, dispatch, next) => {
   const res = await api("post", url, payload);
@@ -33,6 +127,7 @@ const addVMRequest = async (payload, url, dispatch, next) => {
   }
 };
 
+
 const addDiskByYamlTemplate = async (namespace, template) => {
   let url = endPoints.ADD_STORAGE_DISK({
     namespace: namespace,
@@ -49,6 +144,7 @@ const addDiskByYamlTemplate = async (namespace, template) => {
 
   return res.metadata;
 };
+
 
 export const _getNetworks = (networks) => {
   let networksData = [];
@@ -70,6 +166,7 @@ export const _getNetworks = (networks) => {
   return networksData;
 };
 
+
 export const _getDeviceFromDisk = (disk, i) => {
   let busObj = {};
   if (disk?.busType) {
@@ -88,11 +185,13 @@ export const _getDeviceFromDisk = (disk, i) => {
   return obj;
 };
 
+
 export const _getDevices = (_disks) => {
   return _disks.map((disk, i) => {
     return _getDeviceFromDisk(disk, i);
   });
 };
+
 
 export const _getVolumeFromDisk = (disk) => {
   return {
@@ -103,10 +202,12 @@ export const _getVolumeFromDisk = (disk) => {
   };
 };
 
+
 export const _getVolumes = (_disks) =>
   _disks.map((disk, i) => {
     return _getVolumeFromDisk(disk);
   });
+
 
 export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username, password }) => {
   const deviceData = {
@@ -137,6 +238,7 @@ export const _setUserDataAndNetworkDisks = (_devices, _volumes, { name, username
   return { _volumes, _devices, deviceData, volumeData };
 };
 
+
 export const _getAccessCredentials = (sshKey) => {
   let _accessCredentials = [];
   if (sshKey) {
@@ -156,15 +258,14 @@ export const _getAccessCredentials = (sshKey) => {
   return _accessCredentials;
 };
 
+
 const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next) => async (dispatch, getState) => {
   try {
     const { sshKeys } = getState().sshKeys;
     const selectedKey = sshKeys.find((key) => key.name === data.sshKey);
     const sshKeyValue = selectedKey ? selectedKey.sshPublicKey : "";
 
-    // TODO: later we can remove this if
-    // we don't want send vm template directly to
-    // api
+    // TODO: later we can remove this if we don't want send vm template directly to api
     const sendDataVolumesInVm = false;
 
     let { project } = getState();
@@ -415,6 +516,7 @@ const onAddVMAction = (data, disks, images, networks, isVmPool, setLoading, next
   }
 };
 
+
 const onEditVMAction = (data, setLoading, next) => async (dispatch) => {
   setLoading(true);
   let url = endPoints.EDIT_VM({
@@ -468,6 +570,7 @@ const onEditVMAction = (data, setLoading, next) => async (dispatch) => {
   setLoading(false);
 };
 
+
 const onGetVMAction = (data, next) => async () => {
   let url = endPoints.GET_VM({
     namespace: data.namespace,
@@ -487,6 +590,7 @@ const onGetVMAction = (data, next) => async () => {
   }
 };
 
+
 const onGetVMPoolAction =
   ({ name, namespace }, next) =>
   async (dispatch) => {
@@ -501,6 +605,7 @@ const onGetVMPoolAction =
       next(res);
     }
   };
+
 
 const getVolumesAction = (namespace, volumes, next) => async () => {
   const data = await Promise.all(
@@ -525,6 +630,7 @@ const getVolumesAction = (namespace, volumes, next) => async () => {
   const filteredData = data.filter((item) => item !== null);
   next(filteredData);
 };
+
 
 // Start and Stop
 const onChangeVmStatusAction = (data, status, next) => async (dispatch) => {
@@ -552,6 +658,8 @@ const onChangeVmStatusAction = (data, status, next) => async (dispatch) => {
     }
   }
 };
+
+
 const onRestartVMAction = (data) => async (dispatch) => {
   let url = endPoints.RESTART_VM({
     namespace: data.namespace,
@@ -562,6 +670,8 @@ const onRestartVMAction = (data) => async (dispatch) => {
     dispatch(getVMsAction());
   }
 };
+
+
 // Pause UnPause
 const onPauseVMAction = (data, next) => async () => {
   let url = endPoints.PAUSE_VM({
@@ -586,6 +696,7 @@ const onDeleteVMAction = (data) => async (dispatch) => {
     dispatch(getVMsAction());
   }
 };
+
 
 const adddisk = async (data, images, dispatch) => {
   try {
@@ -645,6 +756,7 @@ const adddisk = async (data, images, dispatch) => {
   }
 };
 
+
 const onMigrateVMAction = (data, next) => async (dispatch) => {
   let url = endPoints.MIGRATE_VM({
     namespace: data.namespace,
@@ -682,6 +794,7 @@ const onMigrateVMAction = (data, next) => async (dispatch) => {
     next();
   }
 };
+
 
 const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) => {
   let url = endPoints.HOT_PLUG_VOLUME({ namespace, name });
@@ -722,6 +835,7 @@ const onAddHotPlugVmAction = (namespace, name, data, next) => async (dispatch) =
     next();
   }
 };
+
 
 export const onAddNetworkHotPlugVmAction = (namespace, name, networks, interfaces, data, next) => async (dispatch) => {
   let url = endPoints.HOT_PLUG_NETWORK({ namespace, name });
@@ -775,6 +889,7 @@ export const onAddNetworkHotPlugVmAction = (namespace, name, networks, interface
   }
 };
 
+
 const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
   let items = await Promise.all(
     namespaces.map(async (namespace, i) => {
@@ -807,6 +922,7 @@ const getLiveMigrationsAction = (namespaces) => async (dispatch) => {
   dispatch(setLiveMigrations(items));
 };
 
+
 export const getNetworksAction = (next) => async (dispatch) => {
   let res = await api("get", endPoints.GET_NETWORKS());
 
@@ -821,6 +937,7 @@ export const getNetworksAction = (next) => async (dispatch) => {
     // next(res);
   }
 };
+
 
 const getVmEvents = (namespace, name, next) => async (dispatch) => {
   let url = endPoints.GET_VM_EVENTS({ namespace, name });
@@ -852,6 +969,7 @@ const getVmEvents = (namespace, name, next) => async (dispatch) => {
   } catch (err) {}
 };
 
+
 const getInstanceTypesAction = () => async (dispatch) => {
   const url = endPoints.GET_INSTANCE_TYPES();
   const res = await api("get", url);
@@ -864,6 +982,7 @@ const getInstanceTypesAction = () => async (dispatch) => {
     dispatch(setInstanceTypes(items));
   }
 };
+
 
 const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
   const url = endPoints.INSTANCE_TYPE({ name: data.name });
@@ -889,6 +1008,7 @@ const onAddInstanceTypeAction = (data, next) => async (dispatch) => {
     next(res);
   }
 };
+
 
 const onEditInstanceType = (data, next) => async (dispatch) => {
   const url = endPoints.INSTANCE_TYPE({ name: data.name });
@@ -923,6 +1043,7 @@ const onEditInstanceType = (data, next) => async (dispatch) => {
   }
 };
 
+
 const onDeleteInstanceType =
   ({ name }, next) =>
   async (dispatch) => {
@@ -935,6 +1056,7 @@ const onDeleteInstanceType =
       next(res);
     }
   };
+
 
 const onStopOrStartVMPoolActions =
   ({ name, namespace, action = "stop" }, next) =>
@@ -969,6 +1091,7 @@ const onStopOrStartVMPoolActions =
     }
   };
 
+
 const onVmPoolsScaleAction =
   ({ name, namespace, replicas }, next) =>
   async (dispatch) => {
@@ -998,6 +1121,7 @@ const onVmPoolsScaleAction =
     }
   };
 
+
 const onDeleteVmPoolAction =
   ({ name, namespace }, next) =>
   async (dispatch) => {
@@ -1010,6 +1134,7 @@ const onDeleteVmPoolAction =
       }
     }
   };
+
 
 const onEditVmPoolAction =
   ({ name, namespace, data }, next) =>
@@ -1044,6 +1169,7 @@ const onEditVmPoolAction =
       }
     }
   };
+
 
 const onRemoveVmFromPoolAction =
   ({ name, namespace, node }) =>
@@ -1093,6 +1219,7 @@ const onRemoveVmFromPoolAction =
   };
 
 export {
+  watchVMsAction,
   onAddVMAction,
   onEditVMAction,
   onGetVMAction,

@@ -9,6 +9,7 @@ module.exports = function (app) {
       // target: "http://172.22.48.1:8001",
       target: "http://127.0.0.1:8001",
       changeOrigin: true,
+      ws: true,
       pathRewrite: {
         "^/server": "", // remove /server prefix
       },

@@ -3,6 +3,7 @@ import Page from "../../shared/Page";
 import CustomBreadcrum from "../../shared/CustomBreadcrum";
 import { useDispatch, useSelector } from "react-redux";
 import { getVMsAction } from "../../store/actions/projectActions";
+import { watchVMsAction } from "../../store/actions/vmActions";
 import { useNavigate } from "react-router-dom";
 import MigrateModal from "./Form/MigrateModal";
 import EditVmModal from "./Form/EditVmModal";
@@ -28,6 +29,7 @@ export default function VMList() {
   const [editVisible, setEditVisible] = useState(false);
   const [showVncDialog, setShowVncDialog] = useState(false);
   const [selectedVM, setSelectedVM] = useState(null);
+  const [watchInstance, setWatchInstance] = useState(null);
 
   const hasAccess = () => {
     if (profile?.role === "admin") return true;
@@ -50,6 +52,19 @@ export default function VMList() {
   useEffect(() => {
     dispatch(getVMsAction());
     dispatch(getImagesAction());
+
+    let wsInstance; // Local variable to hold WebSocket instance
+    const startWatch = async () => {
+      wsInstance = await dispatch(watchVMsAction(""));
+      setWatchInstance(wsInstance); // Set the WebSocket instance
+    };
+    startWatch();
+
+    return () => {
+      if (wsInstance) {
+        wsInstance.close(); // Cleanup WebSocket
+      }
+    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -63,12 +78,27 @@ export default function VMList() {
 
   useEffect(() => {
     if (selectedNamespace) {
-      dispatch(getVMsAction(selectedNamespace));
-      dispatch(getImagesAction(selectedNamespace));
-    }
-  }, [selectedNamespace, dispatch]);
+      dispatch(getVMsAction({ namespace: selectedNamespace }));
+      let wsInstance; // Local variable for this effect
+      const startWatch = async () => {
+        if (watchInstance) watchInstance.close(); // Close previous WebSocket
+        wsInstance = await dispatch(watchVMsAction(selectedNamespace));
+        setWatchInstance(wsInstance); // Update state with new WebSocket
+      };
+      startWatch();
 
-  vms = useMemo(() => vms.filter((item) => item?.name?.toLowerCase()?.includes(search?.toLowerCase())), [search, vms]);
+      return () => {
+        if (wsInstance) {
+          wsInstance.close(); // Cleanup on unmount or namespace change
+        }
+      };
+    }
+  }, [selectedNamespace, dispatch, watchInstance]); // Include watchInstance in dependencies
+
+  vms = useMemo(() =>
+    vms.filter((item) => item?.name?.toLowerCase()?.includes(search?.toLowerCase())),
+    [search, vms]
+  );
 
   const showError = () => {
     dispatch(
