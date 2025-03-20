@@ -87,7 +87,14 @@ const endPoints = {
     `/apis/autoscaling/v2/namespaces/${namespace}/horizontalpodautoscalers`,
   UPDATE_AUTO_SCALE: ({ namespace, name }) =>
     `/apis/autoscaling/v2/namespaces/${namespace}/horizontalpodautoscalers/${name}`,
-
+  CREATE_SERVICE: ({ namespace }) =>
+    `/api/v1/namespaces/${namespace}/services`,
+  GET_SERVICES: () =>
+    `/api/v1/services?labelSelector=kubevirt-manager.io%2Fmanaged`,
+  DELETE_SERVICE: ({name, namespace}) =>
+    `/api/v1/namespaces/${namespace}/services/${name}`,
+  UPDATE_SERVICE: ({ name, namespace }) =>
+    `/api/v1/namespaces/${namespace}/services/${name}`,
 
   SSH_KEYS: "/api/v1/namespaces/default/secrets",
   CREATE_SSH_KEY: "/api/v1/namespaces/default/secrets",

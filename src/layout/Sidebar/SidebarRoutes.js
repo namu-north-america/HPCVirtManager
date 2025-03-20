@@ -84,4 +84,9 @@ export const sidebarItems = [
     link: "/auto-scaling",
     icon: "pi pi-arrows-v",
   },
+  {
+    title: "Network Access",
+    link: "/network-access",
+    icon: "pi pi-th-large",
+  },
 ];
