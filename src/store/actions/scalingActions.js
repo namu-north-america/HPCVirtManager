@@ -71,9 +71,9 @@ const getAutoScalingGroups = () => async (dispatch) => {
         vmpool: item.spec.scaleTargetRef.name,
         desired: item.status.desiredReplicas,
         current: item.status.currentReplicas,
-        metric: metrics[0].resource.name,
+        metric: metrics[0]?.resource?.name,
         threshold: item.spec.metrics[0].resource.target.averageUtilization,
-        utilization: metrics == null ? 0 : metrics[0].resource.current.averageUtilization,
+        utilization: metrics == null ? 0 : metrics[0]?.resource?.current.averageUtilization,
       };
     });
     dispatch(setAutoScalings(items));

@@ -21,7 +21,7 @@ import InstanceTypes from "../views/InstanceTypes/InstanceTypes";
 import VMPoolsPage from "../views/VMPools/VMPools";
 import { ViewVMPool } from "../views/VMPools/ViewVMPool";
 import { AutoScaling } from "../views/AutoScaling/AutoScaling";
-import { ServicesPage } from "../views/Services/ServicesPage";
+import { NetworkAccessPage } from "../views/NetworkAccess/NetworkAccessPage";
 
 export const PrivateRoutes = [
   {
@@ -169,9 +169,9 @@ export const PrivateRoutes = [
     role: "shared",
   },
   {
-    path: "/services",
-    name: "Services",
-    element: <ServicesPage />,
+    path: "/network-access",
+    name: "Network Access",
+    element: <NetworkAccessPage />,
     role: "shared",
   },
 ];

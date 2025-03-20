@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Buttonlayout } from "../../shared/CustomButton";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
-import { createServiceAction, getServicesAction } from "../../store/actions/serviceActions";
+import { createNetworkAccessAction, getNetworkAccessAction } from "../../store/actions/networkAccessActions";
 import { ServiceTypeDropdown } from "./ServiceTypeDropdown";
 
 const schema = z.object({
@@ -66,10 +66,10 @@ export const CreateServiceModal = ({ isOpen, onHide }) => {
   const onSubmit = (data) => {
     setIsPending(true);
     dispatch(
-      createServiceAction(data, (res) => {
+      createNetworkAccessAction(data, (res) => {
         setIsPending(false);
         if (res?.status !== "Failure") {
-          dispatch(getServicesAction());
+          dispatch(getNetworkAccessAction());
           reset({});
           onHide();
         }

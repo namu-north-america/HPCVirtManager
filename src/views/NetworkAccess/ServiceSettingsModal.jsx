@@ -6,7 +6,7 @@ import { Buttonlayout } from "../../shared/CustomButton";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { updateServiceAction } from "../../store/actions/serviceActions";
+import { updateNetworkAccessAction } from "../../store/actions/networkAccessActions";
 
 export const ServiceSettingsModal = ({ isOpen, serviceItem, onHide }) => {
   const [isPending, setIsPending] = useState(false);
@@ -28,7 +28,7 @@ export const ServiceSettingsModal = ({ isOpen, serviceItem, onHide }) => {
     };
 
     dispatch(
-      updateServiceAction(values, () => {
+      updateNetworkAccessAction(values, () => {
         setIsPending(false);
         onHide();
         form.reset({});

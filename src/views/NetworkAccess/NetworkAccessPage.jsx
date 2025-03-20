@@ -4,18 +4,18 @@ import { Column } from "primereact/column";
 import { useEffect, useState } from "react";
 import { CreateServiceModal } from "./NewServiceModal";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteServiceAction, getServicesAction } from "../../store/actions/serviceActions";
+import { deleteNetworkAccessAction, getNetworkAccessAction } from "../../store/actions/networkAccessActions";
 import { ActionItem, ActionsOverlay } from "../../shared/ActionsOverlay";
 import { confirmDialog } from "primereact/confirmdialog";
 import { ServiceSettingsModal } from "./ServiceSettingsModal";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 
-export const ServicesPage = () => {
+export const NetworkAccessPage = () => {
   const [isNewServiceModalOpen, setNewServiceModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
   const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState({});
-  const { services } = useSelector((state) => state.services);
+  const { networks } = useSelector((state) => state.networks);
   const dispatch = useDispatch();
 
   const addNew = () => {
@@ -49,7 +49,7 @@ export const ServicesPage = () => {
               icon: "pi pi-info-circle",
               position: "top",
               accept: () => {
-                dispatch(deleteServiceAction({ name: item.name, namespace: item.namespace }, (res) => {}));
+                dispatch(deleteNetworkAccessAction({ name: item.name, namespace: item.namespace }, (res) => {}));
               },
             });
           }}
@@ -61,17 +61,17 @@ export const ServicesPage = () => {
   };
 
   useEffect(() => {
-    dispatch(getServicesAction());
+    dispatch(getNetworkAccessAction());
   }, [dispatch]);
 
   return (
     <Page title="Services" addText="New Service" onAdd={addNew}>
-      <DataTable value={services}>
+      <DataTable value={networks}>
         <Column field="name" header="Name" />
         <Column field="namespace" header="Namespace" />
         <Column field="serviceType" header="Type" />
         <Column field="clusterIP" header="Cluster IP" />
-        <Column header="Load Balancer" />
+        <Column field="externalIP" header="External IP" />
         <Column field="ports.0.port" header="Port" />
         <Column field="ports.0.targetPort" header="Target Port" />
         <Column field="targetResource" header="Target Resource" />

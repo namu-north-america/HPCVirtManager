@@ -1,8 +1,8 @@
 import api from "../../services/api";
 import endPoints from "../../services/endPoints";
-import { setServices } from "../slices/servicesSlice";
+import { setNetworkAccess } from "../slices/networkAccessSlice";
 
-const createServiceAction = (data, next) => async (dispatch) => {
+const createNetworkAccessAction = (data, next) => async (dispatch) => {
   const { name, namespace, ports, serviceType, targetResource } = data;
 
   const payload = {
@@ -34,26 +34,30 @@ const createServiceAction = (data, next) => async (dispatch) => {
   }
 };
 
-const getServicesAction = () => async (dispatch) => {
+const getNetworkAccessAction = () => async (dispatch) => {
   const url = endPoints.GET_SERVICES();
 
   const res = await api("get", url);
-
-  const items = res.items.map((item) => {
+  console.log("items____", res);
+  const items = res?.items?.map((item) => {
+    const { spec, metadata, status } = item;
+    const externalIP =
+      spec.type === "LoadBalancer" && status?.loadBalancer?.ingress ? status.loadBalancer?.ingress[0]?.ip : "N/A";
     return {
-      name: item.metadata.name,
-      namespace: item.metadata.namespace,
-      targetResource: item.spec.selector["kubevirt.io/domain"],
-      serviceType: item.spec.type,
-      clusterIP: item.spec.clusterIP,
-      ports: item.spec.ports,
+      name: metadata.name,
+      namespace: metadata.namespace,
+      targetResource: spec.selector["kubevirt.io/domain"],
+      serviceType: spec.type,
+      clusterIP: spec.clusterIP,
+      ports: spec.ports,
+      externalIP: externalIP,
     };
   });
 
-  dispatch(setServices(items));
+  dispatch(setNetworkAccess(items));
 };
 
-const deleteServiceAction =
+const deleteNetworkAccessAction =
   ({ name, namespace }, next) =>
   async (dispatch) => {
     const url = endPoints.DELETE_SERVICE({ name, namespace });
@@ -61,12 +65,12 @@ const deleteServiceAction =
     const res = await api("delete", url);
 
     if (res) {
-      dispatch(getServicesAction());
+      dispatch(getNetworkAccessAction());
       if (next) next(res);
     }
   };
 
-const updateServiceAction = (data, next) => async (dispatch) => {
+const updateNetworkAccessAction = (data, next) => async (dispatch) => {
   const { name, namespace, serviceType } = data;
 
   const url = endPoints.UPDATE_SERVICE({ name, namespace });
@@ -88,9 +92,9 @@ const updateServiceAction = (data, next) => async (dispatch) => {
   );
 
   if (res?.kind && res.kind === "Service") {
-    dispatch(getServicesAction());
+    dispatch(getNetworkAccessAction());
     if (next) next(res);
   }
 };
 
-export { createServiceAction, getServicesAction, deleteServiceAction, updateServiceAction };
+export { createNetworkAccessAction, getNetworkAccessAction, deleteNetworkAccessAction, updateNetworkAccessAction };
