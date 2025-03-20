@@ -11,7 +11,7 @@ import StorageDisks from "../views/Storage/StorageDisks";
 import StorageClasses from "../views/Storage/StorageClasses";
 import ViewVM from "../views/VirtualMachines/ViewVM";
 import Images from "../views/Images";
-import SSHKeys from '../views/SSHKeys';
+import SSHKeys from "../views/SSHKeys";
 import AddVirtualMachine from "../views/VirtualMachines/AddVirtualMachine";
 import VMTemplate from "../views/VirtualMachines/VMTemplate";
 import AddVMTemplate from "../views/VirtualMachines/AddVMTemplate";
@@ -20,6 +20,7 @@ import CreateK8sCluster from "../views/VMPools/Form/CreateK8sCluster";
 import InstanceTypes from "../views/InstanceTypes/InstanceTypes";
 import VMPoolsPage from "../views/VMPools/VMPools";
 import { ViewVMPool } from "../views/VMPools/ViewVMPool";
+import { AutoScaling } from "../views/AutoScaling/AutoScaling";
 
 export const PrivateRoutes = [
   {
@@ -158,6 +159,12 @@ export const PrivateRoutes = [
     path: "/virtual-machine-pools/:name",
     name: "Virtual Machine Pool",
     element: <ViewVMPool />,
+    role: "shared",
+  },
+  {
+    path: "/auto-scaling",
+    name: "Auto Scaling",
+    element: <AutoScaling />,
     role: "shared",
   },
 ];

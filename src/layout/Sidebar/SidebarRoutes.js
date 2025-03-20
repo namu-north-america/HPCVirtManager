@@ -28,7 +28,6 @@ export const sidebarItems = [
         link: "/live-migrations",
       },
     ],
-
   },
   {
     title: "VM Pools",
@@ -79,5 +78,10 @@ export const sidebarItems = [
     title: "Instance Types",
     link: "/instance-types",
     icon: "pi pi-server",
+  },
+  {
+    title: "Auto Scaling",
+    link: "/auto-scaling",
+    icon: "pi pi-arrows-v",
   },
 ];

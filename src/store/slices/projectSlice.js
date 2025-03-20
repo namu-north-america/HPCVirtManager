@@ -19,7 +19,8 @@ const initialState = {
   networksDropdown: [],
   instanceTypes: [],
   vmPools: [],
-  vmPoolInstances: []
+  vmPoolInstances: [],
+  autoScalings: [],
 };
 
 export const projectSlice = createSlice({
@@ -62,14 +63,17 @@ export const projectSlice = createSlice({
       state.priorityClassesDropdown = action.payload.map((item) => item?.metadata?.name).reverse();
     },
     setNetworks: (state, action) => {
-      state.networksDropdown = action.payload.map(item => item.name);
+      state.networksDropdown = action.payload.map((item) => item.name);
     },
     setInstanceTypes: (state, action) => {
       state.instanceTypes = action.payload;
     },
     setVMsOfPool: (state, action) => {
       state.vmPoolInstances = action.payload;
-    }
+    },
+    setAutoScalings: (state, action) => {
+      state.autoScalings = action.payload;
+    },
   },
 });
 export const {
@@ -85,6 +89,7 @@ export const {
   setNetworks,
   setInstanceTypes,
   setVMPools,
-  setVMsOfPool
+  setVMsOfPool,
+  setAutoScalings,
 } = projectSlice.actions;
 export default projectSlice.reducer;
